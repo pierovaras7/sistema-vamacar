@@ -12,27 +12,30 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('detalle_venta', function (Blueprint $table) {
-            $table->id('idDetalleVenta');
+            $table->unsignedBigInteger('idVenta');
+            $table->unsignedBigInteger('idProducto');
+
             $table->decimal('cantidad');
             $table->decimal('precio');
             $table->decimal('subtotal');
-            $table->unsignedBigInteger('idVenta');
-            $table->unsignedBigInteger('idProducto');
-            $table->foreign('idVenta')
-                    ->references('idVenta') 
-                    ->on('venta')
-                    ->onDelete('restrict');
-            $table->foreign('idProducto')
-                    ->references('idProducto') 
-                    ->on('producto')
-                    ->onDelete('restrict');
             $table->boolean('estado');
+
+            $table->foreign('idVenta')
+                ->references('idVenta')
+                ->on('venta')
+                ->onDelete('restrict');
+
+            $table->foreign('idProducto')
+                ->references('idProducto')
+                ->on('producto')
+                ->onDelete('restrict');
+
+            $table->primary(['idVenta', 'idProducto']); 
+
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
+
     public function down(): void
     {
         Schema::dropIfExists('detalle_venta');

@@ -6,18 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+
     public function up(): void
     {
         Schema::create('detalle_compra', function (Blueprint $table) {
-            $table->id('idDetalleVenta');
+            $table->unsignedBigInteger('idCompra');
+            $table->unsignedBigInteger('idProducto');
             $table->decimal('cantidad');
             $table->decimal('precioCosto');
             $table->decimal('subtotal');
-            $table->unsignedBigInteger('idCompra');
-            $table->unsignedBigInteger('idProducto');
+            $table->boolean('estado');
+            
             $table->foreign('idCompra')
                     ->references('idCompra') 
                     ->on('compra')
@@ -26,13 +25,11 @@ return new class extends Migration
                     ->references('idProducto') 
                     ->on('producto')
                     ->onDelete('restrict');
-            $table->boolean('estado');
+
+            $table->primary(['idCompra', 'idProducto']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('detalle_compra');
