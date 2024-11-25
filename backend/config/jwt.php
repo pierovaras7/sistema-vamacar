@@ -1,6 +1,16 @@
 <?php
 
+/*
+ * This file is part of jwt-auth.
+ *
+ * (c) Sean Tymon <tymon148@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 return [
+
     /*
     |--------------------------------------------------------------------------
     | JWT Authentication Secret
@@ -14,6 +24,7 @@ return [
     | since RSA and ECDSA use a private/public key combo (See below).
     |
     */
+    'user' => App\Models\User::class,
 
     'secret' => env('JWT_SECRET'),
 
@@ -35,6 +46,7 @@ return [
     */
 
     'keys' => [
+
         /*
         |--------------------------------------------------------------------------
         | Public Key
@@ -71,6 +83,7 @@ return [
         */
 
         'passphrase' => env('JWT_PASSPHRASE'),
+
     ],
 
     /*
@@ -117,12 +130,9 @@ return [
     |
     | Specify the hashing algorithm that will be used to sign the token.
     |
-    | See here: https://github.com/namshi/jose/tree/master/src/Namshi/JOSE/Signer/OpenSSL
-    | for possible values.
-    |
     */
 
-    'algo' => env('JWT_ALGO', 'HS256'),
+    'algo' => env('JWT_ALGO', Tymon\JWTAuth\Providers\JWT\Provider::ALGO_HS256),
 
     /*
     |--------------------------------------------------------------------------
@@ -227,17 +237,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Show blacklisted token option
-    |--------------------------------------------------------------------------
-    |
-    | Specify if you want to show black listed token exception on the laravel logs.
-    |
-    */
-
-    'show_black_list_exception' => env('JWT_SHOW_BLACKLIST_EXCEPTION', true),
-
-    /*
-    |--------------------------------------------------------------------------
     | Cookies encryption
     |--------------------------------------------------------------------------
     |
@@ -264,6 +263,7 @@ return [
     */
 
     'providers' => [
+
         /*
         |--------------------------------------------------------------------------
         | JWT Provider
@@ -273,7 +273,7 @@ return [
         |
         */
 
-        'jwt' => PHPOpenSourceSaver\JWTAuth\Providers\JWT\Lcobucci::class,
+        'jwt' => Tymon\JWTAuth\Providers\JWT\Lcobucci::class,
 
         /*
         |--------------------------------------------------------------------------
@@ -284,7 +284,7 @@ return [
         |
         */
 
-        'auth' => PHPOpenSourceSaver\JWTAuth\Providers\Auth\Illuminate::class,
+        'auth' => Tymon\JWTAuth\Providers\Auth\Illuminate::class,
 
         /*
         |--------------------------------------------------------------------------
@@ -295,6 +295,8 @@ return [
         |
         */
 
-        'storage' => PHPOpenSourceSaver\JWTAuth\Providers\Storage\Illuminate::class,
+        'storage' => Tymon\JWTAuth\Providers\Storage\Illuminate::class,
+
     ],
+
 ];

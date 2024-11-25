@@ -2,11 +2,11 @@
  
 namespace App\Models;
  
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject; 
+use Tymon\JWTAuth\Contracts\JWTSubject; 
  
 class User extends Authenticatable implements JWTSubject
 {
@@ -17,6 +17,8 @@ class User extends Authenticatable implements JWTSubject
      *
      * @var array<int, string>
      */
+    protected $primaryKey = 'idUser'; 
+
     protected $fillable = [
         'name',
         'email',
@@ -38,7 +40,7 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->belongsTo(Trabajador::class, 'idTrabajador', 'idTrabajador');
     }
-    
+
     /**
      * Get the attributes that should be cast.
      *
