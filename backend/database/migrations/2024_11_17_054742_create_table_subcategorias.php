@@ -19,8 +19,7 @@ return new class extends Migration
                     ->references('idCategoria') 
                     ->on('categoria')
                     ->onDelete('restrict');
-            $table->boolean('estado');  
- 
+            $table->boolean('estado')->default(1);  
         });
     }
 

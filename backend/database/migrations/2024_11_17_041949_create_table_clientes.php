@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('telefono');
             $table->string('correo');
             $table->string('direccion');
-            $table->boolean('estado');
+            $table->boolean('estado')->default(1);  
         });
     }
 

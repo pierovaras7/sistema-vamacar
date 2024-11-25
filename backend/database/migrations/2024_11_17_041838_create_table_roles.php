@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('rol', function (Blueprint $table) {
             $table->id('idRol');
             $table->string('rol');
-            $table->boolean('estado');
+            $table->boolean('estado')->default(1);  
         });
     }
 

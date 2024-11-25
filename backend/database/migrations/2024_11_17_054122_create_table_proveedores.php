@@ -23,7 +23,7 @@ return new class extends Migration
                     ->references('idRepresentante') 
                     ->on('representante')
                     ->onDelete('restrict'); 
-            $table->boolean('estado');  
+            $table->boolean('estado')->default(1);  
 
         });
     }

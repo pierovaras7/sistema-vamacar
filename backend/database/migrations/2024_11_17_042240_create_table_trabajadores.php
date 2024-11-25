@@ -23,7 +23,7 @@ return new class extends Migration
             $table->date('fechaNacimiento');
             $table->string('turno');
             $table->decimal('salario');
-            $table->boolean('estado');
+            $table->boolean('estado')->default(1);  
         });
     }
 

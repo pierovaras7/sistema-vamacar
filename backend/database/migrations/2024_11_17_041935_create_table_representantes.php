@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('dni');
             $table->string('cargo');
             $table->string('telefono');
-            $table->boolean('estado');
+            $table->boolean('estado')->default(1);  
         });
     }
    /**

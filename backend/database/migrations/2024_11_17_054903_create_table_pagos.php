@@ -25,7 +25,7 @@ return new class extends Migration
                     ->references('idTrabajador') 
                     ->on('trabajador')
                     ->onDelete('restrict');
-            $table->boolean('estado');  
+            $table->boolean('estado')->default(1);    
         });
     }
 

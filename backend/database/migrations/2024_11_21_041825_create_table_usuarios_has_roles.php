@@ -13,17 +13,17 @@ return new class extends Migration
     {
         Schema::create('usuario_has_rol', function (Blueprint $table) {
             $table->unsignedBigInteger('idRol');
-            $table->unsignedBigInteger('idUsuario');
-            $table->boolean('estado');
+            $table->unsignedBigInteger('idUser');
+            $table->boolean('estado')->default(1);  
             $table->foreign('idRol')
                     ->references('idRol') 
                     ->on('rol')
                     ->onDelete('restrict');
-            $table->foreign('idUsuario')
-                    ->references('idUsuario') 
-                    ->on('usuario')
+            $table->foreign('idUser')
+                    ->references('idUser') 
+                    ->on('users')
                     ->onDelete('restrict');
-            $table->primary(['idRol', 'idUsuario']);
+            $table->primary(['idRol', 'idUser']);
         });
     }
 
