@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('tipopago', function (Blueprint $table) {
             $table->id('idTipoPago');
             $table->string('descripcion');
-            $table->boolean('estado');
+            $table->boolean('estado')->default(1);  
         });
     }
 

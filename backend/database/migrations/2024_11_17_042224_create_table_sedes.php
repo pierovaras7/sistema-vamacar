@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id('idSede');
             $table->string('direccion');
             $table->string('telefono');
-            $table->boolean('estado');
+            $table->boolean('estado')->default(1);  
         });
     }
 

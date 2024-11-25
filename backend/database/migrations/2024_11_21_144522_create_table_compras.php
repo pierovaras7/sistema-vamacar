@@ -16,7 +16,7 @@ return new class extends Migration
             $table->date('fechaPedido');
             $table->date('fechaRecibido');
             $table->date('fechaPago');
-            $table->boolean('estado');
+            $table->boolean('estado')->default(1);  
             $table->decimal('total');
             $table->unsignedBigInteger('idProveedor');
             $table->foreign('idProveedor')

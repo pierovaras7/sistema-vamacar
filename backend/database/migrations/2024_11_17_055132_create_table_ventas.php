@@ -35,7 +35,7 @@ return new class extends Migration
                     ->references('idCliente') 
                     ->on('cliente')
                     ->onDelete('restrict');     
-            $table->boolean('estado');          
+            $table->boolean('estado')->default(1);  
         });
     }
 

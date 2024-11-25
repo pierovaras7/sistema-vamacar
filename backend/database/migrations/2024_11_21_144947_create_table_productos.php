@@ -30,7 +30,7 @@ return new class extends Migration
                     ->references('idMarca') 
                     ->on('marca')
                     ->onDelete('restrict');
-            $table->boolean('estado');
+            $table->boolean('estado')->default(1);  
         });
     }
 

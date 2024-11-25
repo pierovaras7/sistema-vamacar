@@ -18,7 +18,7 @@ return new class extends Migration
             $table->decimal('cantidad');
             $table->decimal('precio');
             $table->decimal('subtotal');
-            $table->boolean('estado');
+            $table->boolean('estado')->default(1);  
 
             $table->foreign('idVenta')
                 ->references('idVenta')

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('rol_permiso', function (Blueprint $table) {
             $table->unsignedBigInteger('idRol');
             $table->unsignedBigInteger('idPermiso');
-            $table->boolean('estado');
+            $table->boolean('estado')->default(1);  
             $table->foreign('idRol')
                     ->references('idRol') 
                     ->on('rol')

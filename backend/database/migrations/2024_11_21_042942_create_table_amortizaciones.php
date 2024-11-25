@@ -21,7 +21,7 @@ return new class extends Migration
                     ->references('idVenta') 
                     ->on('venta')
                     ->onDelete('restrict');
-            $table->boolean('estado');
+            $table->boolean('estado')->default(1);  
         });
     }
 
