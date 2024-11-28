@@ -1,8 +1,15 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+import { Poppins } from 'next/font/google';
+import { AuthProvider } from "@/context/AuthContext";
+
+const poppins = Poppins({
+  subsets: ['latin'], // Especifica el subset que necesitas (recomendado)
+  weight: ['400', '500', '700'], // Opcional: define los pesos que necesitas
+  preload: true, // Habilita el preloading para mejorar el rendimiento
+});
+
 
 export const metadata: Metadata = {
   title: "Lama Dev School Management Dashboard",
@@ -15,8 +22,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
-    </html>
+    <AuthProvider>
+      <html lang="en">
+      <body className={poppins.className}>
+        {children}
+      </body>
+      </html>
+    </AuthProvider>
   );
 }

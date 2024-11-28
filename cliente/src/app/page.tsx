@@ -1,8 +1,8 @@
-import LoginPage from "./sign-in/page"
+import LoginPage from "./login/page"
 
 const Homepage = () => {
   return (
-    <LoginPage/>
+    <h1>ss</h1>
   )
 }
 
