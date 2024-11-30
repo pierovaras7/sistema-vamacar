@@ -13,9 +13,7 @@ export type RegisterPayload = {
 export type LoginResponse = {
     message: string;
     user: User
-    // Si necesitas el token también puedes incluirlo aquí
-    // token: string; // Puedes agregar esto si lo devuelves junto con la respuesta
-  }
+}
   
 export type User = {
     idUser: number;
@@ -23,8 +21,24 @@ export type User = {
     email: string;
     username: string;
     email_verified_at: string | null;
-    idTrabajador: number | null;
+    trabajador: Trabajador;
     estado: number;
     created_at: string;
     updated_at: string;
 };
+
+export type Trabajador = {
+    idTrabajador: number; 
+    nombres: string;
+    apellidos: string;
+    telefono: string;
+    sexo: string;
+    direccion: string;
+    dni: string;
+    area: string;
+    fechaNacimiento: string; 
+    turno: string;
+    salario: number; 
+    estado: boolean; 
+  };
+  
