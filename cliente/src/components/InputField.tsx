@@ -7,6 +7,7 @@ type InputFieldProps = {
   name: string;
   defaultValue?: string;
   error?: FieldError;
+  step?: any;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
 };
 
@@ -17,6 +18,7 @@ const InputField = ({
   name,
   defaultValue,
   error,
+  step,
   inputProps,
 }: InputFieldProps) => {
   return (
@@ -27,6 +29,7 @@ const InputField = ({
         {...register(name)}
         className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
         {...inputProps}
+        step={step}
         defaultValue={defaultValue}
       />
       {error?.message && (

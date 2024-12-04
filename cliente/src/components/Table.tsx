@@ -3,7 +3,7 @@ const Table = ({
   renderRow,
   data,
 }: {
-  columns: { header: string; accessor: string; className?: string }[];
+  columns: { header: string; accessor: string; className?: string, width?: string }[];
   renderRow: (item: any) => React.ReactNode;
   data: any[];
 }) => {
@@ -12,7 +12,12 @@ const Table = ({
       <thead>
         <tr className="text-left text-gray-500 text-sm">
           {columns.map((col) => (
-            <th key={col.accessor} className={col.className}>{col.header}</th>
+            <th
+              key={col.accessor}
+              className={`${col.className} ${col.width ? col.width : 'w-auto'}`} // Aquí aplicamos el tamaño de la columna
+            >
+              {col.header}
+            </th>          
           ))}
         </tr>
       </thead>

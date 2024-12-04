@@ -28,7 +28,7 @@ export type User = {
 };
 
 export type Trabajador = {
-    idTrabajador: number; 
+    idTrabajador?: number; 
     nombres: string;
     apellidos: string;
     telefono: string;
@@ -39,6 +39,5 @@ export type Trabajador = {
     fechaNacimiento: string; 
     turno: string;
     salario: number; 
-    estado: boolean; 
-  };
-  
+    estado?: boolean; 
+};

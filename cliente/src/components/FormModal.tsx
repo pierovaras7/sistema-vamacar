@@ -1,35 +1,42 @@
 "use client";
 
+import { deleteTrabajador } from "@/services/trabajadoresService";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useState } from "react";
+import { toast } from "react-toastify";
 
 // USE LAZY LOADING
 
 
-const TeacherForm = dynamic(() => import("./forms/TeacherForm"), {
+
+const TrabajadorForm = dynamic(() => import("./forms/TrabajadorForm"), {
   loading: () => <h1>Loading...</h1>,
-});
-const StudentForm = dynamic(() => import("./forms/StudentForm"), {
-  loading: () => <h1>Loading...</h1>,
+  ssr: false
 });
 
 const forms: {
-  [key: string]: (type: "create" | "update", data?: any) => JSX.Element;
+  [key: string]: (type: "create" | "update", data?: any, id?: number, closeModal?: () => void) => JSX.Element;
 } = {
-  teacher: (type, data) => <TeacherForm type={type} data={data} />,
-  student: (type, data) => <StudentForm type={type} data={data} />
+  trabajador: (type, data, id, closeModal) => {
+    // Si no se pasa closeModal, proporciona un valor por defecto (una función vacía)
+    const handleClose = closeModal || (() => {});
+    return <TrabajadorForm type={type} data={data} id={id} closeModal={handleClose} />;
+  },
 };
+
 
 const FormModal = ({
   table,
   type,
   data,
   id,
+  onUpdate,
 }: {
   table:
     | "teacher"
     | "student"
+    | "trabajador"
     | "parent"
     | "subject"
     | "class"
@@ -43,6 +50,7 @@ const FormModal = ({
   type: "create" | "update" | "delete";
   data?: any;
   id?: number;
+  onUpdate: () => void;
 }) => {
   const size = type === "create" ? "w-8 h-8" : "w-7 h-7";
   const bgColor =
@@ -54,28 +62,52 @@ const FormModal = ({
 
   const [open, setOpen] = useState(false);
 
+  const closeModal = () => {
+    setOpen(false); // Define closeModal aquí
+    onUpdate(); // Actualizar la lista de trabajadores al cerrar el modal
+  }
   const Form = () => {
+
+    const handleDelete = async () => {
+      if(id){
+        try {
+          await deleteTrabajador(id);
+          setOpen(false);
+          toast.success("El trabajador fue eliminado exitosamente");
+          onUpdate();
+        } catch (error) {
+          console.error("Error deleting item:", error);
+        }
+      }
+    };
+  
     return type === "delete" && id ? (
-      <form action="" className="p-4 flex flex-col gap-4">
+      <div className="p-4 flex flex-col gap-4">
         <span className="text-center font-medium">
-          All data will be lost. Are you sure you want to delete this {table}?
+          ¿Estas segro de borrar este registro de {table}?
         </span>
-        <button className="bg-red-700 text-white py-2 px-4 rounded-md border-none w-max self-center">
-          Delete
+        <button
+          className="bg-red-700 text-white py-2 px-4 rounded-md border-none w-max self-center"
+          onClick={handleDelete}
+        >
+          Eliminar
         </button>
-      </form>
+      </div>
     ) : type === "create" || type === "update" ? (
-      forms[table](type, data)
+      forms[table](type, data, id, closeModal)
     ) : (
       "Form not found!"
     );
   };
+  
 
   return (
     <>
       <button
         className={`${size} flex items-center justify-center rounded-full ${bgColor}`}
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          setOpen(true); // Lógica existente
+        }}
       >
         <Image src={`/${type}.png`} alt="" width={16} height={16} />
       </button>
@@ -97,3 +129,4 @@ const FormModal = ({
 };
 
 export default FormModal;
+
