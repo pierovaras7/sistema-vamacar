@@ -15,20 +15,40 @@ class MarcaController extends Controller
     }
 
 
-    public function store(Request $request)
+    public function store(Request $request) 
     {
         $request->validate([
             'marca' => 'required|string|max:255',
-            'estado' => 'required|boolean',
         ]);
 
-        $marca = Marca::create($request->all());
+        $existingMarca = Marca::where('marca', $request->input('marca'))->first();
+
+        if ($existingMarca) {
+            if ($existingMarca->estado == false) {
+                $existingMarca->estado = true;
+                $existingMarca->save();
+
+                return response()->json([
+                    'message' => 'Marca reactivada exitosamente.',
+                    'marca' => $existingMarca,
+                ], 200);
+            } else {
+                return response()->json(['message' => 'La marca ya está creada y activa.'], 400);
+            }
+        }
+
+        $marca = Marca::create([
+            'marca' => $request->input('marca'),
+            'estado' => true, 
+        ]);
 
         return response()->json([
             'message' => 'Marca creada exitosamente.',
             'marca' => $marca,
         ], 201);
     }
+
+    
 
 
     public function show($id)
@@ -73,7 +93,8 @@ class MarcaController extends Controller
             return response()->json(['message' => 'Marca no encontrada.'], 404);
         }
 
-        $marca->delete();
+        $marca->estado = false;
+        $marca->save();
 
         return response()->json(['message' => 'Marca eliminada exitosamente.'], 200);
     }

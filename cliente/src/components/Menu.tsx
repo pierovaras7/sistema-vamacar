@@ -15,6 +15,24 @@ const menuItems = [
         visible: ["admin", "teacher", "student", "parent"],
       },
       {
+        icon: "/home.png",
+        label: "Categoria",
+        href: "/list/categoria",
+        visible: ["admin", "teacher", "student", "parent"],
+      },
+      {
+        icon: "/home.png",
+        label: "Marca",
+        href: "/list/marca",
+        visible: ["admin", "teacher", "student", "parent"],
+      },
+      {
+        icon: "/home.png",
+        label: "Producto",
+        href: "/list/producto",
+        visible: ["admin", "teacher", "student", "parent"],
+      },
+      {
         icon: "/teacher.png",
         label: "Teachers",
         href: "/list/teachers",
