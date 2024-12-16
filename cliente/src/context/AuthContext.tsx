@@ -36,13 +36,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Función para iniciar sesión
   const handleLogin = async (username: string, password: string) => {
     try {
-      const responseLogin = await login(username, password); // Usamos la función del AuthService
-      setUser(responseLogin.user); // Asumimos que el JWT tiene un campo `username`
+      const responseLogin = await login(username, password); // Llamada a login desde AuthService
+      setUser(responseLogin.user); // Guardar usuario en el estado
       setIsAuthenticated(true);
+      localStorage.setItem("user", JSON.stringify(responseLogin.user)); // Guardar usuario en localStorage
     } catch (error) {
       setUser(null);
       setIsAuthenticated(false);
-      throw error; // Lanza el error hacia el componente
+      localStorage.removeItem("user");
+      throw error; // Lanzar error hacia el componente
     }
   };
 
@@ -54,10 +56,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     console.log('DESLOGEANDO DESDE CONTEXT');
   };
 
-  // Verificar autenticación al cargar el componente
-  const handleCheckAuth = () => {
-    
-  };
+// Verificar autenticación al cargar el componente
+const handleCheckAuth = () => {
+  try {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser); // Establecer el usuario en el estado
+      setIsAuthenticated(true);
+    }
+  } catch (error) {
+    console.error("Error al verificar la autenticación:", error);
+    setUser(null);
+    setIsAuthenticated(false);
+  }
+};
+
 
   useEffect(() => {
     handleCheckAuth(); // Al cargar, verificamos si el usuario está autenticado

@@ -90,4 +90,24 @@ public function logout(Request $request)
         return response()->json(['message' => 'Error al procesar el logout', 'error' => $e->getMessage()], 500);
     }
 }
+
+public function getUsers()
+{
+    // Obtener todos los usuarios
+    $users = User::all();
+
+    // Verificar si hay usuarios disponibles
+    if ($users->isEmpty()) {
+        return response()->json(['message' => 'No hay usuarios registrados.'], 404);
+    }
+
+    // Devolver la lista de usuarios
+    return response()->json([
+        'users' => $users
+    ]);
 }
+
+}
+
+
+
