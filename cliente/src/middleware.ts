@@ -23,6 +23,10 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // Si el usuario está autenticado y está intentando acceder a /login, redirigirlo a /admin
+  if (isAuthenticated && request.nextUrl.pathname === '/login') {
+    return NextResponse.redirect(new URL('/admin', request.url)); // Redirige a /admin
+  }
 
 
 

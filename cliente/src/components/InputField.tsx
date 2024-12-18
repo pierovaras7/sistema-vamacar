@@ -7,6 +7,7 @@ type InputFieldProps = {
   name: string;
   defaultValue?: string;
   error?: FieldError;
+  step?: any;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
 };
 
@@ -17,16 +18,18 @@ const InputField = ({
   name,
   defaultValue,
   error,
+  step,
   inputProps,
 }: InputFieldProps) => {
   return (
-    <div className="flex flex-col gap-2 w-full md:w-1/4">
+    <div className="flex flex-col gap-2 w-full px-2">
       <label className="text-xs text-gray-500">{label}</label>
       <input
         type={type}
         {...register(name)}
         className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
         {...inputProps}
+        step={step}
         defaultValue={defaultValue}
       />
       {error?.message && (

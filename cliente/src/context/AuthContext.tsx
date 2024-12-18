@@ -1,7 +1,7 @@
-"use client"
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { login, logout, checkAuth } from '@/services/authService';
-import { LoginResponse, User } from '@/types/auth';
+"use client";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { login, logout as authLogout } from "@/services/authService";
+import { LoginResponse, Trabajador, User } from "@/types/auth";
 
 // Tipo para el contexto de autenticación
 interface AuthContextType {
@@ -13,10 +13,10 @@ interface AuthContextType {
 }
 
 // Estado inicial del contexto
-const initialState = {
+const initialState: AuthContextType = {
   user: null,
   isAuthenticated: false,
-  login: async (username: string, password: string) => {},
+  login: async () => {},
   logout: () => {},
   checkAuth: () => {},
 };
@@ -26,7 +26,7 @@ const AuthContext = createContext<AuthContextType>(initialState);
 
 // Proveedor del contexto de autenticación
 interface AuthProviderProps {
-  children: ReactNode; // Especificamos que children es de tipo ReactNode
+  children: ReactNode;
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
@@ -36,35 +36,61 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Función para iniciar sesión
   const handleLogin = async (username: string, password: string) => {
     try {
-      const responseLogin = await login(username, password); // Usamos la función del AuthService
-      setUser(responseLogin.user); // Asumimos que el JWT tiene un campo `username`
+      const responseLogin = await login(username, password);
+      const userData = responseLogin.user;
+      const trabajadorData = responseLogin.trabajador;
+      setUser(userData);
       setIsAuthenticated(true);
+
+      // Guardar usuario y trabajador en localStorage
+      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("trabajador", JSON.stringify(trabajadorData));
     } catch (error) {
       setUser(null);
       setIsAuthenticated(false);
-      throw error; // Lanza el error hacia el componente
+      throw error;
     }
   };
 
   // Función para cerrar sesión
   const handleLogout = () => {
-    logout(); // Usamos la función del AuthService
+    authLogout();
     setUser(null);
     setIsAuthenticated(false);
-    console.log('DESLOGEANDO DESDE CONTEXT');
+
+    // Eliminar usuario y trabajador de localStorage
+    localStorage.removeItem("user");
+    localStorage.removeItem("trabajador");
   };
 
   // Verificar autenticación al cargar el componente
   const handleCheckAuth = () => {
-    
+    const storedUser = localStorage.getItem("user");
+    const storedTrabajador = localStorage.getItem("trabajador");
+
+    if (storedUser && storedTrabajador) {
+      setUser(JSON.parse(storedUser));
+      setIsAuthenticated(true);
+    } else {
+      setUser(null);
+      setIsAuthenticated(false);
+    }
   };
 
   useEffect(() => {
-    handleCheckAuth(); // Al cargar, verificamos si el usuario está autenticado
+    handleCheckAuth(); // Verifica la autenticación al cargar el componente
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login: handleLogin, logout: handleLogout, checkAuth: handleCheckAuth }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated,
+        login: handleLogin,
+        logout: handleLogout,
+        checkAuth: handleCheckAuth,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
