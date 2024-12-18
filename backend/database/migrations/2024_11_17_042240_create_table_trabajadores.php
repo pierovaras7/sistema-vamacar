@@ -13,16 +13,16 @@ return new class extends Migration
     {
         Schema::create('trabajador', function (Blueprint $table) {
             $table->id('idTrabajador');
-            $table->string('nombres');
-            $table->string('apellidos');
-            $table->string('telefono');
-            $table->char('sexo');
-            $table->string('direccion');
-            $table->string('dni')->unique();
-            $table->string('area');
-            $table->date('fechaNacimiento');
-            $table->string('turno');
-            $table->decimal('salario');
+            $table->string('nombres')->nullable();
+            $table->string('apellidos')->nullable();
+            $table->string('telefono')->nullable();
+            $table->char('sexo')->nullable();
+            $table->string('direccion')->nullable();
+            $table->string('dni')->unique()->nullable();
+            $table->string('area')->nullable();
+            $table->date('fechaNacimiento')->nullable();
+            $table->string('turno')->nullable();
+            $table->decimal('salario')->nullable();
             $table->boolean('estado')->default(1);  
         });
     }

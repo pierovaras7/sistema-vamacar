@@ -20,18 +20,18 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
       <button
         onClick={() => handlePageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="py-2 px-4 rounded-md bg-slate-200 text-xs font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+        className="py-2 px-4 rounded-md bg-slate-200 text-xs font-semibold disabled:opacity-50 disabled:cursor-not-allowed mr-4"
       >
         Prev
       </button>
 
       {/* Páginas numeradas */}
-      <div className="flex items-center gap-2 text-sm">
+      <div className="flex items-center gap-2 text-sm justify-center mx-4">
         {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
           <button
             key={page}
             onClick={() => handlePageChange(page)}
-            className={`px-2 rounded-sm ${page === currentPage ? 'bg-lamaSky' : ''}`}
+            className={`py-1 px-2 rounded-sm ${page === currentPage ? 'bg-lamaSky' : ''}`}
           >
             {page}
           </button>
@@ -42,12 +42,14 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
       <button
         onClick={() => handlePageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="py-2 px-4 rounded-md bg-slate-200 text-xs font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+        className="py-2 px-4 rounded-md bg-slate-200 text-xs font-semibold disabled:opacity-50 disabled:cursor-not-allowed ml-4"
       >
         Next
       </button>
     </div>
+
   );
+  
 };
 
 export default Pagination;

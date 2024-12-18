@@ -1,12 +1,12 @@
 "use client";
 import { useState } from 'react';
-import { toast, ToastContainer } from 'react-toastify'; // Importamos react-toastify
-import 'react-toastify/dist/ReactToastify.css'; // Importar estilos de React Toastify
-import { useAuth } from '@/context/AuthContext'; // Ajusta la ruta si es necesario
+// import 'react-toastify/dist/ReactToastify.css'; // Importar estilos de React Toastify
 import { useRouter } from 'next/navigation'; // Importamos useRouter de Next.js
+import { toast, Toaster } from 'sonner';
+import useAuthStore from '@/stores/AuthStore';
 
 const LoginPage = () => {
-  const { login, user } = useAuth(); // Accedemos a la función `login` del AuthContext
+  const { login } = useAuthStore();
   const router  = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -18,7 +18,10 @@ const LoginPage = () => {
     try {
       await login(username, password);
       toast.success('Inicio de sesión exitoso');
-      router.push('/admin'); // Redirigimos a /admin si el inicio de sesión es exitoso
+      setTimeout(() => {
+        router.push('/trabajadores'); // Redirigimos después de que pase el tiempo
+      }, 3000); // 5000 milisegundos = 5 segundos   
+
     } catch (error: any) {
       toast.error(error.message);
     }
@@ -86,18 +89,8 @@ const LoginPage = () => {
         </div>
       </div>
       {/* Contenedor de toasts */}
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
+      <Toaster position="top-right" richColors />
+
     </div>
   );
 };

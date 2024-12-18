@@ -2,10 +2,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { toast } from 'react-toastify';
 import InputField from "../InputField";
 import { Trabajador } from "@/types/auth";
 import { saveTrabajador, updateTrabajador } from "@/services/trabajadoresService";
+import { toast } from "sonner";
 
 // Calcular la mayoría de edad (18 años)
 const isAdult = (dateString: string): boolean => {
@@ -91,6 +91,7 @@ const TrabajadorForm = ({
       if (type === "create") {
         // Crear un nuevo trabajador
         await saveTrabajador(trabajador);
+        console.log('XXXXXX');
         toast.success("Trabajador creado exitosamente");
       } else if (type === "update" && id) {
         // Actualizar un trabajador existente
@@ -129,7 +130,7 @@ const TrabajadorForm = ({
       <h1 className="text-xl font-semibold">
         {type === "create" ? "Crear Trabajador" : "Actualizar Trabajador"}
       </h1>
-      <div className="flex justify-between flex-wrap gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <InputField
           label="Nombres"
           name="nombres"
@@ -160,7 +161,7 @@ const TrabajadorForm = ({
           register={register}
           error={errors?.dni}
         />
-        <div className="flex flex-col gap-2 w-full md:w-1/4">
+        <div className="flex flex-col gap-2 px-2 w-full">
           <label className="text-xs text-gray-500">Area</label>
           <select
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
@@ -180,7 +181,7 @@ const TrabajadorForm = ({
           register={register}
           error={errors?.fechaNacimiento}
         />
-        <div className="flex flex-col gap-2 w-full md:w-1/4">
+        <div className="flex flex-col gap-2 px-2 w-full">
           <label className="text-xs text-gray-500">Turno</label>
           <select
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
@@ -201,7 +202,7 @@ const TrabajadorForm = ({
           register={register}
           error={errors?.salario}
         />
-        <div className="flex flex-col gap-2 w-full md:w-1/4">
+        <div className="flex flex-col gap-2 w-full px-2">
           <label className="text-xs text-gray-500">Sexo</label>
           <select
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"

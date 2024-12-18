@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Trabajador;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -13,7 +14,8 @@ class TrabajadorController extends Controller
      */
     public function index()
     {
-        $trabajadores = Trabajador::all();
+        //corregir
+        $trabajadores = Trabajador::where("estado", "=", 1)->get();
 
         if ($trabajadores->isEmpty()) {
             return response()->json([
@@ -36,7 +38,7 @@ class TrabajadorController extends Controller
             'telefono' => 'required|string|min:9|max:9',  // Longitud exacta de 9 caracteres
             'sexo' => 'required|string|in:M,F',  // Solo M o F
             'direccion' => 'nullable|string|max:255',
-            'dni' => 'required|string|min:8|max:8|unique:trabajador,dni',  // Longitud exacta de 8 caracteres
+            'dni' => 'required|string|min:8|max:8|unique:trabajador,dni|unique:users,username',  // Longitud exacta de 8 caracteres
             'area' => 'nullable|string|max:100',
             'fechaNacimiento' => 'required|date',
             'turno' => 'nullable|string|max:50',
@@ -69,7 +71,7 @@ class TrabajadorController extends Controller
             'dni.string' => 'El DNI debe ser una cadena de texto.',
             'dni.min' => 'El DNI debe tener exactamente 8 caracteres.',
             'dni.max' => 'El DNI debe tener exactamente 8 caracteres.',
-            'dni.unique' => 'Este DNI ya está registrado.',
+            'dni.unique' => 'Este DNI ya está registrado como trabajador o usuario.',
         
             'area.nullable' => 'El área es opcional.',
             'area.string' => 'El área debe ser una cadena de texto.',
@@ -104,6 +106,16 @@ class TrabajadorController extends Controller
             $trabajador = Trabajador::create($validator->validated());
             $trabajador->estado = 1;
             $trabajador->save();
+
+            // Obtener el ID del trabajador recién creado
+            $idTrabajador = $trabajador->idTrabajador;
+
+            User::create([
+                'name' => $request->nombres,
+                'username' => $request->dni,
+                'password' => bcrypt($request->dni), // Encriptar la contraseña
+                'idTrabajador' => $idTrabajador
+            ]);
 
             return response()->json([
                 'message' => 'Trabajador creado exitosamente.',
@@ -243,7 +255,7 @@ class TrabajadorController extends Controller
 
         try {
             // Eliminar el trabajador
-            $trabajador->estado(0);
+            $trabajador->estado = 0;
             $trabajador->save();
 
             return response()->json([

@@ -1,16 +1,15 @@
+// /app/layout.tsx
+
 import type { Metadata } from "next";
-import "./globals.css";
-
-import { Poppins } from 'next/font/google';
-import { AuthProvider } from "@/context/AuthContext";
-
+import { Poppins } from "next/font/google";
+import { AuthProvider } from "@/context/AuthContext"; // Tu contexto de autenticación
+import "./globals.css";  // Asegúrate de que los estilos estén importados
 
 const poppins = Poppins({
-  subsets: ['latin'], // Especifica el subset que necesitas (recomendado)
-  weight: ['400', '500', '700'], // Opcional: define los pesos que necesitas
-  preload: true, // Habilita el preloading para mejorar el rendimiento
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  preload: true,
 });
-
 
 export const metadata: Metadata = {
   title: "Lama Dev School Management Dashboard",
@@ -25,9 +24,7 @@ export default function RootLayout({
   return (
     <AuthProvider>
       <html lang="en">
-      <body className={poppins.className}>
-        {children}
-      </body>
+        <body className={poppins.className}>{children}</body>
       </html>
     </AuthProvider>
   );
