@@ -6,6 +6,7 @@ import { z } from "zod";
 import InputField from "../InputField";
 import { createBrand, updateBrand } from "@/services/marcaService";
 import { useState } from "react";
+import { toast } from 'react-toastify';
 
 const schema = z.object({
   marca: z.string().min(1, { message: "La marca es obligatoria." }),
@@ -16,10 +17,12 @@ type Inputs = z.infer<typeof schema>;
 const BrandForm = ({
   type,
   data,
+  id,
   onSuccess,
 }: {
   type: "create" | "update";
   data?: any;
+  id?: number;
   onSuccess?: () => void;
 }) => {
   const {
@@ -41,8 +44,10 @@ const BrandForm = ({
     try {
       if (type === "create") {
         await createBrand(formData);
+        toast.success("Marca creada exitosamente");
       } else if (type === "update" && data?.idMarca) {
         await updateBrand(data.idMarca, formData);
+        toast.success("Marca editada exitosamente");
       }
       setErrorMessage("");
       onSuccess?.();

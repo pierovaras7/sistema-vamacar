@@ -6,6 +6,7 @@ import { z } from "zod";
 import InputField from "../InputField"; // Asumo que este componente ya existe.
 import { createCategory, updateCategory } from "@/services/categoriaService";
 import { useState } from "react";
+import { toast } from 'react-toastify';
 
 const schema = z.object({
   categoria: z.string().min(1, { message: "La categoría es obligatoria." }),
@@ -16,10 +17,12 @@ type Inputs = z.infer<typeof schema>;
 const CategoryForm = ({
   type,
   data,
+  id,
   onSuccess,
 }: {
   type: "create" | "update";
   data?: any;
+  id?: number;
   onSuccess?: () => void;
 }) => {
   const {
@@ -41,8 +44,12 @@ const CategoryForm = ({
     try {
       if (type === "create") {
         await createCategory(formData);
+        toast.success("Categoria creada  exitosamente");
+
       } else if (type === "update" && data?.idCategoria) {
         await updateCategory(data.idCategoria, formData);
+        toast.success("Categoria actualizada  exitosamente");
+
       }
       setErrorMessage("");
       onSuccess?.();

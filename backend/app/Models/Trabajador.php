@@ -9,9 +9,9 @@ class Trabajador extends Model
 {
     use HasFactory;
 
-   protected $table = 'trabajador';
+    protected $table = 'trabajador';
 
- protected $primaryKey = 'idTrabajador';
+    protected $primaryKey = 'idTrabajador';
 
     public $timestamps = false;
 

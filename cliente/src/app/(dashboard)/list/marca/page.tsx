@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import FormModal from "@/components/FormModal";
+import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
 import { getBrands, deleteBrand } from "@/services/marcaService";
-import { FiTrash } from "react-icons/fi";
+import Image from "next/image";
+import { toast } from 'react-toastify';
 
 type Brand = {
   idMarca: number;
@@ -14,44 +16,53 @@ type Brand = {
 };
 
 const columns = [
-  { header: "ID", accessor: "idMarca" },
-  { header: "Brand Name", accessor: "marca" },
-  { header: "Actions", accessor: "actions" },
+  { header: "ID", accessor: "idMarca", width: "w-1/12" },
+  { header: "Marca", accessor: "marca", width: "w-8/12" },
+  { header: "Acciones", accessor: "actions", width: "w-3/12" },
 ];
 
 const BrandListPage = () => {
   const [brands, setBrands] = useState<Brand[]>([]);
-  const [filteredBrands, setFilteredBrands] = useState<Brand[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage] = useState(10);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const fetchBrands = async () => {
     try {
-      setLoading(true);
-      const data = await getBrands();
-      const activeBrands = data.filter((brand: Brand) => brand.estado);
+      const response= await getBrands();
+      const activeBrands = response.filter((brand: Brand) => brand.estado);     
       setBrands(activeBrands);
-      setFilteredBrands(activeBrands);
     } catch (error: any) {
       console.error("Error al cargar marcas:", error.message);
-    } finally {
-      setLoading(false);
-    }
+    } 
   };
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);
-    const filtered = brands.filter((brand) =>
-      brand.marca.toLowerCase().includes(term.toLowerCase())
-    );
-    setFilteredBrands(filtered);
   };
 
-  const handleDeleteBrand = async (idMarca: number) => {
+  const filteredBrands = brands.filter((brand) =>
+    brand.marca.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const indexOfLastBrand = currentPage * perPage;
+  const indexOfFirstBrand = indexOfLastBrand - perPage;
+  const currentBrands = filteredBrands.slice(indexOfFirstBrand, indexOfLastBrand);
+
+  const totalPages = Math.ceil(filteredBrands.length / perPage);
+
+  const handlePageChange = (page: number) => setCurrentPage(page);
+
+  const handleDeleteBrand = async () => {
+    if (!selectedBrand) return;
     try {
-      setLoading(true);
-      await deleteBrand(idMarca);
-      await fetchBrands();
+      await deleteBrand(selectedBrand.idMarca);
+      setIsDeleteModalOpen(false);
+      fetchBrands();
+      toast.success("Marca eliminada exitosamente");
     } catch (error: any) {
       console.error("Error al eliminar marca:", error.message);
     } finally {
@@ -69,12 +80,21 @@ const BrandListPage = () => {
       <td>{item.marca}</td>
       <td>
         <div className="flex items-center gap-2">
-          <FormModal table="brand" type="update" data={item} onRefresh={fetchBrands} />
+          <FormModal
+            table="brand"
+            type="update"
+            data={item}
+            id={item.idMarca}
+            onUpdate={fetchBrands}
+          />
           <button
-            className="text-red-500 hover:text-red-700"
-            onClick={() => handleDeleteBrand(item.idMarca)}
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-300"
+            onClick={() => {
+              setSelectedBrand(item);
+              setIsDeleteModalOpen(true);
+            }}
           >
-            <FiTrash size={20} />
+            <Image src="/delete.png" alt="Eliminar" width={16} height={16} />
           </button>
         </div>
       </td>
@@ -84,18 +104,50 @@ const BrandListPage = () => {
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       <div className="flex items-center justify-between">
-        <h1 className="hidden md:block text-lg font-semibold">All Brands</h1>
-        <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+        <h1 className="hidden md:block text-lg font-semibold">Marcas</h1>
+        <div className="flex items-center gap-4 w-full md:w-auto">
           <TableSearch onSearch={handleSearch} />
-          <div className="flex items-center gap-4 self-end">
-            <FormModal table="brand" type="create" onRefresh={fetchBrands} />
-          </div>
+          <FormModal
+            table="brand"
+            type="create"
+            onUpdate={fetchBrands}
+          />
         </div>
       </div>
       {loading ? (
-        <div className="text-center py-4">Loading...</div>
+        <div className="text-center py-4">Cargando...</div>
       ) : (
-        <Table columns={columns} renderRow={renderRow} data={filteredBrands} />
+        <Table columns={columns} renderRow={renderRow} data={currentBrands} />
+      )}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
+      {/* Modal de Confirmación para Eliminar */}
+      {isDeleteModalOpen && selectedBrand && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-md shadow-lg">
+            <h2 className="text-lg font-semibold mb-4">Confirmar eliminación</h2>
+            <p className="mb-6">
+              ¿Estás seguro de que deseas eliminar la marca "{selectedBrand.marca}"?
+            </p>
+            <div className="flex gap-4 justify-end">
+              <button
+                className="bg-gray-300 text-black px-4 py-2 rounded-md"
+                onClick={() => setIsDeleteModalOpen(false)}
+              >
+                Cancelar
+              </button>
+              <button
+                className="bg-red-500 text-white px-4 py-2 rounded-md"
+                onClick={handleDeleteBrand}
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

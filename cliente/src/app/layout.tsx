@@ -4,6 +4,7 @@ import "./globals.css";
 import { Poppins } from 'next/font/google';
 import { AuthProvider } from "@/context/AuthContext";
 
+
 const poppins = Poppins({
   subsets: ['latin'], // Especifica el subset que necesitas (recomendado)
   weight: ['400', '500', '700'], // Opcional: define los pesos que necesitas
@@ -31,3 +32,4 @@ export default function RootLayout({
     </AuthProvider>
   );
 }
+

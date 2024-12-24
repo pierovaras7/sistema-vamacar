@@ -8,6 +8,7 @@ import {
   updateSubcategory,
 } from "@/services/subcategoriaService";
 import { FiEdit, FiTrash } from "react-icons/fi";
+import { toast } from 'react-toastify';
 
 type Subcategory = {
   idSubcategoria: number;
@@ -68,6 +69,7 @@ const SubcategoriesModal = ({
       await deleteSubcategory(selectedSubcategory.idSubcategoria);
       setShowDeleteModal(false);
       setSelectedSubcategory(null);
+      toast.success("Subcategoria eliminada exitosamente");
 
       // Actualizamos el estado local
       setSubcategories((prev) =>

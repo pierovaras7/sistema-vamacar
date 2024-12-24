@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import FormModal from "@/components/FormModal";
-import Pagination from "@/components/Pagination"; // Si usas paginación
+import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import { FiTrash } from "react-icons/fi";
 import { getProducts, deleteProduct } from "@/services/productoService";
+import Image from "next/image";
+import { toast } from 'react-toastify';
 
 type Product = {
   idProducto: number;
@@ -19,58 +20,64 @@ type Product = {
   precioXMayor: number;
   idSubcategoria: number;
   idMarca: number;
+  estado: boolean;
 };
 
 const columns = [
-  { header: "ID", accessor: "idProducto" },
-  { header: "Descripción", accessor: "descripcion" },
-  { header: "Código", accessor: "codigo" },
-  { header: "Unidad", accessor: "uni_medida" },
-  { header: "Precio Costo", accessor: "precioCosto" },
-  { header: "Precio Min", accessor: "precioMinVenta" },
-  { header: "Precio Max", accessor: "precioMaxVenta" },
-  { header: "Precio Mayor", accessor: "precioXMayor" },
-  { header: "Acciones", accessor: "action" },
+  { header: "ID", accessor: "idProducto", width: "w-1/12" },
+  { header: "Descripción", accessor: "descripcion", width: "w-2/12" },
+  { header: "Código", accessor: "codigo", width: "w-1/12" },
+  { header: "Unidad", accessor: "uni_medida", width: "w-1/12" },
+  { header: "Precio Costo", accessor: "precioCosto", width: "w-1/12" },
+  { header: "Precio Min", accessor: "precioMinVenta", width: "w-1/12" },
+  { header: "Precio Max", accessor: "precioMaxVenta", width: "w-1/12" },
+  { header: "Precio Mayor", accessor: "precioXMayor", width: "w-1/12" },
+  { header: "Acciones", accessor: "action", width: "w-2/12" },
 ];
 
 const ProductListPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage] = useState(10);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState<boolean>(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const fetchProducts = async () => {
     try {
-      setLoading(true);
-      const data = await getProducts();
-      setProducts(data);
-      setFilteredProducts(data);
+      const response = await getProducts();
+      const activeProducts = response.filter((product: Product) => product.estado);     
+      setProducts(activeProducts);
     } catch (error: any) {
       console.error("Error al cargar productos:", error.message);
-    } finally {
-      setLoading(false);
-    }
+    } 
   };
+
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);
-    const filtered = products.filter((product) =>
-      product.descripcion.toLowerCase().includes(term.toLowerCase())
-    );
-    setFilteredProducts(filtered);
   };
+
+  const filteredProducts = products.filter((product) =>
+    product.descripcion.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const indexOfLastProduct = currentPage * perPage;
+  const indexOfFirstProduct = indexOfLastProduct - perPage;
+  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+
+  const totalPages = Math.ceil(filteredProducts.length / perPage);
+
+  const handlePageChange = (page: number) => setCurrentPage(page);
 
   const handleDeleteProduct = async () => {
     if (!selectedProduct) return;
-
     try {
-      setLoading(true);
       await deleteProduct(selectedProduct.idProducto);
-      setSelectedProduct(null);
       setIsDeleteModalOpen(false);
-      await fetchProducts();
+      fetchProducts();
+      toast.success("Producto eliminado exitosamente");
     } catch (error: any) {
       console.error("Error al eliminar producto:", error.message);
     } finally {
@@ -97,15 +104,21 @@ const ProductListPage = () => {
       <td>{Number(item.precioXMayor)?.toFixed(2) || "N/A"}</td>
       <td>
         <div className="flex gap-2">
-          <FormModal table="product" type="update" data={item} onRefresh={fetchProducts} />
+          <FormModal
+            table="product"
+            type="update"
+            data={item}
+            id={item.idProducto}
+            onUpdate={fetchProducts}
+          />
           <button
-            className="text-red-500 hover:text-red-700"
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-300"
             onClick={() => {
               setSelectedProduct(item);
               setIsDeleteModalOpen(true);
             }}
           >
-            <FiTrash size={20} />
+            <Image src="/delete.png" alt="Eliminar" width={16} height={16} />
           </button>
         </div>
       </td>
@@ -114,35 +127,34 @@ const ProductListPage = () => {
 
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
-      {/* Encabezado */}
       <div className="flex items-center justify-between">
-        <h1 className="hidden md:block text-lg font-semibold">Todos los Productos</h1>
-        <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+        <h1 className="hidden md:block text-lg font-semibold">Productos</h1>
+        <div className="flex items-center gap-4 w-full md:w-auto">
           <TableSearch onSearch={handleSearch} />
-          <div className="flex items-center gap-4 self-end">
-            <FormModal table="product" type="create" onRefresh={fetchProducts} />
-          </div>
+          <FormModal
+            table="product"
+            type="create"
+            onUpdate={fetchProducts}
+          />
         </div>
       </div>
-
-      {/* Tabla */}
       {loading ? (
         <div className="text-center py-4">Cargando...</div>
       ) : (
-        <Table columns={columns} renderRow={renderRow} data={filteredProducts} />
+        <Table columns={columns} renderRow={renderRow} data={currentProducts} />
       )}
-
-      {/* Paginación */}
-      <Pagination />
-
-      {/* Modal de confirmación de eliminación */}
-      {isDeleteModalOpen && (
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
+      {isDeleteModalOpen && selectedProduct && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-md shadow-lg">
             <h2 className="text-lg font-semibold mb-4">Confirmar eliminación</h2>
             <p className="mb-6">
               ¿Estás seguro de que deseas eliminar el producto "
-              {selectedProduct?.descripcion}"?
+              {selectedProduct.descripcion}"?
             </p>
             <div className="flex gap-4 justify-end">
               <button

@@ -6,6 +6,7 @@ import { z } from "zod";
 import InputField from "../InputField";
 import { createSubcategory, updateSubcategory } from "@/services/subcategoriaService";
 import { useState } from "react";
+import { toast } from 'react-toastify';
 
 const schema = z.object({
   subcategoria: z.string().min(1, { message: "La subcategoría es obligatoria." }),
@@ -17,11 +18,13 @@ const SubcategoryForm = ({
   type,
   data,
   idCategoria,
+  id,
   onSuccess,
 }: {
   type: "create" | "update";
   data?: any;
   idCategoria?: number;
+  id?: number;
   onSuccess?: () => void;
 }) => {
   const {
@@ -44,11 +47,12 @@ const SubcategoryForm = ({
       if (type === "create") {
         if (!idCategoria) throw new Error("El ID de la categoría es requerido.");
         await createSubcategory({ ...formData, idCategoria });
+        toast.success("Subcategoria creada exitosamente");
+
       } else if (type === "update" && data?.idSubcategoria) {
-        await updateSubcategory(data.idSubcategoria, {
-          ...formData,
-          idCategoria: data.idCategoria,
-        });
+        await updateSubcategory(data.idSubcategoria, {...formData, idCategoria: data.idCategoria });
+        toast.success("Subcategoria actualizado exitosamente");
+
       }
       setErrorMessage("");
       onSuccess?.();

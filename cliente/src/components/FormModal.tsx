@@ -1,61 +1,79 @@
 "use client";
 
+import { deleteTrabajador } from "@/services/trabajadoresService";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { ReactNode, useState } from "react";
+import { useState } from "react";
+import { toast } from "react-toastify";
 
-// Lazy loading de formularios
-const TeacherForm = dynamic(() => import("./forms/TeacherForm"), {
+// USE LAZY LOADING
+
+
+
+const TrabajadorForm = dynamic(() => import("./forms/TrabajadorForm"), {
   loading: () => <h1>Loading...</h1>,
-});
-const StudentForm = dynamic(() => import("./forms/StudentForm"), {
-  loading: () => <h1>Loading...</h1>,
+  ssr: false,
 });
 const CategoryForm = dynamic(() => import("./forms/CategoryForm"), {
   loading: () => <h1>Loading...</h1>,
+  ssr: false,
 });
 const SubcategoryForm = dynamic(() => import("./forms/SubcategoryForm"), {
   loading: () => <h1>Loading...</h1>,
+  ssr: false,
 });
-
 const BrandForm = dynamic(() => import("./forms/BrandForm"), {
   loading: () => <h1>Loading...</h1>,
+  ssr: false,
 });
 
 const ProductForm = dynamic(() => import("./forms/ProductForm"), {
   loading: () => <h1>Loading...</h1>,
+  ssr: false,
 });
 
-// Mapear formularios a tablas
+
 const forms: {
-  [key: string]: (type: "create" | "update", data?: any, onSuccess?: () => void) => JSX.Element;
+  [key: string]: (type: "create" | "update", data?: any, id?: number, closeModal?: () => void) => JSX.Element;
 } = {
-  category: (type, data, onSuccess) => (
-    <CategoryForm type={type} data={data} onSuccess={onSuccess} />
-  ),
-  subcategory: (type, data, onSuccess) => (
-    <SubcategoryForm type={type} data={data} idCategoria={data?.idCategoria} onSuccess={onSuccess} />
-  ),
-  brand: (type, data, onSuccess) => (
-    <BrandForm type={type} data={data} onSuccess={onSuccess} />
-  ),
-  product: (type, data, onSuccess) => (
-    <ProductForm type={type} data={data} onSuccess={onSuccess} />
-  ),
+  trabajador: (type, data, id, closeModal) =>
+    <TrabajadorForm type={type} data={data} id={id} closeModal={closeModal || (() => {})} />,
+  category: (type, data, id, closeModal) =>
+    <CategoryForm type={type} data={data} id={id} onSuccess={() => closeModal?.()} />,
+  subcategory: (type, data, id, closeModal) =>
+    <SubcategoryForm type={type} data={data}       idCategoria={data?.idCategoria || id}  onSuccess={() => closeModal?.()} />,
+  brand: (type, data, id, closeModal) =>
+    <BrandForm
+      type={type}
+      data={data}
+      id={id}
+      onSuccess={() => closeModal?.()}
+    />,
+    product: (type, data, id, closeModal) =>
+      <ProductForm
+        type={type}
+        data={data}
+        id={id}
+        onSuccess={() => closeModal?.()}
+      />,
 };
+
 
 const FormModal = ({
   table,
   type,
   data,
   id,
-  onRefresh,
-  onConfirm,
-  children, // Nuevo prop para contenido personalaizado
+  onUpdate,
 }: {
   table:
     | "teacher"
     | "student"
+    | "trabajador"
+    | "category"
+    | "brand"
+    | "subcategory"
+    | "product"
     | "parent"
     | "subject"
     | "class"
@@ -65,17 +83,11 @@ const FormModal = ({
     | "result"
     | "attendance"
     | "event"
-    | "announcement"
-    | "category"
-    | "subcategory"
-    | "brand"
-    | "product";  
+    | "announcement";
   type: "create" | "update" | "delete";
   data?: any;
   id?: number;
-  onRefresh?: () => void;
-  onConfirm?: () => void;
-  children?: ReactNode; // Permite contenido adicional
+  onUpdate: () => void;
 }) => {
   const size = type === "create" ? "w-8 h-8" : "w-7 h-7";
   const bgColor =
@@ -87,42 +99,59 @@ const FormModal = ({
 
   const [open, setOpen] = useState(false);
 
-  const handleSuccess = () => {
-    setOpen(false);
-    onRefresh?.();
-  };
-
+  const closeModal = () => {
+    setOpen(false); // Define closeModal aquí
+    onUpdate(); // Actualizar la lista de trabajadores al cerrar el modal
+  }
   const Form = () => {
-    if (type === "delete" && id) {
-      return (
-        <form className="p-4 flex flex-col gap-4">
-          <span className="text-center font-medium">
-            All data will be lost. Are you sure you want to delete this {table}?
-          </span>
-          <button className="bg-red-700 text-white py-2 px-4 rounded-md border-none w-max self-center">
-            Delete
-          </button>
-        </form>
-      );
-    } else if ((type === "create" || type === "update") && forms[table]) {
-      return forms[table](type, data, handleSuccess);
-    } else {
-      return <div>Form not found!</div>;
-    }
+
+    const handleDelete = async () => {
+      if(id){
+        try {
+          await deleteTrabajador(id);
+          setOpen(false);
+          toast.success("El trabajador fue eliminado exitosamente");
+          onUpdate();
+        } catch (error) {
+          console.error("Error deleting item:", error);
+        }
+      }
+    };
+  
+    return type === "delete" && id ? (
+      <div className="p-4 flex flex-col gap-4">
+        <span className="text-center font-medium">
+          ¿Estas segro de borrar este registro de {table}?
+        </span>
+        <button
+          className="bg-red-700 text-white py-2 px-4 rounded-md border-none w-max self-center"
+          onClick={handleDelete}
+        >
+          Eliminar
+        </button>
+      </div>
+    ) : type === "create" || type === "update" ? (
+      forms[table](type, data, id, closeModal)
+    ) : (
+      "Form not found!"
+    );
   };
+  
 
   return (
     <>
       <button
         className={`${size} flex items-center justify-center rounded-full ${bgColor}`}
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          setOpen(true); // Lógica existente
+        }}
       >
         <Image src={`/${type}.png`} alt="" width={16} height={16} />
       </button>
       {open && (
         <div className="w-screen h-screen absolute left-0 top-0 bg-black bg-opacity-60 z-50 flex items-center justify-center">
           <div className="bg-white p-4 rounded-md relative w-[90%] md:w-[70%] lg:w-[60%] xl:w-[50%] 2xl:w-[40%]">
-            {children || <Form />}
+            <Form />
             <div
               className="absolute top-4 right-4 cursor-pointer"
               onClick={() => setOpen(false)}

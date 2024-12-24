@@ -7,6 +7,7 @@ use App\Http\Controllers\MarcaController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\SubcategoriaController;
 use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\TrabajadorController;
 
 
 // Route::get('/user', function (Request $request) {
@@ -52,4 +53,6 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::put('/productos/{id}', [ProductoController::class, 'update']);
     Route::delete('/productos/{id}', [ProductoController::class, 'destroy']);
     
+    Route::resource('trabajadores', TrabajadorController::class);
+
 });
