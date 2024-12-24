@@ -93,6 +93,15 @@ const ProductForm = ({
     fetchData();
   }, []);
 
+
+  useEffect(() => {
+    if (type === "update" && data) {
+      setSelectedSubcategoryName(data.subcategoria?.subcategoria || "");
+      setSelectedBrandName(data.marca?.marca || "");
+    }
+  }, [type, data]);
+
+
   const openModal = (type: "subcategory" | "brand") => {
     setModalType(type);
     setModalData(type === "subcategory" ? subcategories : brands);
@@ -166,10 +175,10 @@ const paginatedData = filteredData.slice(startIndex, startIndex + ITEMS_PER_PAGE
         <InputField label="Descripción" name="descripcion" register={register} error={errors.descripcion} />
         <InputField label="Código" name="codigo" register={register} error={errors.codigo} />
         <InputField label="Unidad de Medida" name="uni_medida" register={register} error={errors.uni_medida} />
-        <InputField label="Precio de Costo" name="precioCosto" type="number" register={register} error={errors.precioCosto} />
-        <InputField label="Precio Mínimo de Venta" name="precioMinVenta" type="number" register={register} error={errors.precioMinVenta} />
-        <InputField label="Precio Máximo de Venta" name="precioMaxVenta" type="number" register={register} error={errors.precioMaxVenta} />
-        <InputField label="Precio por Mayor" name="precioXMayor" type="number" register={register} error={errors.precioXMayor} />
+        <InputField label="Precio de Costo" name="precioCosto" step="0.01" type="number" register={register} error={errors.precioCosto} />
+        <InputField label="Precio Mínimo de Venta" name="precioMinVenta" step="0.01" type="number" register={register} error={errors.precioMinVenta} />
+        <InputField label="Precio Máximo de Venta" name="precioMaxVenta" step="0.01" type="number" register={register} error={errors.precioMaxVenta} />
+        <InputField label="Precio por Mayor" name="precioXMayor"   step="0.01" type="number" register={register} error={errors.precioXMayor} />
 
         <div className="mb-4">
   <label htmlFor="idSubcategoria" className="block text-sm font-medium text-gray-700 mb-2">
