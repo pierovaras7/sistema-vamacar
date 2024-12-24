@@ -3,9 +3,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import InputField from "../InputField";
-import { Trabajador } from "@/types/auth";
 import { saveTrabajador, updateTrabajador } from "@/services/trabajadoresService";
 import { toast } from "sonner";
+import { Trabajador } from "@/types";
 
 // Calcular la mayoría de edad (18 años)
 const isAdult = (dateString: string): boolean => {
@@ -44,7 +44,8 @@ const schema = z.object({
     .number({
       invalid_type_error: "Salario debe ser un número.",
     })
-    .positive({ message: "Salario debe ser mayor a 0." })
+    .positive({ message: "Salario debe ser mayor a 0." }),
+  crearCuenta: z.boolean().optional(),
 });
 
 type Inputs = z.infer<typeof schema>;
@@ -69,8 +70,11 @@ const TrabajadorForm = ({
   } = useForm<Inputs>({
     resolver: zodResolver(schema),
     defaultValues: data
-    ? { ...data, fechaNacimiento: data.fechaNacimiento?.split('T')[0] }
-    : undefined,
+    ? { ...data, 
+      fechaNacimiento: data.fechaNacimiento?.split('T')[0],
+      crearCuenta: data.crearCuenta || false 
+    }
+    : { crearCuenta: false },
   });
 
   const onSubmit = handleSubmit(async (data) => {
@@ -88,10 +92,14 @@ const TrabajadorForm = ({
         salario: data.salario,
       };
 
+      const requestData = {
+        ...trabajador,
+        crearCuenta: data.crearCuenta, // Aquí se pasa el valor del checkbox
+      };
+
       if (type === "create") {
         // Crear un nuevo trabajador
-        await saveTrabajador(trabajador);
-        console.log('XXXXXX');
+        await saveTrabajador(requestData);
         toast.success("Trabajador creado exitosamente");
       } else if (type === "update" && id) {
         // Actualizar un trabajador existente
@@ -161,6 +169,19 @@ const TrabajadorForm = ({
           register={register}
           error={errors?.dni}
         />
+        <div className="flex flex-col gap-2 w-full px-2">
+          <label className="text-xs text-gray-500">Sexo</label>
+          <select
+            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+            {...register("sexo")}
+          >
+            <option value="M">Masculino</option>
+            <option value="F">Femenino</option>
+          </select>
+          {errors.sexo?.message && (
+            <p className="text-xs text-red-400">{errors.sexo.message}</p>
+          )}
+        </div>
         <div className="flex flex-col gap-2 px-2 w-full">
           <label className="text-xs text-gray-500">Area</label>
           <select
@@ -202,20 +223,14 @@ const TrabajadorForm = ({
           register={register}
           error={errors?.salario}
         />
-        <div className="flex flex-col gap-2 w-full px-2">
-          <label className="text-xs text-gray-500">Sexo</label>
-          <select
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-            {...register("sexo")}
-          >
-            <option value="M">Masculino</option>
-            <option value="F">Femenino</option>
-          </select>
-          {errors.sexo?.message && (
-            <p className="text-xs text-red-400">{errors.sexo.message}</p>
+        <div className="flex flex-col justify-center gap-2 px-2 w-full col-span-2">
+          <label className="text-sm">
+            <input type="checkbox" {...register("crearCuenta")} /> Crear cuenta en el sistema
+          </label>
+          {errors.crearCuenta && (
+            <p className="text-xs text-red-400">{errors.crearCuenta.message}</p>
           )}
         </div>
-        
       </div>
       <button className="bg-blue-700 text-white p-2 rounded-md">
         {type === "create" ? "Crear" : "Actualizar"}

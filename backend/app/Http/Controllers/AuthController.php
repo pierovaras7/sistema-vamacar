@@ -52,15 +52,23 @@ class AuthController extends Controller
             $user = JWTAuth::user();
         
             // Cargar el trabajador relacionado
+            $user->load('modules');
+
             $user->load('trabajador');
         
             // Crear la cookie HttpOnly para almacenar el token
             $cookie = cookie('token', $token, 60 * 24, '/', null, true, true); 
         
+            $isAdmin = false;
+
+            if($user->username == "admin"){
+                $isAdmin = true;
+            }
             // Retornar la respuesta con la cookie y la información del usuario
             return response()->json([
                 'message' => 'Autenticación exitosa',
                 'user' => $user, // Incluye los datos del usuario en la respuesta
+                'isAdmin' => $isAdmin,
                 'trabajador' => $user->trabajador, // Incluye los datos del trabajador
             ])->cookie($cookie); // Se añade la cookie a la respuesta
         }
@@ -160,27 +168,4 @@ class AuthController extends Controller
         }
     }
     
-    public function getUser(Request $request)
-    {
-        try {
-            // Obtener el usuario autenticado desde el token
-            if (!$user = JWTAuth::parseToken()->authenticate()) {
-                return response()->json([
-                    'message' => 'Usuario no encontrado',
-                ], 404);
-            }
-
-            $user->load('trabajador');
-            // Devolver los datos del usuario autenticado
-            return response()->json([
-                'user' => $user,
-            ], 200);
-
-        } catch (JWTException $e) {
-            // Manejar casos de error en la autenticación del token
-            return response()->json([
-                'message' => 'Token no válido o expirado',
-            ], 401);
-        }
-    }
 }

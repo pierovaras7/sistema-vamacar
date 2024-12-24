@@ -110,12 +110,14 @@ class TrabajadorController extends Controller
             // Obtener el ID del trabajador recién creado
             $idTrabajador = $trabajador->idTrabajador;
 
-            User::create([
-                'name' => $request->nombres,
-                'username' => $request->dni,
-                'password' => bcrypt($request->dni), // Encriptar la contraseña
-                'idTrabajador' => $idTrabajador
-            ]);
+            if($request->crearCuenta){
+                User::create([
+                    'name' => $request->nombres,
+                    'username' => $request->dni,
+                    'password' => bcrypt($request->dni), // Encriptar la contraseña
+                    'idTrabajador' => $idTrabajador
+                ]);
+            }
 
             return response()->json([
                 'message' => 'Trabajador creado exitosamente.',

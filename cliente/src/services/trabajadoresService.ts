@@ -1,5 +1,5 @@
 import axiosInstance from '@/lib/axiosInstance';
-import { Trabajador } from '@/types/auth';
+import { Trabajador } from '@/types';
 
 // Definir la URL base para los trabajadores
 const API_URL = '/trabajadores'; // Cambia la URL según tu API

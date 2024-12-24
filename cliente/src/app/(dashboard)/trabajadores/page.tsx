@@ -1,5 +1,5 @@
 "use client";
-import { Trabajador } from "@/types/auth";
+import { Trabajador } from "@/types";
 import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
@@ -9,6 +9,7 @@ import { getAllTrabajadores } from "@/services/trabajadoresService";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import useAuthStore from "@/stores/AuthStore";
+import PrivateRoute from "@/components/PrivateRouter";
 
 const columns = [
   { header: "Nombres", accessor: "nombres", className: "pl-4", width: "w-3/12" },
@@ -28,7 +29,6 @@ const TrabajadoresPage = () => {
   const [loading, setLoading] = useState(true); // Estado de carga
   const { user } = useAuthStore()
 
-  console.log(user);
   const refreshTrabajadores = async () => {
     setLoading(true); // Comienza la carga
     try {
@@ -111,32 +111,34 @@ const TrabajadoresPage = () => {
   };
 
   return (
-    <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-      <h1 className="text-lg font-semibold">Trabajadores</h1>
-      <div className="flex flex-wrap items-center gap-4 ml-auto w-full md:w-auto">
-        <div className="w-full sm:w-1/3 md:w-auto">
-          <TableSearch onSearch={(term) => setSearchTerm(term)} />
+    <PrivateRoute slug="/trabajadores">
+      <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+        <h1 className="text-lg font-semibold">Trabajadores</h1>
+        <div className="flex flex-wrap items-center gap-4 ml-auto w-full md:w-auto">
+          <div className="w-full sm:w-1/3 md:w-auto">
+            <TableSearch onSearch={(term) => setSearchTerm(term)} />
+          </div>
+          <div className="w-full sm:w-1/3 md:w-auto">
+            <FormModal table="trabajador" type="create" onUpdate={refreshTrabajadores} />
+          </div>
         </div>
-        <div className="w-full sm:w-1/3 md:w-auto">
-          <FormModal table="trabajador" type="create" onUpdate={refreshTrabajadores} />
+      </div>
+
+
+        <div className="overflow-x-auto">
+          <Table columns={columns} renderRow={renderRow} data={currentTrabajadores} />
+        </div>
+
+        <div className="flex justify-center mt-4">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
         </div>
       </div>
-    </div>
-
-
-      <div className="overflow-x-auto">
-        <Table columns={columns} renderRow={renderRow} data={currentTrabajadores} />
-      </div>
-
-      <div className="flex justify-center mt-4">
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
-      </div>
-    </div>
+    </PrivateRoute>
   );
 };
 

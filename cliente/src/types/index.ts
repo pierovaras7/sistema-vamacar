@@ -1,3 +1,5 @@
+// LOGIN Y REGISTER
+
 export type LoginPayload = {
     email: string;
     password: string;
@@ -9,7 +11,6 @@ export type RegisterPayload = {
     password: string;
 }
 
-// Tipo para la respuesta de login que incluye el token y los datos del usuario
 export type LoginResponse = {
     message: string;
     user: User;
@@ -19,15 +20,30 @@ export type LoginResponse = {
 export type User = {
     idUser: number;
     name: string;
-    email: string;
     username: string;
-    email_verified_at: string | null;
-    idTrabajador: number | null;
-    estado: number;
-    created_at: string;
-    updated_at: string;
+    password?: string;
+    estado?: number;
     trabajador?: Trabajador;
+    modules?: Module[];
 };
+
+// PROFILE
+
+export type PerfilPayload = {
+    username: string;
+    password: string;
+    password_confirmation: string;
+    nombres: string;
+    apellidos: string;
+    telefono: string;
+    sexo: "M" | "F" | "SE" | undefined;
+    direccion: string;
+    dni: string;
+    fechaNacimiento: string;
+}
+
+
+// TRABAJADOR
 
 export type Trabajador = {
     idTrabajador?: number; 
@@ -42,18 +58,13 @@ export type Trabajador = {
     turno: string;
     salario: number; 
     estado?: boolean; 
+    crearCuenta?: boolean;
 };
 
-export interface PerfilPayload {
-    username: string;
-    password: string;
-    password_confirmation: string;
-    nombres: string;
-    apellidos: string;
-    telefono: string;
-    sexo: "M" | "F" | "SE" | undefined;
-    direccion: string;
-    dni: string;
-    fechaNacimiento: string;
-  }
-  
+// ACCESO
+
+export type Module = {
+    idModule : number;
+    name: string;
+    slug: string;
+}

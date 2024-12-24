@@ -43,6 +43,11 @@ class User extends Authenticatable implements JWTSubject
         return $this->belongsTo(Trabajador::class, 'idTrabajador', 'idTrabajador');
     }
 
+     public function modules()
+     {
+        return $this->belongsToMany(Module::class, 'modules_for_user', 'idUser', 'idModule');
+    }
+
     /**
      * Get the attributes that should be cast.
      *

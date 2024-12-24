@@ -1,7 +1,7 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { login, logout as authLogout } from "@/services/authService";
-import { LoginResponse, Trabajador, User } from "@/types/auth";
+import { LoginResponse, Trabajador, User } from "@/types";
 
 // Tipo para el contexto de autenticación
 interface AuthContextType {
