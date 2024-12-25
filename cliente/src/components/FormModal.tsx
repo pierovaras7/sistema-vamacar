@@ -4,13 +4,31 @@ import { deleteTrabajador } from "@/services/trabajadoresService";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useState } from "react";
-import { toast } from "react-toastify";
 
-// Lazy loading para el formulario de Trabajador
-const TrabajadorForm = dynamic(() => import("./forms/TrabajadorForm"), {
+// USE LAZY LOADING
+
+// import TeacherForm from "./forms/TeacherForm";
+// import StudentForm from "./forms/StudentForm";
+
+const TeacherForm = dynamic(() => import("./forms/TeacherForm"), {
+  loading: () => <h1>Loading...</h1>,
+});
+
+const CategoryForm = dynamic(() => import("./forms/CategoryForm"), {
   loading: () => <h1>Loading...</h1>,
   ssr: false,
 });
+const SubcategoryForm = dynamic(() => import("./forms/SubcategoryForm"), {
+  loading: () => <h1>Loading...</h1>,
+  ssr: false,
+});
+const BrandForm = dynamic(() => import("./forms/BrandForm"), {
+  loading: () => <h1>Loading...</h1>,
+  ssr: false,
+});
+
+
+
 
 // Mapeo de formularios por tabla
 const forms: {
@@ -19,13 +37,31 @@ const forms: {
     data?: any,
     id?: number,
     closeModal?: () => void
-  ) => JSX.Element;
-} = {
+  ) => JSX.Element;} = {
   trabajador: (type, data, id, closeModal) => {
     const handleClose = closeModal || (() => {});
     return <TrabajadorForm type={type} data={data} id={id} closeModal={handleClose} />;
   },
+  category: (type, data, id, closeModal) =>
+    <CategoryForm type={type} data={data} id={id} onSuccess={() => closeModal?.()} />,
+  subcategory: (type, data, id, closeModal) =>
+    <SubcategoryForm type={type} data={data}       idCategoria={data?.idCategoria || id}  onSuccess={() => closeModal?.()} />,
+  brand: (type, data, id, closeModal) =>
+    <BrandForm
+      type={type}
+      data={data}
+      id={id}
+      onSuccess={() => closeModal?.()}
+    />,
+    product: (type, data, id, closeModal) =>
+      <ProductForm
+        type={type}
+        data={data}
+        id={id}
+        onSuccess={() => closeModal?.()}
+      />,
 };
+
 
 const FormModal = ({
   table,
@@ -35,19 +71,11 @@ const FormModal = ({
   onUpdate,
 }: {
   table:
-    | "teacher"
-    | "student"
-    | "trabajador"
-    | "parent"
-    | "subject"
-    | "class"
-    | "lesson"
-    | "exam"
-    | "assignment"
-    | "result"
-    | "attendance"
-    | "event"
-    | "announcement";
+    "trabajador"
+    | "category"
+    | "brand"
+    | "subcategory"
+    | "product"
   type: "create" | "update" | "delete";
   data?: any;
   id?: number;
@@ -68,25 +96,24 @@ const FormModal = ({
     onUpdate(); // Actualizar lista al cerrar modal
   };
 
+
   const Form = () => {
     const handleDelete = async () => {
-      if (id) {
+      if(id){
         try {
           await deleteTrabajador(id);
           setOpen(false);
           toast.success("El trabajador fue eliminado exitosamente");
           onUpdate();
         } catch (error) {
-          console.error("Error eliminando trabajador:", error);
-          toast.error("Error al eliminar el trabajador. Intenta de nuevo.");
+          console.error("Error deleting item:", error);
         }
       }
     };
-
     return type === "delete" && id ? (
       <div className="p-4 flex flex-col gap-4">
         <span className="text-center font-medium">
-          ¿Estás seguro de borrar este registro de {table}?
+          All data will be lost. Are you sure you want to delete this {table}?
         </span>
         <button
           className="bg-red-700 text-white py-2 px-4 rounded-md border-none w-max self-center"
@@ -101,12 +128,15 @@ const FormModal = ({
       "Form not found!"
     );
   };
+  
 
   return (
     <>
       <button
         className={`${size} flex items-center justify-center rounded-full ${bgColor}`}
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          setOpen(true); // Lógica existente
+        }}
       >
         <Image src={`/${type}.png`} alt="" width={16} height={16} />
       </button>

@@ -5,6 +5,7 @@ import { Poppins } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext"; // Tu contexto de autenticación
 import "./globals.css";  // Asegúrate de que los estilos estén importados
 
+
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["400", "500", "700"],
