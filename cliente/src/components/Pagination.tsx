@@ -14,22 +14,6 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
     }
   };
 
-import React from 'react';
-
-interface PaginationProps {
-  currentPage: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
-}
-
-const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPageChange }) => {
-  // Maneja el cambio de página (previa, siguiente o página específica)
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      onPageChange(page);
-    }
-  };
-
   return (
     <div className="p-4 flex items-center justify-between text-gray-500">
       {/* Botón "Prev" */}
