@@ -5,7 +5,6 @@ import Navbar from "@/components/Navbar";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import Image from "next/image";
 import Link from "next/link";
-import "react-toastify/dist/ReactToastify.css";
 import { useEffect, useState } from "react";
 import { Toaster } from "sonner";
 import useAuthStore from "@/stores/AuthStore";

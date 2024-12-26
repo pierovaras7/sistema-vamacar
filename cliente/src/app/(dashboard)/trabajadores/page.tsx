@@ -20,6 +20,8 @@ const columns = [
   { header: "Opciones", accessor: "opciones", width: "w-1/12" },
 ];
 
+
+
 const TrabajadoresPage = () => {
   const [trabajadores, setTrabajadores] = useState<Trabajador[]>([]);
   const [filteredTrabajadores, setFilteredTrabajadores] = useState<Trabajador[]>([]);
@@ -52,7 +54,7 @@ const TrabajadoresPage = () => {
       `${trabajador.nombres} ${trabajador.apellidos}`
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
-      trabajador.dni.includes(searchTerm)
+        (trabajador.dni && trabajador.dni.includes(searchTerm))
     );
     setFilteredTrabajadores(filtered);
   }, [searchTerm, trabajadores]);

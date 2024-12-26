@@ -4,6 +4,7 @@ import { deleteTrabajador } from "@/services/trabajadoresService";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useState } from "react";
+import { toast } from "sonner";
 
 // USE LAZY LOADING
 
@@ -22,11 +23,16 @@ const SubcategoryForm = dynamic(() => import("./forms/SubcategoryForm"), {
   loading: () => <h1>Loading...</h1>,
   ssr: false,
 });
+
 const BrandForm = dynamic(() => import("./forms/BrandForm"), {
   loading: () => <h1>Loading...</h1>,
   ssr: false,
 });
 
+const ProductForm = dynamic(() => import("./forms/ProductForm"), {
+  loading: () => <h1>Loading...</h1>,
+  ssr: false,
+});
 
 
 
@@ -111,17 +117,27 @@ const FormModal = ({
       }
     };
     return type === "delete" && id ? (
-      <div className="p-4 flex flex-col gap-4">
-        <span className="text-center font-medium">
-          All data will be lost. Are you sure you want to delete this {table}?
-        </span>
+      <div>
+        <h2 className="text-lg font-semibold mb-4">Confirmar eliminación</h2>
+        <p className="mb-6">
+         ¿Estás seguro de que deseas eliminar este registro de la tabla {table}?
+        </p>
+        <div className="flex gap-4 justify-end">
         <button
-          className="bg-red-700 text-white py-2 px-4 rounded-md border-none w-max self-center"
-          onClick={handleDelete}
-        >
-          Eliminar
-        </button>
+            className="bg-gray-300 text-black px-4 py-2 rounded-md"
+            onClick={() => setOpen(false)}
+          >
+            Cancelar
+          </button>
+          <button
+            className="bg-red-500 text-white px-4 py-2 rounded-md"
+            onClick={handleDelete}
+          >
+            Confirmar
+          </button>
+        </div>
       </div>
+
     ) : type === "create" || type === "update" ? (
       forms[table](type, data, id, closeModal)
     ) : (
@@ -134,30 +150,26 @@ const FormModal = ({
     <>
       <button
         className={`${size} flex items-center justify-center rounded-full ${bgColor}`}
-        onClick={() => {
-          setOpen(true); // Lógica existente
-        }}
+        onClick={() => setOpen(true)}
       >
         <Image src={`/${type}.png`} alt="" width={16} height={16} />
       </button>
       {open && (
-  <div className="w-screen h-screen fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center px-4">
-    <div className="bg-white rounded-lg shadow-lg relative w-full max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl p-6 overflow-y-auto max-h-[80vh] my-8">
-      <Form />
-      <div
-        className="absolute top-4 right-4 cursor-pointer"
-        onClick={() => setOpen(false)}
-      >
-        <Image src="/close.png" alt="Cerrar" width={14} height={14} />
-      </div>
-    </div>
-  </div>
-)}
-
-
-
+        <div className="fixed inset-0 px-4 bg-black bg-opacity-60 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg shadow-lg relative w-full max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl p-6 overflow-y-auto max-h-[80vh]">
+            <Form />
+            <div
+              className="absolute top-4 right-4 cursor-pointer"
+              onClick={() => setOpen(false)}
+            >
+              <Image src="/close.png" alt="Cerrar" width={14} height={14} />
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
+  
 };
 
 export default FormModal;

@@ -9,7 +9,7 @@ import { getCategories, deleteCategory } from "@/services/categoriaService";
 import { FiTrash, FiEye } from "react-icons/fi";
 import SubcategoriesModal from "./subcategoria/page";
 import Image from "next/image";
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 
 type Category = {
   idCategoria: number;
@@ -18,10 +18,10 @@ type Category = {
 };
 
 const columns = [
-  { header: "ID", accessor: "idCategoria", width: "w-1/12" },
-  { header: "Categoría", accessor: "categoria", width: "w-6/12" },
-  { header: "Subcategorías", accessor: "subcategories", width: "w-3/12" },
-  { header: "Acciones", accessor: "actions", width: "w-2/12" },
+  { header: "ID", accessor: "idCategoria", className: "pl-4", width: "w-2/12" },
+  { header: "Categoría", accessor: "categoria", width: "w-4/12" },
+  { header: "Subcategorías", accessor: "subcategories", className: "hidden md:table-cell", width: "w-3/12" },
+  { header: "Acciones", accessor: "actions", width: "w-3/12" },
 ];
 
 const CategoriesPage = () => {
@@ -74,9 +74,8 @@ const CategoriesPage = () => {
     try {
       await deleteCategory(selectedCategory.idCategoria);
       setIsDeleteModalOpen(false);
-      fetchCategories();
       toast.success("Categoria eliminada exitosamente");
-      
+      fetchCategories();
     } catch (error) {
       console.error("Error al eliminar categoría:", error);
     }
@@ -93,9 +92,9 @@ const CategoriesPage = () => {
       className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
     >
       <td className="p-4">{item.idCategoria}</td>
-      <td>{item.categoria}</td>
-      <td>
-        <div className="flex items-center gap-2">
+      <td className="">{item.categoria}</td>
+      <td className="hidden md:table-cell">
+        <div className="items-center hidden md:flex gap-2">
           <button
             className="text-blue-500 hover:text-blue-700"
             onClick={() => setShowSubcategoriesModal({ idCategoria: item.idCategoria, isOpen: true })}
@@ -111,7 +110,7 @@ const CategoriesPage = () => {
         </div>
       </td>
       <td>
-        <div className="flex items-center gap-2">
+        <div className="flex gap-2">
           <FormModal
             table="category"
             type="update"
@@ -120,7 +119,7 @@ const CategoriesPage = () => {
             onUpdate={fetchCategories}
           />
           <button
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-300"
+            className="w-7 h-7 flex items-center justify-center rounded-full bg-red-500"
             onClick={() => {
               setSelectedCategory(item);
               setIsDeleteModalOpen(true);
@@ -150,7 +149,7 @@ const CategoriesPage = () => {
       />
       {isDeleteModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-md shadow-lg">
+          <div className="bg-white p-6 rounded-md shadow-lg mx-4">
             <h2 className="text-lg font-semibold mb-4">Confirmar eliminación</h2>
             <p className="mb-6">
               ¿Estás seguro de que deseas eliminar la categoría "{selectedCategory?.categoria}"?

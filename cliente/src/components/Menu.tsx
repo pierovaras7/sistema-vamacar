@@ -12,59 +12,12 @@ interface MenuProps {
 
 const menuItems = [
   {
-    title: "MENU",
-    items: [
-      {
-        icon: "/home.png",
-        label: "Home",
-        href: "/",
-        visible: ["admin", "teacher", "student", "parent"],
-      },
-      {
-        icon: "/home.png",
-        label: "Categoria",
-        href: "/list/categoria",
-        visible: ["admin", "teacher", "student", "parent"],
-      },
-      {
-        icon: "/home.png",
-        label: "Marca",
-        href: "/list/marca",
-        visible: ["admin", "teacher", "student", "parent"],
-      },
-      {
-        icon: "/home.png",
-        label: "Producto",
-        href: "/list/producto",
-        visible: ["admin", "teacher", "student", "parent"],
-      },
-      {
-        icon: "/teacher.png",
-        label: "Trabajadores",
-        href: "/trabajadores",
-        visible: ["admin", "teacher"],
-      },
-      {
-        icon: "/student.png",
-        label: "Students",
-        href: "/list/students",
-        visible: ["admin", "teacher"],
-      },
-    ],
-  },
-  {
-    title: "OTHER",
+    title: "OTROS",
     items: [
       {
         icon: "/profile.png",
         label: "Profile",
         href: "/profile",
-        visible: ["admin", "teacher", "student", "parent"],
-      },
-      {
-        icon: "/setting.png",
-        label: "Settings",
-        href: "/settings",
         visible: ["admin", "teacher", "student", "parent"],
       },
       {
@@ -81,6 +34,27 @@ const menuItems = [
 const Menu: React.FC<MenuProps> = ({ modules }) => {
   return (
     <div className="mt-4 text-sm">
+      {/* Renderiza los módulos */}
+      {modules.length > 0 && (
+        <div className="flex flex-col gap-2 mt-4">
+          {modules.map((module) => (
+            <Link
+              href={module.slug}
+              key={module.idModule}
+              className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-md hover:bg-lamaSkyLight"
+            >
+            <Image 
+              src={`/${module.name.toLowerCase()}.png`} 
+              alt={`Imagen de ${module.name}`} 
+              width={20} 
+              height={20} 
+            />
+            <span className="hidden lg:block">{module.name}</span>
+            </Link>
+          ))}
+        </div>
+      )}
+
       {/* Renderiza el menú basado en el rol */}
       {menuItems.map((section) => (
         <div className="flex flex-col gap-2" key={section.title}>
@@ -104,21 +78,6 @@ const Menu: React.FC<MenuProps> = ({ modules }) => {
           })}
         </div>
       ))}
-
-      {/* Renderiza los módulos */}
-      {modules.length > 0 && (
-        <div className="flex flex-col gap-2 mt-4">
-          {modules.map((module) => (
-            <Link
-              href={module.slug}
-              key={module.idModule}
-              className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-md hover:bg-lamaSkyLight"
-            >
-              <span className="hidden lg:block">{module.name}</span>
-            </Link>
-          ))}
-        </div>
-      )}
     </div>
   );
 };

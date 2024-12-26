@@ -6,7 +6,7 @@ import { z } from "zod";
 import InputField from "../InputField";
 import { createSubcategory, updateSubcategory } from "@/services/subcategoriaService";
 import { useState } from "react";
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 
 const schema = z.object({
   subcategoria: z.string().min(1, { message: "La subcategoría es obligatoria." }),
@@ -81,7 +81,7 @@ const SubcategoryForm = ({
       </div>
 
       <button
-        className="bg-blue-400 text-white p-2 rounded-md"
+        className="bg-blue-800 hover:bg-blue-600 text-white p-2 rounded-md"
         disabled={loading}
       >
         {loading ? "Cargando..." : type === "create" ? "Crear" : "Actualizar"}

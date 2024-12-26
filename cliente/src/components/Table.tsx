@@ -6,7 +6,7 @@ const Table = ({
   renderRow,
   data,
 }: {
-  columns: { header: string; accessor: string; className?: string; width?: string }[];
+  columns: { header: string; accessor: string; className?: string; width?: string; styles?: string }[];
   renderRow: (item: any) => React.ReactNode;
   data: any[];
 }) => {

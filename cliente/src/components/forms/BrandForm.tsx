@@ -6,7 +6,7 @@ import { z } from "zod";
 import InputField from "../InputField";
 import { createBrand, updateBrand } from "@/services/marcaService";
 import { useState } from "react";
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 
 const schema = z.object({
   marca: z.string().min(1, { message: "La marca es obligatoria." }),
@@ -76,7 +76,7 @@ const BrandForm = ({
       </div>
 
       <button
-        className="bg-blue-400 text-white p-2 rounded-md"
+        className="bg-blue-800 hover:bg-blue-600 text-white p-2 rounded-md"
         disabled={loading}
       >
         {loading ? "Cargando..." : type === "create" ? "Crear" : "Actualizar"}

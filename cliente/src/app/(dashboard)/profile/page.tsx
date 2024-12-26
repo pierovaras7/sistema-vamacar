@@ -33,7 +33,7 @@ const esquemaValidacion = z
 type ProfilePayload = z.infer<typeof esquemaValidacion>;
 
 const PaginaPerfil: React.FC = () => {
-  const { user } = useAuthStore();
+  const { user, isAdmin } = useAuthStore();
   const [isPasswordChanged, setIsPasswordChanged] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -97,7 +97,7 @@ const PaginaPerfil: React.FC = () => {
   const isFormChanged = Object.keys(dirtyFields).length > 0;
 
   return (
-    <div className="container w-full rounded-xl p-2 md:px-8 md:py-4 bg-white">
+    <div className="container w-full rounded-xl mx-6 p-2 md:px-8 md:py-4 bg-white">
       <h1 className="text-2xl font-semibold mb-6">Actualizar Perfil</h1>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         {/* Datos de Usuario */}
@@ -127,64 +127,65 @@ const PaginaPerfil: React.FC = () => {
           </div>
         </div>
 
-        {/* Datos Personales */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Datos Personales</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <InputField
-              label="Nombres"
-              name="nombres"
-              register={register}
-              error={errors.nombres}
-            />
-            <InputField
-              label="Apellidos"
-              name="apellidos"
-              register={register}
-              error={errors.apellidos}
-            />
-            <InputField
-              label="Teléfono"
-              name="telefono"
-              register={register}
-              error={errors.telefono}
-            />
-            <div className="flex flex-col gap-2 w-full px-2">
-              <label className="text-xs text-gray-500">Sexo</label>
-              <select
-                className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-                {...register("sexo")}
-              >
-                <option value="M">Masculino</option>
-                <option value="F">Femenino</option>
-                <option value="SE">Sin especificar</option>
-              </select>
-              {errors.sexo?.message && (
-                <p className="text-xs text-red-400">{errors.sexo.message}</p>
-              )}
+        {!isAdmin && (
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Datos Personales</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <InputField
+                label="Nombres"
+                name="nombres"
+                register={register}
+                error={errors.nombres}
+              />
+              <InputField
+                label="Apellidos"
+                name="apellidos"
+                register={register}
+                error={errors.apellidos}
+              />
+              <InputField
+                label="Teléfono"
+                name="telefono"
+                register={register}
+                error={errors.telefono}
+              />
+              <div className="flex flex-col gap-2 w-full px-2">
+                <label className="text-xs text-gray-500">Sexo</label>
+                <select
+                  className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+                  {...register("sexo")}
+                >
+                  <option value="M">Masculino</option>
+                  <option value="F">Femenino</option>
+                  <option value="SE">Sin especificar</option>
+                </select>
+                {errors.sexo?.message && (
+                  <p className="text-xs text-red-400">{errors.sexo.message}</p>
+                )}
+              </div>
+              <InputField
+                label="Dirección"
+                name="direccion"
+                register={register}
+                error={errors.direccion}
+              />
+              <InputField
+                label="DNI"
+                name="dni"
+                register={register}
+                error={errors.dni}
+              />
+              <InputField
+                label="Fecha de Nacimiento"
+                name="fechaNacimiento"
+                type="date"
+                register={register}
+                error={errors.fechaNacimiento}
+              />
             </div>
-            <InputField
-              label="Dirección"
-              name="direccion"
-              register={register}
-              error={errors.direccion}
-            />
-            <InputField
-              label="DNI"
-              name="dni"
-              register={register}
-              error={errors.dni}
-            />
-            <InputField
-              label="Fecha de Nacimiento"
-              name="fechaNacimiento"
-              type="date"
-              register={register}
-              error={errors.fechaNacimiento}
-            />
           </div>
-        </div>
-
+        )}
+        
         <button
           type="submit"
           className={`px-4 py-2 rounded w-full md:w-auto transition-colors duration-300 ${

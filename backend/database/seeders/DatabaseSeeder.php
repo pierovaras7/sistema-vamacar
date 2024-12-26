@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(TrabajadorSeeder::class);
+        $this->call(ModuleSeeder::class);
 
         // User::factory()->create([
         //     'name' => 'Test User',

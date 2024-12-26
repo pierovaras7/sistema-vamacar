@@ -7,7 +7,7 @@ import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
 import { getBrands, deleteBrand } from "@/services/marcaService";
 import Image from "next/image";
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 
 type Brand = {
   idMarca: number;
@@ -16,8 +16,8 @@ type Brand = {
 };
 
 const columns = [
-  { header: "ID", accessor: "idMarca", width: "w-1/12" },
-  { header: "Marca", accessor: "marca", width: "w-8/12" },
+  { header: "ID", accessor: "idMarca", className: "pl-4", width: "w-3/12" },
+  { header: "Marca", accessor: "marca", width: "w-6/12" },
   { header: "Acciones", accessor: "actions", width: "w-3/12" },
 ];
 
@@ -88,7 +88,7 @@ const BrandListPage = () => {
             onUpdate={fetchBrands}
           />
           <button
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-300"
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-red-500"
             onClick={() => {
               setSelectedBrand(item);
               setIsDeleteModalOpen(true);
@@ -127,7 +127,7 @@ const BrandListPage = () => {
       {/* Modal de Confirmación para Eliminar */}
       {isDeleteModalOpen && selectedBrand && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-md shadow-lg">
+          <div className="bg-white p-6 rounded-md shadow-lg mx-4">
             <h2 className="text-lg font-semibold mb-4">Confirmar eliminación</h2>
             <p className="mb-6">
               ¿Estás seguro de que deseas eliminar la marca "{selectedBrand.marca}"?

@@ -1,6 +1,5 @@
 "use client";
 import { useState } from 'react';
-// import 'react-toastify/dist/ReactToastify.css'; // Importar estilos de React Toastify
 import { useRouter } from 'next/navigation'; // Importamos useRouter de Next.js
 import { toast, Toaster } from 'sonner';
 import useAuthStore from '@/stores/AuthStore';

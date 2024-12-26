@@ -8,7 +8,7 @@ import {
   updateSubcategory,
 } from "@/services/subcategoriaService";
 import { FiEdit, FiTrash } from "react-icons/fi";
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 
 type Subcategory = {
   idSubcategoria: number;
@@ -119,9 +119,9 @@ const SubcategoriesModal = ({
   };
 
   const columns = [
-    { header: "ID", accessor: "idSubcategoria" },
-    { header: "Subcategory Name", accessor: "subcategoria" },
-    { header: "Actions", accessor: "actions" },
+    { header: "ID", className: "pl-4",accessor: "idSubcategoria" },
+    { header: "Subcategoria", accessor: "subcategoria" },
+    { header: "Acciones", accessor: "actions" },
   ];
 
   const renderRow = (item: Subcategory) => (
@@ -232,7 +232,7 @@ const SubcategoriesModal = ({
                 </button>
                 <button
                   type="submit"
-                  className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                  className="bg-blue-800 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
                 >
                   Guardar
                 </button>

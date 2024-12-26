@@ -7,7 +7,7 @@ import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
 import { getProducts, deleteProduct } from "@/services/productoService";
 import Image from "next/image";
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 
 type Product = {
   idProducto: number;
@@ -24,16 +24,18 @@ type Product = {
 };
 
 const columns = [
-  { header: "ID", accessor: "idProducto", width: "w-1/12" },
-  { header: "Descripción", accessor: "descripcion", width: "w-2/12" },
-  { header: "Código", accessor: "codigo", width: "w-1/12" },
-  { header: "Unidad", accessor: "uni_medida", width: "w-1/12" },
-  { header: "Precio Costo", accessor: "precioCosto", width: "w-1/12" },
-  { header: "Precio Min", accessor: "precioMinVenta", width: "w-1/12" },
-  { header: "Precio Max", accessor: "precioMaxVenta", width: "w-1/12" },
-  { header: "Precio Mayor", accessor: "precioXMayor", width: "w-1/12" },
-  { header: "Acciones", accessor: "action", width: "w-2/12" },
+  { header: "ID", accessor: "idProducto", width: "w-1/12", className: "text-center" },
+  { header: "Descripción", accessor: "descripcion", width: "w-2/12", className: "text-center" },
+  { header: "Código", accessor: "codigo", width: "w-1/12", className: "text-center hidden lg:table-cell" },
+  { header: "Unidad", accessor: "uni_medida", width: "w-1/12", className: "text-center hidden xl:table-cell" },
+  { header: "Precio Costo", accessor: "precioCosto", width: "w-1/12", className: "text-center hidden xl:table-cell" },
+  { header: "Precio Min", accessor: "precioMinVenta", width: "w-1/12", className: "text-center hidden 2xl:table-cell" },
+  { header: "Precio Max", accessor: "precioMaxVenta", width: "w-1/12", className: "text-center hidden 2xl:table-cell" },
+  { header: "Precio Mayor", accessor: "precioXMayor", width: "w-1/12", className: "text-center hidden 2xl:table-cell" },
+  { header: "Acciones", accessor: "action", width: "w-2/12", className: "text-center" },
 ];
+
+
 
 const ProductListPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -94,16 +96,24 @@ const ProductListPage = () => {
       key={item.idProducto}
       className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-gray-100"
     >
-      <td className="p-4">{item.idProducto}</td>
-      <td>{item.descripcion}</td>
-      <td>{item.codigo}</td>
-      <td>{item.uni_medida}</td>
-      <td>{Number(item.precioCosto)?.toFixed(2) || "N/A"}</td>
-      <td>{Number(item.precioMinVenta)?.toFixed(2) || "N/A"}</td>
-      <td>{Number(item.precioMaxVenta)?.toFixed(2) || "N/A"}</td>
-      <td>{Number(item.precioXMayor)?.toFixed(2) || "N/A"}</td>
-      <td>
-        <div className="flex gap-2">
+      <td className="p-4 text-center">{item.idProducto}</td>
+      <td className="text-center">{item.descripcion}</td>
+      <td className="text-center hidden lg:table-cell">{item.codigo}</td>
+      <td className="text-center hidden xl:table-cell">{item.uni_medida}</td>
+      <td className="text-center hidden xl:table-cell">
+        {Number(item.precioCosto)?.toFixed(2) || "N/A"}
+      </td>
+      <td className="text-center hidden 2xl:table-cell">
+        {Number(item.precioMinVenta)?.toFixed(2) || "N/A"}
+      </td>
+      <td className="text-center hidden 2xl:table-cell">
+        {Number(item.precioMaxVenta)?.toFixed(2) || "N/A"}
+      </td>
+      <td className="text-center hidden 2xl:table-cell">
+        {Number(item.precioXMayor)?.toFixed(2) || "N/A"}
+      </td>
+      <td className="text-center">
+        <div className="flex gap-2 justify-center">
           <FormModal
             table="product"
             type="update"
@@ -112,7 +122,7 @@ const ProductListPage = () => {
             onUpdate={fetchProducts}
           />
           <button
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-300"
+            className="w-7 h-7 flex items-center justify-center rounded-full bg-red-500"
             onClick={() => {
               setSelectedProduct(item);
               setIsDeleteModalOpen(true);
@@ -124,7 +134,7 @@ const ProductListPage = () => {
       </td>
     </tr>
   );
-
+  
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       <div className="flex items-center justify-between">

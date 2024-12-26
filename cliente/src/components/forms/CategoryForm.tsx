@@ -6,7 +6,7 @@ import { z } from "zod";
 import InputField from "../InputField"; // Asumo que este componente ya existe.
 import { createCategory, updateCategory } from "@/services/categoriaService";
 import { useState } from "react";
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 
 const schema = z.object({
   categoria: z.string().min(1, { message: "La categoría es obligatoria." }),
@@ -80,7 +80,7 @@ const CategoryForm = ({
       </div>
 
       <button
-        className="bg-blue-400 text-white p-2 rounded-md"
+        className="bg-blue-800 hover:bg-blue-600 text-white p-2 rounded-md"
         disabled={loading}
       >
         {loading ? "Cargando..." : type === "create" ? "Crear" : "Actualizar"}

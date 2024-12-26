@@ -50,5 +50,7 @@ Route::group([
     Route::delete('/productos/{id}', [ProductoController::class, 'destroy']);
     
     Route::resource('trabajadores', TrabajadorController::class);
+    Route::resource('users', UsersController::class);
+    Route::get('modules', [UsersController::class, 'getAvailableModules']);
 
 });
