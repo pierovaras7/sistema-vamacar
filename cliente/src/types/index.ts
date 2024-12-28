@@ -68,3 +68,45 @@ export type Module = {
     name: string;
     slug: string;
 }
+
+// PRODUCTO
+
+export type Producto = {
+    idProducto: number;
+    descripcion: string;
+    codigo: string;
+    uni_medida: string;
+    precioCosto: number;
+    precioMinVenta: number;
+    precioMaxVenta: number;
+    precioXMayor: number;
+    idSubcategoria: number;
+    idMarca: number;
+    estado: boolean;
+  };
+
+export type DetailVenta = {
+    idDetalleVenta: number,
+    producto: Producto,
+    precio: number,
+    cantidad: number,
+    subtotal: number
+}
+
+export type Venta = {
+    idVenta?: number;
+    fecha: string; // Usualmente en formato 'YYYY-MM-DD' o 'YYYY-MM-DD HH:MM:SS'
+    total: number;
+    tipoVenta: string; // Podría ser 'contado', 'crédito', etc.
+    metodoPago: string; // Por ejemplo, 'efectivo', 'tarjeta', etc.
+    idTrabajador?: number;
+    idSede?: number;
+    cliente?: Cliente;
+    estado?: boolean; // Estado de la venta (activada/desactivada)
+    detalles?: DetailVenta;
+};
+
+export type Cliente = {
+    idCliente: number;
+    nombres: string;
+}

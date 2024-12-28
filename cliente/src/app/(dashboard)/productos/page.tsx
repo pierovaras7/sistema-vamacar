@@ -8,20 +8,8 @@ import TableSearch from "@/components/TableSearch";
 import { getProducts, deleteProduct } from "@/services/productoService";
 import Image from "next/image";
 import { toast } from 'sonner';
+import { Producto } from "@/types";
 
-type Product = {
-  idProducto: number;
-  descripcion: string;
-  codigo: string;
-  uni_medida: string;
-  precioCosto: number;
-  precioMinVenta: number;
-  precioMaxVenta: number;
-  precioXMayor: number;
-  idSubcategoria: number;
-  idMarca: number;
-  estado: boolean;
-};
 
 const columns = [
   { header: "ID", accessor: "idProducto", width: "w-1/12", className: "text-center" },
@@ -38,18 +26,18 @@ const columns = [
 
 
 const ProductListPage = () => {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Producto[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState<boolean>(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const fetchProducts = async () => {
     try {
       const response = await getProducts();
-      const activeProducts = response.filter((product: Product) => product.estado);     
+      const activeProducts = response.filter((product: Producto) => product.estado);     
       setProducts(activeProducts);
     } catch (error: any) {
       console.error("Error al cargar productos:", error.message);
@@ -91,7 +79,7 @@ const ProductListPage = () => {
     fetchProducts();
   }, []);
 
-  const renderRow = (item: Product) => (
+  const renderRow = (item: Producto) => (
     <tr
       key={item.idProducto}
       className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-gray-100"

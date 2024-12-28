@@ -51,7 +51,7 @@ const forms: {
   category: (type, data, id, closeModal) =>
     <CategoryForm type={type} data={data} id={id} onSuccess={() => closeModal?.()} />,
   subcategory: (type, data, id, closeModal) =>
-    <SubcategoryForm type={type} data={data}       idCategoria={data?.idCategoria || id}  onSuccess={() => closeModal?.()} />,
+    <SubcategoryForm type={type} data={data} idCategoria={data?.idCategoria || id}  onSuccess={() => closeModal?.()} />,
   brand: (type, data, id, closeModal) =>
     <BrandForm
       type={type}
@@ -82,6 +82,7 @@ const FormModal = ({
     | "brand"
     | "subcategory"
     | "product"
+    
   type: "create" | "update" | "delete";
   data?: any;
   id?: number;
