@@ -8,6 +8,10 @@ use App\Http\Controllers\MarcaController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\SubcategoriaController;
 use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\RepresentanteController;
+use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\NaturalController;
+use App\Http\Controllers\JuridicoController;
 
 
 // Route::get('/user', function (Request $request) {
@@ -52,5 +56,32 @@ Route::group([
     Route::resource('trabajadores', TrabajadorController::class);
     Route::resource('users', UsersController::class);
     Route::get('modules', [UsersController::class, 'getAvailableModules']);
+
+    Route::get('/representantes', [RepresentanteController::class, 'index']);
+    Route::post('/representantes', [RepresentanteController::class, 'store']);
+    Route::get('/representantes/{id}', [RepresentanteController::class, 'show']);
+    Route::put('/representantes/{id}', [RepresentanteController::class, 'update']);
+    Route::delete('/representantes/{id}', [RepresentanteController::class, 'destroy']);
+
+
+
+    Route::get('/clientes', [ClienteController::class, 'index']);
+    Route::post('/clientes', [ClienteController::class, 'store']);
+    Route::get('/clientes/{id}', [ClienteController::class, 'show']);
+    Route::put('/clientes/{id}', [ClienteController::class, 'update']);
+    Route::delete('/clientes/{id}', [ClienteController::class, 'destroy']);
+    
+    Route::get('/naturales', [NaturalController::class, 'index']);
+    Route::post('/naturales', [NaturalController::class, 'store']);
+    Route::get('/naturales/{id}', [NaturalController::class, 'show']);
+    Route::put('/naturales/{id}', [NaturalController::class, 'update']);
+    Route::delete('/naturales/{id}', [NaturalController::class, 'destroy']);
+    
+    Route::get('/juridicos', [JuridicoController::class, 'index']);
+    Route::post('/juridicos', [JuridicoController::class, 'store']);
+    Route::get('/juridicos/{id}', [JuridicoController::class, 'show']);
+    Route::put('/juridicos/{id}', [JuridicoController::class, 'update']);
+    Route::delete('/juridicos/{id}', [JuridicoController::class, 'destroy']);
+    
 
 });

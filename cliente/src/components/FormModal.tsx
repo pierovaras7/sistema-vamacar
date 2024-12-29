@@ -34,6 +34,15 @@ const ProductForm = dynamic(() => import("./forms/ProductForm"), {
   ssr: false,
 });
 
+const ClientesForm = dynamic(() => import("./forms/ClientesForm"), {
+  loading: () => <h1>Loading...</h1>,
+  ssr: false,
+});
+
+const RepresentanteForm = dynamic(() => import("./forms/RepresentanteForm"), {
+  loading: () => <h1>Loading...</h1>,
+  ssr: false,
+});
 
 
 // Mapeo de formularios por tabla
@@ -47,6 +56,14 @@ const forms: {
   trabajador: (type, data, id, closeModal) => {
     const handleClose = closeModal || (() => {});
     return <TrabajadorForm type={type} data={data} id={id} closeModal={handleClose} />;
+  },
+  cliente: (type, data, id, closeModal) => {
+    const handleClose = closeModal || (() => {});
+    return <ClientesForm type={type} data={data} id={id} closeModal={handleClose} />;
+  },
+  representante: (type, data, id, closeModal) => {
+    const handleClose = closeModal || (() => {});
+    return <RepresentanteForm type={type} data={data} id={id} closeModal={handleClose} />;
   },
   category: (type, data, id, closeModal) =>
     <CategoryForm type={type} data={data} id={id} onSuccess={() => closeModal?.()} />,
@@ -82,6 +99,8 @@ const FormModal = ({
     | "brand"
     | "subcategory"
     | "product"
+    | "cliente"
+    | "representante"
   type: "create" | "update" | "delete";
   data?: any;
   id?: number;

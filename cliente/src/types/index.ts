@@ -68,3 +68,43 @@ export type Module = {
     name: string;
     slug: string;
 }
+
+
+export type Representante = {
+    idRepresentante?: number;   // ID único del representante
+    nombres: string;            // Nombres del representante
+    apellidos: string;          // Apellidos del representante
+    dni: string;                // DNI del representante
+    cargo: string;              // Cargo del representante
+    telefono: string;           // Teléfono del representante
+    estado?: boolean;           // Activo (true) o Inactivo (false)
+};
+
+export type Cliente = {
+    idCliente?: number; 
+    tipoCliente: string;  // Persona Natural o Jurídica
+    telefono: string;
+    correo: string;
+    direccion: string;
+    estado?: boolean; // Activo (true) o Inactivo (false)
+};
+  
+
+export type Natural = {
+    idNatural?: number;          // ID único del cliente natural
+    nombres: string;             // Nombres del cliente natural
+    apellidos: string;           // Apellidos del cliente natural
+    estado?: boolean;            // Activo (true) o Inactivo (false)
+    idCliente: number;           // ID del cliente principal
+  };
+  
+
+  export type Juridico = {
+    idJuridico?: number;         // ID único del cliente jurídico
+    razonSocial: string;         // Razón social de la empresa
+    ruc: string;                 // RUC del cliente jurídico
+    idRepresentante: number;     // ID del representante (referencia al tipo `Representante`)
+    estado?: boolean;            // Activo (true) o Inactivo (false)
+    idCliente: number;           // ID del cliente principal
+  };
+  
