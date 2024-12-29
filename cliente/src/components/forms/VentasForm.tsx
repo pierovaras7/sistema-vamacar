@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -7,19 +7,36 @@ import { DetailVenta, Producto, Venta } from "@/types";
 import InputField from "../InputField";
 import { ChevronDoubleDownIcon, ChevronDoubleUpIcon } from "@heroicons/react/24/outline";
 import SearchDropdown from "../SearchDropdown";
+import { saveVenta } from "@/services/ventaService";
+import useAuthStore from "@/stores/AuthStore";
 
 const schema = z.object({
-  cliente: z.string().min(1, { message: "Cliente es un campo requerido." }),
   fecha: z.string().min(1, { message: "Fecha de venta es requerida." }),
-  total: z.number({ invalid_type_error: "Total debe ser un número." }),
+  montoPagado: z
+    .coerce
+    .number({
+      invalid_type_error: "Monto pagado debe ser un número.",
+    })
+    .min(0)
+    .optional(),
+  total: z.number().min(0),
   metodoPago: z.enum(["efectivo", "tarjeta", "yape", "plin"], {
     message: "Método de pago requerido.",
   }),
   tipoVenta: z.enum(["contado", "credito"], {
     message: "Tipo de Venta es un campo requerido.",
   }),
-  montoAbonado: z.number().optional(), // Campo opcional para monto abonado
+}).superRefine((data, ctx) => {
+  // Validación condicional para montoPagado solo si tipoVenta es "credito"
+  if (data.tipoVenta === "credito" && data.montoPagado === undefined) {
+    ctx.addIssue({
+      path: ["montoPagado"], // Apunta al campo montoPagado
+      message: "Monto pagado es requerido cuando el tipo de venta es 'credito'.",
+      code: z.ZodIssueCode.custom,
+    });
+  }
 });
+
 
 type Inputs = z.infer<typeof schema>;
 
@@ -27,7 +44,13 @@ type VentaFormProps = {
   productosBase: Producto[]
 }
 
-const VentasForm: React.FC<VentaFormProps> = ({productosBase})  => {
+const VentasForm = ({
+  data,
+  productosBase,
+}: {
+  data?: Inputs;
+  productosBase: Producto[];
+}) => {
   const [showDataVenta, setShowDataVenta] = useState(true);
   const [showDataCliente, setShowDataCliente] = useState(true); // Estado para la sección de cliente
   const [showDataDetails, setShowDataDetails] = useState(true); // Estado para la sección de detalles
@@ -35,74 +58,121 @@ const VentasForm: React.FC<VentaFormProps> = ({productosBase})  => {
   const [selectedProducto, setSelectedProducto] = useState<Producto | null>(null);
   const [resetDropdown, setResetDropdown] = useState(false);
 
+  const { reset } = useForm<Inputs>();
+  const { user } = useAuthStore();
+
+  // Valores predeterminados
+  const dValues = {
+    fecha: new Date().toISOString().split("T")[0], // Formato YYYY-MM-DD
+    montoPagado: undefined,      // Número predeterminado
+    metodoPago: "tarjeta" as const, // Valor dentro de las opciones del enum
+    tipoVenta: "contado" as const,  // Valor dentro de las opciones del enum
+    total: 0
+  };
+
   const {
     register,
+    setValue,
     handleSubmit,
     formState: { errors },
     watch, // Agregar watch aquí
   } = useForm<Inputs>({
     resolver: zodResolver(schema),
-    defaultValues: {
-      cliente: "",
-      fecha: new Date().toISOString().split('T')[0],
-      total: 0,
-      metodoPago: "efectivo",
-      tipoVenta: "contado",
-    },
+    defaultValues: dValues
   });
 
-  const onSubmit = (() => {
-    alert('xxxx');
-    // const venta: Venta = {
-    //   fecha: data.fecha,
-    //   total: data.total,
-    //   metodoPago: data.metodoPago,
-    //   tipoVenta: data.tipoVenta,
-    // };
+  const onSubmit = handleSubmit(async (data) => {
 
-    // console.log("Venta registrada:", venta);
+    if(detallesVentaAgregados.length == 0){
+      toast.warning("Ingrese productos a la venta.");
+      return;
+    }
+
+    try{
+      const venta: Venta = {
+        fecha: data.fecha,
+        metodoPago: data.metodoPago,
+        total: data.total,
+        tipoVenta: data.tipoVenta,
+        detalles: detallesVentaAgregados,
+        ...(data.tipoVenta === "credito" && data.montoPagado !== undefined && { montoPagado: data.montoPagado }),
+        trabajador: user?.trabajador,
+        sede: user?.trabajador?.sede, 
+      };
+      
+      console.log(venta);
+      
+      await saveVenta(venta);
+      toast.success("Venta creada exitosamente");
+    } catch (error: any) {
+      // Si tienes un error de validación con un formato JSON.stringify, procesarlo
+      const errorMessage = error.message ? error.message : 'Error desconocido';
+
+      try {
+        const validationErrors = JSON.parse(errorMessage);
+        if (validationErrors) {
+          // Muestra los errores específicos de validación
+          Object.keys(validationErrors).forEach((field) => {
+            const messages = validationErrors[field];
+            // Aquí puedes usar los mensajes de error, por ejemplo, mostrarlos en un toast o en una lista
+            messages.forEach((msg: string) => {
+              // Utilizamos una expresión regular para extraer el mensaje después del primer ':'
+              const cleanMessage = msg.replace(/^.*?:\s*/, ''); // Esto elimina todo hasta el primer ":"
+              toast.error(cleanMessage); // Mostrar el mensaje limpio en el toast
+            });          
+          });
+        }
+      } catch (e) {
+        // Si no es un error de validación, muestra el error genérico
+        toast.error(errorMessage);
+      }
+    }
+
     toast.success("Venta registrada exitosamente.");
+    reset(dValues);
+    setDetallesVentaAgregados([]);
     setShowDataVenta(true);
   });
+  
 
   const handleSelectProducto = (producto: Producto) => {
       setSelectedProducto(producto);
-    };
+  };
   
-    const handleAgregarProducto = () => {
-      if (selectedProducto) {
-        const detalleVenta: DetailVenta = {
-          idDetalleVenta: Date.now(), // Asignar un ID único para el detalle de la venta
-          producto: selectedProducto,
-          precio: selectedProducto.precioMaxVenta, // Usamos el precio del producto directamente en el detalle
-          cantidad: 1, // Inicializamos con cantidad 1
-          subtotal: selectedProducto.precioMaxVenta * 1, // Inicializamos el subtotal (cantidad * precio)
-        };
-  
-        // Aquí buscamos por producto.idProducto en lugar de idProducto directamente
-        const productoExiste = detallesVentaAgregados.find(
-          (p) => p.producto.idProducto === selectedProducto.idProducto
+  const handleAgregarProducto = () => {
+    if (selectedProducto) {
+      const detalleVenta: DetailVenta = {
+        idDetalleVenta: Date.now(), // Asignar un ID único para el detalle de la venta
+        producto: selectedProducto,
+        precio: selectedProducto.precioMaxVenta, // Usamos el precio del producto directamente en el detalle
+        cantidad: 1, // Inicializamos con cantidad 1
+        subtotal: selectedProducto.precioMaxVenta * 1, // Inicializamos el subtotal (cantidad * precio)
+      };
+
+      // Aquí buscamos por producto.idProducto en lugar de idProducto directamente
+      const productoExiste = detallesVentaAgregados.find(
+        (p) => p.producto.idProducto === selectedProducto.idProducto
+      );
+
+      if (productoExiste) {
+        setDetallesVentaAgregados((prev) =>
+          prev.map((p) =>
+            p.producto.idProducto === selectedProducto.idProducto
+              ? { 
+                  ...p, 
+                  cantidad: p.cantidad + 1, 
+                  subtotal: (p.cantidad + 1) * p.precio // Actualizamos el subtotal
+                }
+              : p
+          )
         );
-  
-        if (productoExiste) {
-          setDetallesVentaAgregados((prev) =>
-            prev.map((p) =>
-              p.producto.idProducto === selectedProducto.idProducto
-                ? { 
-                    ...p, 
-                    cantidad: p.cantidad + 1, 
-                    subtotal: (p.cantidad + 1) * p.precio // Actualizamos el subtotal
-                  }
-                : p
-            )
-          );
-        } else {
-          setDetallesVentaAgregados((prev) => [...prev, detalleVenta]);
-        }
+      } else {
+        setDetallesVentaAgregados((prev) => [...prev, detalleVenta]);
       }
-      setSelectedProducto(null);
-      setResetDropdown(true); // Resetea el dropdown
-    };
+    }
+    setSelectedProducto(null);
+    setResetDropdown(true); // Resetea el dropdown
+  };
   
     // Función para editar el detalle de venta
     const handleEditarDetalle = (
@@ -132,10 +202,15 @@ const VentasForm: React.FC<VentaFormProps> = ({productosBase})  => {
         );
       };
       
-  
     const handleEliminarDetalle = (detalleVenta: DetailVenta) => {
       setDetallesVentaAgregados((prev) => prev.filter((detalle) => detalle !== detalleVenta));
     };
+
+  // Dentro de tu componente o efecto
+  useEffect(() => {
+    setValue("total", calcularTotal());
+  }, [calcularTotal]); 
+
   return (
     <div className="w-full flex justify-center">
       <form className="w-full md:w-3/4 grid grid-cols-2 md:grid-cols-12" onSubmit={onSubmit}>
@@ -218,15 +293,17 @@ const VentasForm: React.FC<VentaFormProps> = ({productosBase})  => {
           </div>
             {watch("tipoVenta") === "credito" && (
                 <div className="flex flex-col gap-2 px-2 w-full">
-                <label className="text-sm text-gray-500">Monto Abonado</label>
+                <label className="text-sm text-gray-500">Monto Pagado</label>
                 <input
                     type="number"
+                    min="0"
+                    step="0.01"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:ring focus:ring-blue-300 focus:outline-none"
-                    {...register("montoAbonado")}
-                    placeholder="Ingrese el monto abonado"
+                    {...register("montoPagado")}
+                    placeholder="Ingrese el monto a pagar"
                 />
-                {errors.montoAbonado?.message && (
-                    <p className="text-xs text-red-400">{errors.montoAbonado.message}</p>
+                {errors.montoPagado?.message && (
+                    <p className="text-xs text-red-400">{errors.montoPagado.message}</p>
                 )}
                 </div>
             )}
@@ -350,11 +427,19 @@ const VentasForm: React.FC<VentaFormProps> = ({productosBase})  => {
                         </tr>
                     ))}
                     <tr className="bg-gray-100 font-bold">
-                        <td colSpan={4} className="px-6 py-3 text-right">
+                      <td colSpan={4} className="px-6 py-3 text-right">
                         Total
-                        </td>
-                        <td className="px-6 py-3"> S/ {calcularTotal().toFixed(2)}</td>
+                      </td>
+                      <td className="p-1">
+                        <input
+                          type="text"
+                          className="bg-gray-100 font-bold w-1/2 text-center"
+                          value={calcularTotal()} // O actualizar el estado con setValue
+                          readOnly // Para evitar edición manual
+                        />
+                      </td>
                     </tr>
+
                     </tbody>
                 </table>
             </div>

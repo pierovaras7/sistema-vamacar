@@ -18,6 +18,7 @@ class Venta extends Model
     protected $fillable = [
         'fecha',
         'total',
+        'montoPagado',
         'tipoVenta',
         'metodoPago',
         'idTrabajador',

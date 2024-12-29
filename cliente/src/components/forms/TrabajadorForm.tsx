@@ -3,9 +3,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import InputField from "../InputField";
-import { saveTrabajador, updateTrabajador } from "@/services/trabajadoresService";
+import { getAllSedes, saveTrabajador, updateTrabajador } from "@/services/trabajadoresService";
 import { toast } from "sonner";
-import { Trabajador } from "@/types";
+import { Sede, Trabajador } from "@/types";
+import { useEffect, useState } from "react";
 
 // Calcular la mayoría de edad (18 años)
 const isAdult = (dateString: string): boolean => {
@@ -28,6 +29,7 @@ const schema = z.object({
     .length(9, { message: "El teléfono debe tener exactamente 9 caracteres." })
     .regex(/^\d+$/, { message: "El teléfono debe contener solo números." }),
   sexo: z.enum(["M", "F"], { message: "Sexo es un campo requerido." }),
+  sede: z.string().min(1,{ message: "Sede es un campo requerido." }),
   direccion: z.string().min(1, { message: "Dirección es requerida." }),
   dni: z
     .string()
@@ -56,12 +58,14 @@ const TrabajadorForm = ({
   type,
   data,
   id,
-  closeModal
+  closeModal,
+  sedes
 }: {
   type: "create" | "update";
   data?: Inputs;
   id?: number;
-  closeModal: () => void
+  closeModal: () => void,
+  sedes?: Sede[]
 }) => {
   const {
     register,
@@ -77,6 +81,15 @@ const TrabajadorForm = ({
     : { crearCuenta: false },
   });
 
+  const [sedeSeleccionada, setSedeSeleccionada] = useState<Sede>(); 
+
+  const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const sedeSeleccionada = sedes?.find(sede => sede.idSede === Number(event.target.value));
+    if (sedeSeleccionada) {
+      setSedeSeleccionada(sedeSeleccionada);
+    }
+  };
+   
   const onSubmit = handleSubmit(async (data) => {
     try {
       const trabajador: Trabajador = {
@@ -90,7 +103,10 @@ const TrabajadorForm = ({
         fechaNacimiento: new Date(data.fechaNacimiento).toISOString(),
         turno: data.turno,
         salario: data.salario,
+        sede: sedeSeleccionada
       };
+
+      console.log(trabajador);
 
       const requestData = {
         ...trabajador,
@@ -223,6 +239,26 @@ const TrabajadorForm = ({
           register={register}
           error={errors?.salario}
         />
+        <div className="flex flex-col gap-2 w-full px-2">
+          <label className="text-xs text-gray-500">Sede</label>
+          <select
+            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+            value={sedeSeleccionada?.idSede} // Usamos el ID de la sede como valor del select
+            onChange={handleChange}
+          >
+            <option value="" disabled>
+              Selecciona una sede
+            </option>
+            {sedes?.map((sede) => (
+              <option key={sede.idSede} value={sede.idSede}>
+                {sede.direccion}
+              </option>
+            ))}
+          </select>
+          {errors.sede?.message && (
+            <p className="text-xs text-red-400">{errors.sede.message}</p>
+          )}
+        </div>
         <div className="flex flex-col justify-center gap-2 px-2 w-full col-span-2">
           <label className="text-sm">
             <input type="checkbox" {...register("crearCuenta")} /> Crear cuenta en el sistema

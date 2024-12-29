@@ -1,11 +1,11 @@
 "use client";
-import { Trabajador } from "@/types";
+import { Sede, Trabajador } from "@/types";
 import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
 import { useEffect, useState, useMemo } from "react";
-import { getAllTrabajadores } from "@/services/trabajadoresService";
+import { getAllSedes, getAllTrabajadores } from "@/services/trabajadoresService";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import useAuthStore from "@/stores/AuthStore";
@@ -30,6 +30,7 @@ const TrabajadoresPage = () => {
   const [perPage] = useState(10);
   const [loading, setLoading] = useState(true); // Estado de carga
   const { user } = useAuthStore()
+  const [sedes, setSedes] = useState<Sede[]>();
 
   const refreshTrabajadores = async () => {
     setLoading(true); // Comienza la carga
@@ -44,8 +45,18 @@ const TrabajadoresPage = () => {
     }
   };
 
+  const getSedes = async () => {
+    try {
+      const response = await getAllSedes();
+      setSedes(response);
+    } catch (error) {
+      console.error("Error al obtener sedes:", error);
+    }
+  };
+
   useEffect(() => {
     refreshTrabajadores();
+    getSedes();
   }, []);
 
   // Filtrar trabajadores según el término de búsqueda

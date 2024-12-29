@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id('idVenta');
             $table->date('fecha');
             $table->decimal('total');
+            $table->decimal('montoPagado');
             $table->string('tipoVenta');
             $table->string('metodoPago');
             $table->unsignedBigInteger('idTrabajador');

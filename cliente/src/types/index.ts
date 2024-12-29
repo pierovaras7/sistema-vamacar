@@ -59,6 +59,7 @@ export type Trabajador = {
     salario: number; 
     estado?: boolean; 
     crearCuenta?: boolean;
+    sede?: Sede;
 };
 
 // ACCESO
@@ -93,17 +94,25 @@ export type DetailVenta = {
     subtotal: number
 }
 
+export type Sede = {
+    idSede?: number;
+    direccion: string;
+    telefono: string;
+    estado?: boolean;
+}
+
 export type Venta = {
     idVenta?: number;
     fecha: string; // Usualmente en formato 'YYYY-MM-DD' o 'YYYY-MM-DD HH:MM:SS'
-    total: number;
+    total?: number;
+    montoPagado?: number;
     tipoVenta: string; // Podría ser 'contado', 'crédito', etc.
     metodoPago: string; // Por ejemplo, 'efectivo', 'tarjeta', etc.
-    idTrabajador?: number;
-    idSede?: number;
+    trabajador?: Trabajador;
+    sede?: Sede;
     cliente?: Cliente;
     estado?: boolean; // Estado de la venta (activada/desactivada)
-    detalles?: DetailVenta;
+    detalles?: DetailVenta[];
 };
 
 export type Cliente = {

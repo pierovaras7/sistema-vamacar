@@ -8,7 +8,8 @@ use App\Http\Controllers\MarcaController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\SubcategoriaController;
 use App\Http\Controllers\ProductoController;
-
+use App\Http\Controllers\VentaController;
+use App\Models\Trabajador;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -48,9 +49,13 @@ Route::group([
     Route::get('/productos/{id}', [ProductoController::class, 'show']);
     Route::put('/productos/{id}', [ProductoController::class, 'update']);
     Route::delete('/productos/{id}', [ProductoController::class, 'destroy']);
+    Route::get('modules', [UsersController::class, 'getAvailableModules']);
     
     Route::resource('trabajadores', TrabajadorController::class);
-    Route::resource('users', UsersController::class);
-    Route::get('modules', [UsersController::class, 'getAvailableModules']);
+    Route::get('sedes', [TrabajadorController::class, 'getAvailableSedes']);
 
+
+    Route::resource('users', UsersController::class);
+    Route::resource('ventas', VentaController::class);
+    
 });

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Sede;
 use App\Models\Trabajador;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -24,6 +25,20 @@ class TrabajadorController extends Controller
         }
 
         return response()->json($trabajadores, 200);
+    }
+
+    public function getAvailableSedes()
+    {
+        //corregir
+        $sedes = Sede::where("estado", "=", 1)->get();
+
+        if ($sedes->isEmpty()) {
+            return response()->json([
+                'message' => 'No se encontraron sedes.'
+            ], 404);
+        }
+
+        return response()->json($sedes, 200);
     }
 
     /**
