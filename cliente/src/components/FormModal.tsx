@@ -1,6 +1,8 @@
 "use client";
 
 import { deleteTrabajador } from "@/services/trabajadoresService";
+import { deleteRepresentante} from "@/services/representantesService";
+
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useState } from "react";
@@ -124,17 +126,29 @@ const FormModal = ({
 
   const Form = () => {
     const handleDelete = async () => {
-      if(id){
+      if (id) {
         try {
-          await deleteTrabajador(id);
+          console.log(`🛠️ [Componente] Eliminando elemento de la tabla: ${table}, ID: ${id}`);
+          
+          if (table === "trabajador") {
+            await deleteTrabajador(id);
+            toast.success("El trabajador fue eliminado exitosamente");
+          } else if (table === "representante") {
+            await deleteRepresentante(id);
+            toast.success("El representante fue desactivado exitosamente");
+          } else {
+            console.warn("⚠️ [Componente] Tabla no reconocida para eliminación:", table);
+          }
+    
           setOpen(false);
-          toast.success("El trabajador fue eliminado exitosamente");
-          onUpdate();
-        } catch (error) {
-          console.error("Error deleting item:", error);
+          onUpdate(); // Actualiza la lista
+        } catch (error: any) {
+          console.error("❌ [Componente] Error al eliminar elemento:", error.message || error);
+          toast.error("Error al eliminar elemento");
         }
       }
     };
+    
     return type === "delete" && id ? (
       <div>
         <h2 className="text-lg font-semibold mb-4">Confirmar eliminación</h2>

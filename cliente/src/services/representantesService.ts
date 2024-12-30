@@ -39,27 +39,11 @@ export const getRepresentanteById = async (id: number): Promise<Representante> =
 
 export const updateRepresentante = async (id: number, representante: Representante): Promise<void> => {
   try {
-    // Imprime los datos para verificar antes de enviarlos
-    console.log("Enviando datos para actualizar:", representante);
-
-    // Envía los datos al backend
-    const response = await axiosInstance.put(`${API_URL}/${id}`, representante);
-
-    // Imprime la respuesta del servidor
-    console.log("Respuesta de la actualización:", response.data);
-
+    console.log("📤 [Servicio] Actualizando representante con ID:", id, representante);
+    const response = await axiosInstance.put(`/representantes/${id}`, representante);
+    console.log("✅ [Servicio] Representante actualizado:", response.data);
   } catch (error: any) {
-    // Comprobar si el error es una respuesta HTTP con un status code 422 (validación fallida)
-    if (error.response && error.response.status === 422) {
-      // Extraer los errores del backend
-      const validationErrors = error.response.data.errors;
-      // Lanzar un nuevo error con los errores de validación
-      throw new Error(JSON.stringify(validationErrors));
-    } else {
-      // Si el error no es de validación, lanzar un error genérico
-      console.error("Error al actualizar:", error);
-      throw new Error('Error al actualizar el representante');
-    }
+    handleError(error, "Error al actualizar el representante");
   }
 };
 
@@ -70,3 +54,7 @@ export const deleteRepresentante = async (id: number): Promise<void> => {
     throw new Error('Error al eliminar el representante');
   }
 };
+function handleError(error: any, arg1: string) {
+  throw new Error('Function not implemented.');
+}
+

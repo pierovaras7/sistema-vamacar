@@ -14,9 +14,12 @@ export const getAllClientes = async (): Promise<Cliente[]> => {
 };
 
 // Guardar un nuevo cliente
-export const saveCliente = async (cliente: Cliente): Promise<void> => {
+export const saveCliente = async (cliente: Cliente): Promise<{ idCliente: number }> => {
   try {
-    await axiosInstance.post(API_URL, cliente);
+    const response = await axiosInstance.post(API_URL, cliente);
+    
+    // Asumiendo que el backend retorna el cliente con su id (como { idCliente: number })
+    return { idCliente: response.data.idCliente }; 
   } catch (error: any) {
     if (error.response && error.response.status === 422) {
       const validationErrors = error.response.data.errors;
@@ -26,6 +29,7 @@ export const saveCliente = async (cliente: Cliente): Promise<void> => {
     }
   }
 };
+
 
 // Obtener un cliente por ID
 export const getClienteById = async (id: number): Promise<Cliente> => {
@@ -52,11 +56,20 @@ export const updateCliente = async (id: number, cliente: Cliente): Promise<void>
 };
 
 // Eliminar (desactivar) un cliente por ID
-export const deleteCliente = async (id: number): Promise<void> => {
+export const deleteRepresentante = async (id: number): Promise<void> => {
   try {
-    await axiosInstance.delete(`${API_URL}/${id}`);
-  } catch (error) {
-    throw new Error('Error al eliminar el cliente');
+    console.log("🛠️ [Servicio] ID del representante a eliminar (desactivar):", id);
+    
+    const response = await axiosInstance.put(`${API_URL}/${id}`, { estado: false });
+    
+    console.log("✅ [Servicio] Representante desactivado correctamente:", response.data);
+  } catch (error: any) {
+    if (error.response) {
+      console.error("❌ [Servicio] Error en la respuesta del servidor:", error.response.data);
+      throw new Error(JSON.stringify(error.response.data.errors || error.response.data));
+    } else {
+      console.error("❌ [Servicio] Error inesperado al desactivar representante:", error);
+      throw new Error('Error al desactivar el representante');
+    }
   }
 };
-
