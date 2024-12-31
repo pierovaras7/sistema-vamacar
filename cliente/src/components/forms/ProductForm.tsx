@@ -30,6 +30,15 @@ const schema = z.object({
     (value) => (typeof value === "string" ? parseFloat(value) : value),
     z.number().positive({ message: "El precio debe ser positivo." })
   ),
+  stockMinimo: z.preprocess(
+    (value) => (typeof value === "string" ? parseFloat(value) : value),
+    z.number().positive({ message: "El stock Minimo debe ser un valor mayor a 0." })
+  ),
+  stockInicial: z
+    .string() // Espera un string
+    .transform((val) => parseFloat(val)) // Convierte el string a un número
+    .refine((val) => !isNaN(val), { message: "El stock Actual es un campo requerido." }) // Asegúrate de que sea un número
+    .refine((val) => val >= 0, { message: "Stock Actual debe ser mayor o igual a 0." }),
   idSubcategoria: z.number().positive({ message: "Seleccione una subcategoría válida." }),
   idMarca: z.number().positive({ message: "Seleccione una marca válida." }),
 });
@@ -62,6 +71,7 @@ const ProductForm = ({
       precioMinVenta: data?.precioMinVenta || 0,
       precioMaxVenta: data?.precioMaxVenta || 0,
       precioXMayor: data?.precioXMayor || 0,
+      stockMinimo: data?.stockMinimo || 0,
       idSubcategoria: data?.idSubcategoria || 0,
       idMarca: data?.idMarca || 0,
     },
@@ -151,6 +161,7 @@ const paginatedData = filteredData.slice(startIndex, startIndex + ITEMS_PER_PAGE
     setLoading(true);
     try {
       if (type === "create") {
+        console.log(formData);
         await createProduct(formData);
         toast.success("Producto creado exitosamente");
       } else if (type === "update" && data?.idProducto) {
@@ -179,6 +190,9 @@ const paginatedData = filteredData.slice(startIndex, startIndex + ITEMS_PER_PAGE
         <InputField label="Precio Mínimo de Venta" name="precioMinVenta" step="0.01" type="number" register={register} error={errors.precioMinVenta} />
         <InputField label="Precio Máximo de Venta" name="precioMaxVenta" step="0.01" type="number" register={register} error={errors.precioMaxVenta} />
         <InputField label="Precio por Mayor" name="precioXMayor"   step="0.01" type="number" register={register} error={errors.precioXMayor} />
+        <InputField label="Stock Minimo" name="stockMinimo" type="number" register={register} error={errors.stockMinimo} />
+        {type === "create" && <InputField label="Stock Inicial" name="stockInicial" type="number" register={register} error={errors.stockInicial} />}
+        
 
         <div className="mb-4">
   <label htmlFor="idSubcategoria" className="block text-sm font-medium text-gray-700 mb-2">

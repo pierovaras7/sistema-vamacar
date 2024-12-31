@@ -18,7 +18,7 @@ return new class extends Migration
             $table->decimal('montoPagado');
             $table->string('tipoVenta');
             $table->string('metodoPago');
-            $table->unsignedBigInteger('idTrabajador');
+            $table->unsignedBigInteger('idTrabajador')->nullable();
             $table->unsignedBigInteger('idSede');
             $table->unsignedBigInteger('idCliente');
 

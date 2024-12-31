@@ -21,7 +21,7 @@ class User extends Authenticatable implements JWTSubject
 
     protected $fillable = [
         'name',
-        'email',
+        // 'email',
         'username',
         'password',
         'idTrabajador'
@@ -43,8 +43,8 @@ class User extends Authenticatable implements JWTSubject
         return $this->belongsTo(Trabajador::class, 'idTrabajador', 'idTrabajador');
     }
 
-     public function modules()
-     {
+    public function modules()
+    {
         return $this->belongsToMany(Module::class, 'modules_for_user', 'idUser', 'idModule');
     }
 

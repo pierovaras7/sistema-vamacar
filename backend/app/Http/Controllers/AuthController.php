@@ -55,6 +55,9 @@ class AuthController extends Controller
             $user->load('modules');
 
             $user->load('trabajador');
+
+            $user->load('trabajador.sede');
+
         
             // Crear la cookie HttpOnly para almacenar el token
             $cookie = cookie('token', $token, 60 * 24, '/', null, true, true); 
@@ -69,7 +72,6 @@ class AuthController extends Controller
                 'message' => 'Autenticación exitosa',
                 'user' => $user, // Incluye los datos del usuario en la respuesta
                 'isAdmin' => $isAdmin,
-                'trabajador' => $user->trabajador, // Incluye los datos del trabajador
             ])->cookie($cookie); // Se añade la cookie a la respuesta
         }
         

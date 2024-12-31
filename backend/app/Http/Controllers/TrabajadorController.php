@@ -58,6 +58,7 @@ class TrabajadorController extends Controller
             'fechaNacimiento' => 'required|date',
             'turno' => 'nullable|string|max:50',
             'salario' => 'required|numeric|min:0',
+            'sede' => 'required'
         ];
         
         $messages = [
@@ -117,8 +118,22 @@ class TrabajadorController extends Controller
         }
 
         try {
-            // Si la validación pasa, crear el trabajador
-            $trabajador = Trabajador::create($validator->validated());
+            // Si `sede` es un objeto, verifica y obtén el ID de la sede
+            $sedeId = $request->input('sede.idSede');
+
+            // dd($sedeId);
+
+            if (!$sedeId || !Sede::find($sedeId)) {
+                return response()->json([
+                    'message' => 'La sede proporcionada no existe.'
+                ], 422);
+            }
+
+            // Crear el trabajador
+            $trabajador = Trabajador::create(array_merge(
+                $validator->validated(),
+                ['idSede' => $sedeId] // Agregar la relación con la sede
+            ));
             $trabajador->estado = 1;
             $trabajador->save();
 
@@ -133,6 +148,8 @@ class TrabajadorController extends Controller
                     'idTrabajador' => $idTrabajador
                 ]);
             }
+            
+            $trabajador->load('sede');
 
             return response()->json([
                 'message' => 'Trabajador creado exitosamente.',
@@ -188,6 +205,7 @@ class TrabajadorController extends Controller
             'fechaNacimiento' => 'required|date', // Obligatorio, debe ser una fecha válida
             'turno' => 'nullable|string|max:50', // Opcional, máximo 50 caracteres
             'salario' => 'required|numeric|min:0', // Obligatorio, debe ser un número mayor o igual a 0
+            'sede' => 'required'
         ];
         
 
@@ -245,6 +263,12 @@ class TrabajadorController extends Controller
             // Si la validación pasa, actualizar el trabajador
             $trabajador->update($validator->validated());
 
+            // Asociar la sede
+            if ($request->has('sede')) {
+                $trabajador->idSede = $request->input('sede.idSede');
+                $trabajador->save();
+            }
+            
             return response()->json([
                 'message' => 'Trabajador actualizado exitosamente.',
                 'trabajador' => $trabajador

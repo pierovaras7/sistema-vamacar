@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Inventario;
 use App\Models\Producto;
 use Illuminate\Http\Request;
 
@@ -71,6 +72,13 @@ class ProductoController extends Controller
                 'estado' => true, // Estado por defecto
             ]);
     
+            // Crear inventario asociado
+            Inventario::create([
+                'idProducto' => $producto->idProducto,
+                'stockMinimo'  => $request->input('stockMinimo'), 
+                'stockActual' => $request->input('stockInicial'),
+            ]);
+
             return response()->json([
                 'message' => 'Producto creado exitosamente.',
                 'producto' => $producto,

@@ -11,15 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('amortizacion', function (Blueprint $table) {
-            $table->id('idAmortizacion');
-            $table->date('fecha');
-            $table->decimal('monto');
-            $table->string('metodoPago');
-            $table->unsignedBigInteger('idVenta');
-            $table->foreign('idVenta')
-                    ->references('idVenta') 
-                    ->on('venta')
+        Schema::create('inventario', function (Blueprint $table) {
+            $table->id('idInventario');
+            $table->decimal('stockMinimo');
+            $table->decimal('stockActual');
+            $table->unsignedBigInteger('idProducto');
+            $table->foreign('idProducto')
+                    ->references('idProducto') 
+                    ->on('producto')
                     ->onDelete('restrict');
             $table->boolean('estado')->default(1);  
         });
@@ -30,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('amortizacion');
+        Schema::dropIfExists('inventario');
     }
 };

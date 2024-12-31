@@ -3,12 +3,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
-import { DetailVenta, Producto, Venta } from "@/types";
+import { DetailVenta, Producto, Sede, Venta } from "@/types";
 import InputField from "../InputField";
 import { ChevronDoubleDownIcon, ChevronDoubleUpIcon } from "@heroicons/react/24/outline";
 import SearchDropdown from "../SearchDropdown";
 import { saveVenta } from "@/services/ventaService";
 import useAuthStore from "@/stores/AuthStore";
+import { getAllSedes } from "@/services/trabajadoresService";
 
 const schema = z.object({
   fecha: z.string().min(1, { message: "Fecha de venta es requerida." }),
@@ -26,7 +27,13 @@ const schema = z.object({
   tipoVenta: z.enum(["contado", "credito"], {
     message: "Tipo de Venta es un campo requerido.",
   }),
-}).superRefine((data, ctx) => {
+  sede: z
+  .string()
+  .refine((value) => value.trim() !== "", {
+    message: "Sede es un campo requerido."
+  })
+  .optional()  // Esto permite que el campo sea opcional
+  }).superRefine((data, ctx) => {
   // Validación condicional para montoPagado solo si tipoVenta es "credito"
   if (data.tipoVenta === "credito" && data.montoPagado === undefined) {
     ctx.addIssue({
@@ -57,9 +64,32 @@ const VentasForm = ({
   const [detallesVentaAgregados, setDetallesVentaAgregados] = useState<DetailVenta[]>([]);
   const [selectedProducto, setSelectedProducto] = useState<Producto | null>(null);
   const [resetDropdown, setResetDropdown] = useState(false);
+  const { user, isAdmin } = useAuthStore();
 
   const { reset } = useForm<Inputs>();
-  const { user } = useAuthStore();
+
+  const [sedeSeleccionada, setSedeSeleccionada] = useState<Sede>(); 
+    const [sedes, setSedes] = useState<Sede[]>();
+  
+    const getSedes = async () =>{
+      try {
+        const response = await getAllSedes();
+        setSedes(response);
+      } catch {
+        console.error("Error al cargar las sedes");
+      }
+    }
+  
+    useEffect(()=>{
+      getSedes();
+    },[])
+  
+    const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+      const sedeSeleccionada = sedes?.find(sede => sede.idSede === Number(event.target.value));
+      if (sedeSeleccionada) {
+        setSedeSeleccionada(sedeSeleccionada);
+      }
+    };
 
   // Valores predeterminados
   const dValues = {
@@ -97,7 +127,7 @@ const VentasForm = ({
         detalles: detallesVentaAgregados,
         ...(data.tipoVenta === "credito" && data.montoPagado !== undefined && { montoPagado: data.montoPagado }),
         trabajador: user?.trabajador,
-        sede: user?.trabajador?.sede, 
+        sede: sedeSeleccionada ?? user?.trabajador?.sede
       };
       
       console.log(venta);
@@ -323,6 +353,31 @@ const VentasForm = ({
               <p className="text-xs text-red-400">{errors.metodoPago.message}</p>
             )}
           </div>
+
+          {isAdmin && (<div className="flex flex-col gap-2 w-full px-2">
+            <label className="text-sm font-medium text-gray-700">Sede</label>
+            <select
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:ring focus:ring-blue-300 focus:outline-none"
+              {...register("sede")}
+              value={sedeSeleccionada?.idSede} 
+              onChange={handleChange}
+            >
+              <option value="" selected>
+                Selecciona una sede
+              </option>
+              {sedes?.map((sede) => (
+                <option key={sede.idSede} value={sede.idSede}>
+                  {sede.direccion}
+                </option>
+              ))}
+            </select>
+
+            {errors.sede?.message && (
+              <p className="text-sm text-red-500">{errors.sede.message}</p>
+            )}
+
+          </div>
+          )}
         </div>
 
 

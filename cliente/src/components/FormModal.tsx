@@ -157,7 +157,7 @@ const FormModal = ({
       </button>
       {open && (
         <div className="fixed inset-0 px-4 bg-black bg-opacity-60 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg shadow-lg relative w-full max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl p-6 overflow-y-auto max-h-[80vh]">
+          <div className="bg-white rounded-lg shadow-lg relative w-full md:w-2/3 p-6 overflow-y-auto max-h-[80vh]">
             <Form />
             <div
               className="absolute top-4 right-4 cursor-pointer"

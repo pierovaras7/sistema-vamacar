@@ -25,6 +25,19 @@ const InputField = ({
   value,
   className,
 }: InputFieldProps) => {
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const allowedKeys = ["Backspace", "Tab", "ArrowLeft", "ArrowRight", "Delete", "Enter", "Comma"];
+    const allowedChars = /^[0-9,]$/; // Only numbers and comma
+
+    if (
+      !allowedKeys.includes(e.key) && 
+      !allowedChars.test(e.key)
+    ) {
+      e.preventDefault(); // Prevent the input of non-numeric and non-comma characters
+    }
+  };
+
   return (
     <div className={`flex flex-col gap-2 px-2 w-full`}>
       <label className="text-sm font-medium text-gray-700">{label}</label>
@@ -35,6 +48,7 @@ const InputField = ({
         {...inputProps}
         step={step}
         defaultValue={defaultValue}
+        onKeyDown={type === "number" ? handleKeyDown : undefined} // Apply the handler only if the type is "number"
       />
       {error?.message && (
         <p className="text-sm text-red-500">{error.message.toString()}</p>

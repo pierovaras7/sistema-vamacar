@@ -29,7 +29,7 @@ const schema = z.object({
     .length(9, { message: "El teléfono debe tener exactamente 9 caracteres." })
     .regex(/^\d+$/, { message: "El teléfono debe contener solo números." }),
   sexo: z.enum(["M", "F"], { message: "Sexo es un campo requerido." }),
-  sede: z.string().min(1,{ message: "Sede es un campo requerido." }),
+  sede: z.string().nonempty({ message: "Sede es un campo requerido." }),
   direccion: z.string().min(1, { message: "Dirección es requerida." }),
   dni: z
     .string()
@@ -42,11 +42,10 @@ const schema = z.object({
   .refine(isAdult, { message: "Debe ser mayor de edad." }),  
   turno: z.enum(['mañana', 'tarde'], { message: "Turno es un campo requerido." }),
   salario: z
-    .coerce
-    .number({
-      invalid_type_error: "Salario debe ser un número.",
-    })
-    .positive({ message: "Salario debe ser mayor a 0." }),
+    .string() // Espera un string
+    .transform((val) => parseFloat(val)) // Convierte el string a un número
+    .refine((val) => !isNaN(val), { message: "Salario debe ser un número." }) // Asegúrate de que sea un número
+    .refine((val) => val >= 0, { message: "Salario debe ser mayor o igual a 0." }),
   crearCuenta: z.boolean().optional(),
 });
 
@@ -59,13 +58,11 @@ const TrabajadorForm = ({
   data,
   id,
   closeModal,
-  sedes
 }: {
   type: "create" | "update";
   data?: Inputs;
   id?: number;
   closeModal: () => void,
-  sedes?: Sede[]
 }) => {
   const {
     register,
@@ -82,6 +79,20 @@ const TrabajadorForm = ({
   });
 
   const [sedeSeleccionada, setSedeSeleccionada] = useState<Sede>(); 
+  const [sedes, setSedes] = useState<Sede[]>();
+
+  const getSedes = async () =>{
+    try {
+      const response = await getAllSedes();
+      setSedes(response);
+    } catch {
+      console.error("Error al cargar las sedes");
+    }
+  }
+
+  useEffect(()=>{
+    getSedes();
+  },[])
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const sedeSeleccionada = sedes?.find(sede => sede.idSede === Number(event.target.value));
@@ -149,12 +160,14 @@ const TrabajadorForm = ({
     }
   });
 
+  
+
   return (
     <form className="flex flex-col gap-8" onSubmit={onSubmit}>
       <h1 className="text-xl font-semibold">
         {type === "create" ? "Crear Trabajador" : "Actualizar Trabajador"}
       </h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         <InputField
           label="Nombres"
           name="nombres"
@@ -186,29 +199,29 @@ const TrabajadorForm = ({
           error={errors?.dni}
         />
         <div className="flex flex-col gap-2 w-full px-2">
-          <label className="text-xs text-gray-500">Sexo</label>
-          <select
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+        <label className="text-sm font-medium text-gray-700">Sexo</label>
+        <select
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:ring focus:ring-blue-300 focus:outline-none"
             {...register("sexo")}
           >
             <option value="M">Masculino</option>
             <option value="F">Femenino</option>
           </select>
           {errors.sexo?.message && (
-            <p className="text-xs text-red-400">{errors.sexo.message}</p>
+            <p className="text-sm text-red-500">{errors.sexo.message}</p>
           )}
         </div>
         <div className="flex flex-col gap-2 px-2 w-full">
-          <label className="text-xs text-gray-500">Area</label>
-          <select
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+        <label className="text-sm font-medium text-gray-700">Area</label>
+        <select
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:ring focus:ring-blue-300 focus:outline-none"
             {...register("area")}
           >
             {type === "create" ? <option value="">Seleccionar una opción</option> : ""}
             <option value="atencion">Atencion</option>
           </select>
           {errors.area?.message && (
-            <p className="text-xs text-red-400">{errors.area.message}</p>
+            <p className="text-sm text-red-500">{errors.area.message}</p>
           )}
         </div>
         <InputField
@@ -219,16 +232,16 @@ const TrabajadorForm = ({
           error={errors?.fechaNacimiento}
         />
         <div className="flex flex-col gap-2 px-2 w-full">
-          <label className="text-xs text-gray-500">Turno</label>
+          <label className="text-sm font-medium text-gray-700">Turno</label>
           <select
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:ring focus:ring-blue-300 focus:outline-none"
             {...register("turno")}
           >
             <option value="mañana">Mañana</option>
             <option value="tarde">Tarde</option>
           </select>
           {errors.turno?.message && (
-            <p className="text-xs text-red-400">{errors.turno.message}</p>
+            <p className="text-sm text-red-500">{errors.turno.message}</p>
           )}
         </div>
         <InputField
@@ -240,13 +253,14 @@ const TrabajadorForm = ({
           error={errors?.salario}
         />
         <div className="flex flex-col gap-2 w-full px-2">
-          <label className="text-xs text-gray-500">Sede</label>
+          <label className="text-sm font-medium text-gray-700">Sede</label>
           <select
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-            value={sedeSeleccionada?.idSede} // Usamos el ID de la sede como valor del select
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:ring focus:ring-blue-300 focus:outline-none"
+            {...register("sede")}
+            value={sedeSeleccionada?.idSede} 
             onChange={handleChange}
           >
-            <option value="" disabled>
+            <option value="" selected>
               Selecciona una sede
             </option>
             {sedes?.map((sede) => (
@@ -255,16 +269,17 @@ const TrabajadorForm = ({
               </option>
             ))}
           </select>
+
           {errors.sede?.message && (
-            <p className="text-xs text-red-400">{errors.sede.message}</p>
+            <p className="text-sm text-red-500">{errors.sede.message}</p>
           )}
         </div>
-        <div className="flex flex-col justify-center gap-2 px-2 w-full col-span-2">
+        <div className="flex flex-col justify-center gap-2 px-4 py-3 w-full col-span-2">
           <label className="text-sm">
             <input type="checkbox" {...register("crearCuenta")} /> Crear cuenta en el sistema
           </label>
           {errors.crearCuenta && (
-            <p className="text-xs text-red-400">{errors.crearCuenta.message}</p>
+            <p className="text-sm text-red-500">{errors.crearCuenta.message}</p>
           )}
         </div>
       </div>

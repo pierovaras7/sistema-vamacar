@@ -6,7 +6,11 @@ use App\Models\Venta;
 use App\Models\Trabajador;
 use App\Models\Sede;
 use App\Models\Cliente;
+use App\Models\CuentaPorCobrar;
+use App\Models\DetalleCC;
 use App\Models\DetalleVenta;
+use App\Models\Inventario;
+use App\Models\MovInventario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -52,10 +56,25 @@ class VentaController extends Controller
             return response()->json(['errors' => $validator->errors()], 400);
         }
 
-        // Crear la venta
-        $venta = Venta::create($request->only([
-            'fecha', 'total', 'montoPagado', 'tipoVenta', 'metodoPago', 'estado'
-        ]));
+        // Inicializar un array con los campos básicos de la venta
+        $ventaData = $request->only([
+            'fecha', 'total', 'tipoVenta', 'metodoPago', 'estado'
+        ]);
+
+        // Verificar si el campo 'sede' está presente en la solicitud y agregarlo al array
+        if ($request->has('sede')) {
+            $ventaData['idSede'] = $request->input('sede')['idSede']; // Agregar idSede al array
+        }
+
+        // Si el tipo de venta es "contado", agregar montoPagado al array
+        if ($request->input('tipoVenta') == "contado") {
+            $ventaData['montoPagado'] = $request->input('total'); // Asignar montoPagado
+        } else{
+            $ventaData['estado'] = 0; 
+        }
+
+        // Crear la venta con todos los datos de $ventaData
+        $venta = Venta::create($ventaData);
 
         // Crear los detalles de la venta
         $detallesData = $request->input('detalles');
@@ -68,7 +87,44 @@ class VentaController extends Controller
                 'cantidad' => $detalle['cantidad'],
                 'subtotal' => $detalle['subtotal'],
             ]);
+
+            $invProd = Inventario::where('idProducto', $detalle['producto']['idProducto'])->first();
+
+            MovInventario::create([
+                'tipo' => 'Salida',
+                'descripcion' => 'Venta Realizada',
+                'fecha' => $venta->fecha,
+                'cantidad' => $detalle['cantidad'],
+                'idInventario' => $invProd->idInventario
+            ]);
         }
+
+        $clienteId = $request->input('idCliente');
+
+        // Solo crear la cuenta por cobrar si la venta es a crédito
+        if ($request->input('tipoVenta') == 'credito') {
+            // Buscar la cuenta por cobrar del cliente, si existe
+            $cuentaPorCobrar = CuentaPorCobrar::where('idCliente', $clienteId)->first();
+
+            if (!$cuentaPorCobrar) {
+                // Si no existe, crear una nueva cuenta por cobrar
+                $cuentaPorCobrar = CuentaPorCobrar::create([
+                    'idCliente' => $clienteId,
+                    'montoCuenta' => 0, // Inicialmente el monto es 0
+                ]);
+            }
+
+            // Calcular la diferencia entre el total y el monto pagado
+            $montoDetalle = $request->input('total') - $request->input('montoPagado');
+
+            // Crear un detalle para la cuenta por cobrar con el monto de la venta a crédito
+            DetalleCC::create([
+                'idCC' => $cuentaPorCobrar->idCC, // Asociar el detalle con la cuenta por cobrar
+                'fecha' => $request->input('fecha'),
+                'motivo' => 'Venta',
+                'monto' => $montoDetalle, // La diferencia entre total y monto pagado
+            ]);
+        } 
 
         // Responder con los datos de la venta y sus detalles
         return response()->json(['venta' => $venta, 'detalles' => $detallesData], 201);
