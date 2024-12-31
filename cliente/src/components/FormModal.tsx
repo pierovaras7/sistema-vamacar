@@ -6,10 +6,6 @@ import Image from "next/image";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
-// USE LAZY LOADING
-
-
-
 const TrabajadorForm = dynamic(() => import("./forms/TrabajadorForm"), {
   loading: () => <h1>Loading...</h1>,
   ssr: false,
@@ -28,6 +24,11 @@ const BrandForm = dynamic(() => import("./forms/BrandForm"), {
 });
 
 const ProductForm = dynamic(() => import("./forms/ProductForm"), {
+  loading: () => <h1>Loading...</h1>,
+  ssr: false,
+});
+
+const ProviderForm = dynamic(() => import("./forms/ProviderForm"), {
   loading: () => <h1>Loading...</h1>,
   ssr: false,
 });
@@ -56,6 +57,8 @@ const forms: {
         id={id}
         onSuccess={() => closeModal?.()}
       />,
+      provider: (type, data, id, closeModal) =>
+        <ProviderForm type={type} data={data} id={id} onSuccess={() => closeModal?.()} />,
 };
 
 
@@ -65,6 +68,7 @@ const FormModal = ({
   data,
   id,
   onUpdate,
+  onClick,
 }: {
   table:
     | "teacher"
@@ -74,6 +78,7 @@ const FormModal = ({
     | "brand"
     | "subcategory"
     | "product"
+    | "provider"
     | "parent"
     | "subject"
     | "class"
@@ -88,6 +93,7 @@ const FormModal = ({
   data?: any;
   id?: number;
   onUpdate: () => void;
+  onClick?: (proveedor?: Proveedor) => void; // Cambiar el tipo de función
 }) => {
   const size = type === "create" ? "w-8 h-8" : "w-7 h-7";
   const bgColor =

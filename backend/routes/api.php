@@ -8,6 +8,8 @@ use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\SubcategoriaController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\TrabajadorController;
+use App\Http\Controllers\RepresentanteController;
+use App\Http\Controllers\ProveedorController;
 
 
 // Route::get('/user', function (Request $request) {
@@ -55,4 +57,18 @@ Route::group(['middleware' => 'auth:api'], function () {
     
     Route::resource('trabajadores', TrabajadorController::class);
 
+
+    Route::get('/representantes', [RepresentanteController::class, 'index']); // Obtener todos los representantes
+    Route::post('/representantes', [RepresentanteController::class, 'store']); // Crear un representante
+    Route::get('/representantes/{id}', [RepresentanteController::class, 'show']); // Obtener un representante por ID
+    Route::put('/representantes/{id}', [RepresentanteController::class, 'update']); // Actualizar un representante
+    Route::delete('/representantes/{id}', [RepresentanteController::class, 'destroy']); // Eliminación lógica de un representante
+    Route::get('/representantes/dni/{dni}', [RepresentanteController::class, 'getByDni']);
+
+
+        Route::get('/proveedores', [ProveedorController::class, 'index']); // Obtener todos los proveedores activos
+        Route::get('/proveedores/ruc/{ruc}', [ProveedorController::class, 'getByRuc']); // Obtener un proveedor por RUC (activo)
+        Route::post('/proveedores', [ProveedorController::class, 'store']); // Crear un proveedor
+        Route::put('/proveedores/{id}', [ProveedorController::class, 'update']); // Actualizar un proveedor
+        Route::delete('/proveedores/{id}', [ProveedorController::class, 'destroy']); // Eliminación lógica de un proveedor
 });

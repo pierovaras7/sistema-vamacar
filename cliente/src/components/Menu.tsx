@@ -33,6 +33,12 @@ const menuItems = [
         visible: ["admin", "teacher", "student", "parent"],
       },
       {
+        icon: "/home.png",
+        label: "Proveedor",
+        href: "/list/proveedor",
+        visible: ["admin", "teacher", "student", "parent"],
+      },
+      {
         icon: "/teacher.png",
         label: "Trabajadores",
         href: "/trabajadores",
