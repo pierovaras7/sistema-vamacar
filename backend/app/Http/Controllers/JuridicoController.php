@@ -78,4 +78,20 @@ class JuridicoController extends Controller
 
         return response()->json(['message' => 'Juridico eliminado']);
     }
+
+
+    public function getByCliente($idCliente)
+    {
+        // Busca registros jurídicos asociados al cliente
+        $juridicos = Juridico::with('cliente', 'representante')
+            ->where('idCliente', $idCliente)
+            ->get();
+
+        if ($juridicos->isEmpty()) {
+            return response()->json(['message' => 'No se encontraron registros jurídicos para este cliente'], 404);
+        }
+
+        return response()->json($juridicos);
+    }
+
 }

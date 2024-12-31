@@ -55,3 +55,14 @@ export const deleteNatural = async (id: number): Promise<void> => {
     throw new Error('Error al eliminar el cliente natural');
   }
 };
+
+
+// Obtener clientes naturales por ID de Cliente
+export const getNaturalesByCliente = async (idCliente: number): Promise<Natural[]> => {
+  try {
+    const response = await axiosInstance.get(`${API_URL}/cliente/${idCliente}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(`Error al obtener los clientes naturales para el cliente con ID ${idCliente}`);
+  }
+};

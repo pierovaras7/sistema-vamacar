@@ -84,4 +84,7 @@ Route::group([
     Route::delete('/juridicos/{id}', [JuridicoController::class, 'destroy']);
     
 
+    Route::get('/juridicos/cliente/{idCliente}', [JuridicoController::class, 'getByCliente']);
+    Route::get('/naturales/cliente/{idCliente}', [NaturalController::class, 'getByCliente']);
+
 });

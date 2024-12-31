@@ -7,6 +7,9 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useState } from "react";
 import { toast } from "sonner";
+import { deleteJuridico } from "@/services/juridicosService";
+import { deleteNatural } from "@/services/naturalesService";
+import { deleteCliente } from "@/services/clientesService";
 
 // USE LAZY LOADING
 
@@ -103,6 +106,8 @@ const FormModal = ({
     | "product"
     | "cliente"
     | "representante"
+    | "juridico"
+    | "natural"
   type: "create" | "update" | "delete";
   data?: any;
   id?: number;
@@ -130,14 +135,27 @@ const FormModal = ({
         try {
           console.log(`🛠️ [Componente] Eliminando elemento de la tabla: ${table}, ID: ${id}`);
           
-          if (table === "trabajador") {
-            await deleteTrabajador(id);
-            toast.success("El trabajador fue eliminado exitosamente");
-          } else if (table === "representante") {
-            await deleteRepresentante(id);
-            toast.success("El representante fue desactivado exitosamente");
-          } else {
-            console.warn("⚠️ [Componente] Tabla no reconocida para eliminación:", table);
+          switch (table) {
+            case "trabajador":
+              await deleteTrabajador(id);
+              toast.success("El trabajador fue eliminado exitosamente");
+              break;
+            
+            case "representante":
+              await deleteRepresentante(id);
+              toast.success("El representante fue desactivado exitosamente");
+              break;
+            
+            case "cliente":
+              await deleteCliente(id);
+              toast.success("El registro  fue eliminado exitosamente");
+            
+              break;
+    
+            
+            default:
+              console.warn("⚠️ [Componente] Tabla no reconocida para eliminación:", table);
+              break;
           }
     
           setOpen(false);
@@ -148,6 +166,7 @@ const FormModal = ({
         }
       }
     };
+    
     
     return type === "delete" && id ? (
       <div>

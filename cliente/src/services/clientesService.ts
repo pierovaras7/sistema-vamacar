@@ -1,5 +1,7 @@
 import axiosInstance from '@/lib/axiosInstance';
 import { Cliente } from '@/types';
+import { deleteNatural } from './naturalesService';
+import { deleteJuridico } from './juridicosService';
 
 const API_URL = '/clientes';
 
@@ -56,20 +58,26 @@ export const updateCliente = async (id: number, cliente: Cliente): Promise<void>
 };
 
 // Eliminar (desactivar) un cliente por ID
-export const deleteRepresentante = async (id: number): Promise<void> => {
+export const deleteCliente = async (id: number): Promise<void> => {
   try {
-    console.log("🛠️ [Servicio] ID del representante a eliminar (desactivar):", id);
-    
-    const response = await axiosInstance.put(`${API_URL}/${id}`, { estado: false });
-    
-    console.log("✅ [Servicio] Representante desactivado correctamente:", response.data);
-  } catch (error: any) {
-    if (error.response) {
-      console.error("❌ [Servicio] Error en la respuesta del servidor:", error.response.data);
-      throw new Error(JSON.stringify(error.response.data.errors || error.response.data));
-    } else {
-      console.error("❌ [Servicio] Error inesperado al desactivar representante:", error);
-      throw new Error('Error al desactivar el representante');
+    await axiosInstance.delete(`${API_URL}/${id}`);
+  } catch (error) {
+    throw new Error('Error al eliminar el representante');
+  }
+};
+
+
+export const deleteClienteConDependencias = async (id: number, tipo: 'natural' | 'juridico'): Promise<void> => {
+  try {
+    if (tipo === 'natural') {
+      await deleteNatural(id);
+    } else if (tipo === 'juridico') {
+      await deleteJuridico(id);
     }
+
+    // Finalmente, eliminar de la tabla principal
+    await axiosInstance.delete(`${API_URL}/${id}`);
+  } catch (error) {
+    throw new Error('Error al eliminar el cliente con dependencias');
   }
 };

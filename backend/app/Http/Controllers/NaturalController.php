@@ -76,4 +76,19 @@ class NaturalController extends Controller
 
         return response()->json(['message' => 'Natural eliminado']);
     }
+
+    public function getByCliente($idCliente)
+{
+    // Busca registros naturales asociados al cliente
+    $naturales = Natural::with('cliente')
+        ->where('idCliente', $idCliente)
+        ->get();
+
+    if ($naturales->isEmpty()) {
+        return response()->json(['message' => 'No se encontraron registros naturales para este cliente'], 404);
+    }
+
+    return response()->json($naturales);
+}
+
 }
