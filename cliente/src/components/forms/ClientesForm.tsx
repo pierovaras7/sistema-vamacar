@@ -107,6 +107,7 @@ const ClientesForm = ({
 
   const onSubmit = handleSubmit(async (data) => {
     console.log("Submitting form with data:", data);
+  
     try {
       const cliente: Cliente = {
         tipoCliente: data.tipoCliente,
@@ -115,9 +116,9 @@ const ClientesForm = ({
         direccion: data.direccion,
         estado: true,
       };
-
+  
       let idCliente: number;
-
+  
       if (type === "create") {
         const savedCliente = await saveCliente(cliente);
         console.log("Cliente creado:", savedCliente);
@@ -130,7 +131,7 @@ const ClientesForm = ({
         console.log("Updating cliente with id:", id);
         idCliente = id!;
       }
-
+  
       // Si es Natural
       if (data.tipoCliente === "Natural") {
         const clienteNatural: Natural = {
@@ -139,7 +140,7 @@ const ClientesForm = ({
           idCliente,
           estado: true,
         };
-
+  
         // Primero actualizamos los datos del cliente Natural
         if (type === "create") {
           await saveNatural(clienteNatural);
@@ -148,21 +149,21 @@ const ClientesForm = ({
           await updateNatural(clienteNatural.idCliente, clienteNatural);
           console.log("Natural cliente actualizado:", clienteNatural);
         }
-
+  
         // Luego actualizamos los datos generales del cliente
         await updateCliente(idCliente, cliente);
         console.log("Cliente actualizado:", cliente);
-
+  
       // Si es Jurídico
       } else {
         const idRepresentante = data.idRepresentante
           ? parseInt(data.idRepresentante as unknown as string, 10)
           : undefined;
-
+  
         if (idRepresentante === undefined || isNaN(idRepresentante)) {
           throw new Error("El ID del representante debe ser un número válido.");
         }
-
+  
         const clienteJuridico: Juridico = {
           razonSocial: data.razonSocial!,
           ruc: data.ruc!,
@@ -170,7 +171,7 @@ const ClientesForm = ({
           idRepresentante,
           estado: true,
         };
-
+  
         // Primero actualizamos los datos del cliente Jurídico
         if (type === "create") {
           await saveJuridico(clienteJuridico);
@@ -179,21 +180,23 @@ const ClientesForm = ({
           await updateJuridico(clienteJuridico.idCliente, clienteJuridico);
           console.log("Juridico cliente actualizado:", clienteJuridico);
         }
-
+  
         // Luego actualizamos los datos generales del cliente
         await updateCliente(idCliente, cliente);
         console.log("Cliente actualizado:", cliente);
       }
-
+  
       toast.success(
         `${type === "create" ? "Cliente creado" : "Cliente actualizado"} exitosamente`
       );
       closeModal();
     } catch (error: any) {
+      console.error("Error en la actualización:", error);
       toast.error(error.message || "Error desconocido");
-      console.log("Error en la actualización:", error);
     }
   });
+  
+  
 
   return (
     <form className="flex flex-col gap-8" onSubmit={onSubmit}>
