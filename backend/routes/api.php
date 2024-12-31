@@ -9,7 +9,10 @@ use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\SubcategoriaController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\VentaController;
-use App\Models\Trabajador;
+use App\Http\Controllers\RepresentanteController;
+use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\NaturalController;
+use App\Http\Controllers\JuridicoController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -56,6 +59,6 @@ Route::group([
 
 
     Route::resource('users', UsersController::class);
-    Route::resource('ventas', VentaController::class);
-    
+    Route::get('modules', [UsersController::class, 'getAvailableModules']);
+
 });

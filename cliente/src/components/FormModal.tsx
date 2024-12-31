@@ -1,10 +1,15 @@
 "use client";
 
 import { deleteTrabajador } from "@/services/trabajadoresService";
+import { deleteRepresentante} from "@/services/representantesService";
+
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useState } from "react";
 import { toast } from "sonner";
+import { deleteJuridico } from "@/services/juridicosService";
+import { deleteNatural } from "@/services/naturalesService";
+import { deleteCliente } from "@/services/clientesService";
 
 // USE LAZY LOADING
 
@@ -34,6 +39,15 @@ const ProductForm = dynamic(() => import("./forms/ProductForm"), {
   ssr: false,
 });
 
+const ClientesForm = dynamic(() => import("./forms/ClientesForm"), {
+  loading: () => <h1>Loading...</h1>,
+  ssr: false,
+});
+
+const RepresentanteForm = dynamic(() => import("./forms/RepresentanteForm"), {
+  loading: () => <h1>Loading...</h1>,
+  ssr: false,
+});
 
 
 // Mapeo de formularios por tabla
@@ -47,6 +61,14 @@ const forms: {
   trabajador: (type, data, id, closeModal) => {
     const handleClose = closeModal || (() => {});
     return <TrabajadorForm type={type} data={data} id={id} closeModal={handleClose} />;
+  },
+  cliente: (type, data, id, closeModal) => {
+    const handleClose = closeModal || (() => {});
+    return <ClientesForm type={type} data={data} id={id} closeModal={handleClose} />;
+  },
+  representante: (type, data, id, closeModal) => {
+    const handleClose = closeModal || (() => {});
+    return <RepresentanteForm type={type} data={data} id={id} closeModal={handleClose} />;
   },
   category: (type, data, id, closeModal) =>
     <CategoryForm type={type} data={data} id={id} onSuccess={() => closeModal?.()} />,
@@ -82,7 +104,10 @@ const FormModal = ({
     | "brand"
     | "subcategory"
     | "product"
-    
+    | "cliente"
+    | "representante"
+    | "juridico"
+    | "natural"
   type: "create" | "update" | "delete";
   data?: any;
   id?: number;
@@ -106,17 +131,43 @@ const FormModal = ({
 
   const Form = () => {
     const handleDelete = async () => {
-      if(id){
+      if (id) {
         try {
-          await deleteTrabajador(id);
+          console.log(`🛠️ [Componente] Eliminando elemento de la tabla: ${table}, ID: ${id}`);
+          
+          switch (table) {
+            case "trabajador":
+              await deleteTrabajador(id);
+              toast.success("El trabajador fue eliminado exitosamente");
+              break;
+            
+            case "representante":
+              await deleteRepresentante(id);
+              toast.success("El representante fue desactivado exitosamente");
+              break;
+            
+            case "cliente":
+              await deleteCliente(id);
+              toast.success("El registro  fue eliminado exitosamente");
+            
+              break;
+    
+            
+            default:
+              console.warn("⚠️ [Componente] Tabla no reconocida para eliminación:", table);
+              break;
+          }
+    
           setOpen(false);
-          toast.success("El trabajador fue eliminado exitosamente");
-          onUpdate();
-        } catch (error) {
-          console.error("Error deleting item:", error);
+          onUpdate(); // Actualiza la lista
+        } catch (error: any) {
+          console.error("❌ [Componente] Error al eliminar elemento:", error.message || error);
+          toast.error("Error al eliminar elemento");
         }
       }
     };
+    
+    
     return type === "delete" && id ? (
       <div>
         <h2 className="text-lg font-semibold mb-4">Confirmar eliminación</h2>
