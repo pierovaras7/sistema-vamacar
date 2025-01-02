@@ -16,12 +16,12 @@ export const getAllClientes = async (): Promise<Cliente[]> => {
 };
 
 // Guardar un nuevo cliente
-export const saveCliente = async (cliente: Cliente): Promise<{ idCliente: number }> => {
+export const saveCliente = async (cliente: Cliente): Promise<{ idCliente: number, clienteSaved: Cliente }> => {
   try {
     const response = await axiosInstance.post(API_URL, cliente);
     
     // Asumiendo que el backend retorna el cliente con su id (como { idCliente: number })
-    return { idCliente: response.data.idCliente }; 
+    return { idCliente: response.data.idCliente, clienteSaved : response.data }; 
   } catch (error: any) {
     if (error.response && error.response.status === 422) {
       const validationErrors = error.response.data.errors;

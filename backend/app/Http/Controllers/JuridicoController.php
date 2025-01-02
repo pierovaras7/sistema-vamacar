@@ -10,7 +10,7 @@ class JuridicoController extends Controller
     public function index()
     {
         // Obtiene todos los registros de tipo Juridico
-        return response()->json(Juridico::with('cliente', 'representante')->get());
+        return response()->json(Juridico::with('cliente')->get());
     }
 
     public function store(Request $request)
@@ -20,7 +20,7 @@ class JuridicoController extends Controller
             'razonSocial' => 'required|string|max:255',
             'ruc' => 'required|string|max:15',
             'idCliente' => 'required|exists:cliente,idCliente',
-            'idRepresentante' => 'required|exists:representante,idRepresentante',
+            'representante' => 'required|string|max:255',
             'estado' => 'required|boolean',
         ]);
 
@@ -33,7 +33,7 @@ class JuridicoController extends Controller
     public function show($id)
     {
         // Obtiene un registro específico de tipo Juridico
-        $juridico = Juridico::with('cliente', 'representante')->find($id);
+        $juridico = Juridico::with('cliente')->find($id);
 
         if (!$juridico) {
             return response()->json(['message' => 'Juridico no encontrado'], 404);
@@ -49,7 +49,7 @@ class JuridicoController extends Controller
             'razonSocial' => 'required|string|max:255',
             'ruc' => 'required|string|max:15',
             'idCliente' => 'required|exists:cliente,idCliente',
-            'idRepresentante' => 'required|exists:representante,idRepresentante',
+            'representante' => 'required|string|max:255',
             'estado' => 'required|boolean',
         ]);
 
@@ -83,7 +83,7 @@ class JuridicoController extends Controller
     public function getByCliente($idCliente)
     {
         // Busca registros jurídicos asociados al cliente
-        $juridicos = Juridico::with('cliente', 'representante')
+        $juridicos = Juridico::with('cliente')
             ->where('idCliente', $idCliente)
             ->get();
 

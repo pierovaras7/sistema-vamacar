@@ -88,11 +88,15 @@ export type Cliente = {
     correo: string;
     direccion: string;
     estado?: boolean; // Activo (true) o Inactivo (false)
+    natural?: Natural;
+    juridico?: Juridico;
+    dniRuc?: string;
 };
   
 
 export type Natural = {
-    idNatural?: number;          // ID único del cliente natural
+    idNatural?: number;
+    dni: string;          // ID único del cliente natural
     nombres: string;             // Nombres del cliente natural
     apellidos: string;           // Apellidos del cliente natural
     estado?: boolean;            // Activo (true) o Inactivo (false)
@@ -100,14 +104,14 @@ export type Natural = {
   };
   
 
-  export type Juridico = {
+export type Juridico = {
     idJuridico?: number;         // ID único del cliente jurídico
     razonSocial: string;         // Razón social de la empresa
     ruc: string;                 // RUC del cliente jurídico
-    idRepresentante: number;     // ID del representante (referencia al tipo `Representante`)
+    representante: string;     // ID del representante (referencia al tipo `Representante`)
     estado?: boolean;            // Activo (true) o Inactivo (false)
     idCliente: number;           // ID del cliente principal
-  };
+};
   
 
 // PRODUCTO
@@ -124,7 +128,7 @@ export type Producto = {
     idSubcategoria: number;
     idMarca: number;
     estado: boolean;
-  };
+};
 
 export type DetailVenta = {
     idDetalleVenta: number,
@@ -154,8 +158,3 @@ export type Venta = {
     estado?: boolean; // Estado de la venta (activada/desactivada)
     detalles?: DetailVenta[];
 };
-
-export type Cliente = {
-    idCliente: number;
-    nombres: string;
-}

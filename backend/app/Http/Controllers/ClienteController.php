@@ -8,10 +8,12 @@ use Illuminate\Http\Request;
 class ClienteController extends Controller
 {
     public function index()
-    {
-        // Obtiene todos los clientes
-        return response()->json(Cliente::all());
-    }
+{
+    $clientes = Cliente::where("estado","=",1)->with(['juridico', 'natural'])->get();
+    
+    // Retorna la respuesta JSON con los clientes
+    return response()->json($clientes);
+}
 
     public function store(Request $request)
     {
@@ -39,7 +41,41 @@ class ClienteController extends Controller
             return response()->json(['message' => 'Cliente no encontrado'], 404);
         }
 
+        // Cargar relación condicionalmente
+        if ($cliente->tipoCliente === 'natural') {
+            $cliente->load('natural');
+        } elseif ($cliente->tipoCliente === 'juridico') {
+            $cliente->load('juridico');
+        }
+
         return response()->json($cliente);
+    }
+
+    public function findCliente($valor)
+    {
+        if (!$valor) {
+            return response()->json(['message' => 'Debe proporcionar un valor para buscar.'], 400);
+        }
+
+        // Buscar en la relación Natural por dni
+        $clienteNatural = Cliente::whereHas('natural', function ($query) use ($valor) {
+            $query->where('dni', $valor);
+        })->with('natural')->first();
+
+        if ($clienteNatural) {
+            return response()->json($clienteNatural);
+        }
+
+        // Buscar en la relación Juridico por ruc
+        $clienteJuridico = Cliente::whereHas('juridico', function ($query) use ($valor) {
+            $query->where('ruc', $valor);
+        })->with('juridico')->first();
+
+        if ($clienteJuridico) {
+            return response()->json($clienteJuridico);
+        }
+
+        return response()->json(['message' => 'Cliente no encontrado.'], 404);
     }
 
     public function update(Request $request, $id)

@@ -13,6 +13,7 @@ use App\Http\Controllers\RepresentanteController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\NaturalController;
 use App\Http\Controllers\JuridicoController;
+use App\Models\Cliente;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -57,8 +58,32 @@ Route::group([
     Route::resource('trabajadores', TrabajadorController::class);
     Route::get('sedes', [TrabajadorController::class, 'getAvailableSedes']);
 
+    Route::resource('clientes', ClienteController::class);
+    Route::get('findCliente/{valor}', [ClienteController::class, 'findCliente']);
+
 
     Route::resource('users', UsersController::class);
     Route::get('modules', [UsersController::class, 'getAvailableModules']);
+
+    Route::resource('ventas', VentaController::class);
+
+    Route::resource('naturales', NaturalController::class);
+    Route::resource('juridicos', JuridicoController::class);
+
+    // Route::get('/naturales', [NaturalController::class, 'index']);
+    // Route::post('/naturales', [NaturalController::class, 'store']);
+    // Route::get('/naturales/{id}', [NaturalController::class, 'show']);
+    // Route::put('/naturales/{id}', [NaturalController::class, 'update']);
+    // Route::delete('/naturales/{id}', [NaturalController::class, 'destroy']);
+    
+    // Route::get('/juridicos', [JuridicoController::class, 'index']);
+    // Route::post('/juridicos', [JuridicoController::class, 'store']);
+    // Route::get('/juridicos/{id}', [JuridicoController::class, 'show']);
+    // Route::put('/juridicos/{id}', [JuridicoController::class, 'update']);
+    // Route::delete('/juridicos/{id}', [JuridicoController::class, 'destroy']);
+    
+
+    Route::get('/juridicos/cliente/{idCliente}', [JuridicoController::class, 'getByCliente']);
+    Route::get('/naturales/cliente/{idCliente}', [NaturalController::class, 'getByCliente']);
 
 });

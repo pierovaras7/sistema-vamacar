@@ -71,7 +71,7 @@ const VentasPage = () => {
       className="text-center border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
     >
       <td className="text-center hidden md:table-cell p-4">{item.fecha}</td>
-      <td className="text-center hidden md:table-cell">{item.cliente?.nombres}</td>
+      <td className="text-center hidden md:table-cell">{item.cliente?.juridico?.razonSocial ?? item.cliente?.natural?.nombres}</td>
       <td className="text-center hidden md:table-cell">{item.total}</td>
       <td className="text-center hidden md:table-cell">{item.tipoVenta}</td>
       <td className="text-center hidden md:table-cell">{item.metodoPago}</td>

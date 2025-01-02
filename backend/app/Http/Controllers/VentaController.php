@@ -45,6 +45,7 @@ class VentaController extends Controller
             'tipoVenta' => 'required|in:contado,credito',
             'metodoPago' => 'required|in:efectivo,tarjeta,yape,plin',
             'estado' => 'boolean',
+            'cliente' => 'required',
             'detalles' => 'required|array',
             'detalles.*.producto.idProducto' => 'required|exists:producto,idProducto', // Validación del producto
             'detalles.*.precio' => 'required|numeric|min:0',
@@ -61,6 +62,8 @@ class VentaController extends Controller
             'fecha', 'total', 'tipoVenta', 'metodoPago', 'estado'
         ]);
 
+        $ventaData['idCliente'] = $request->input('cliente')['idCliente']; // Agregar idSede al array
+
         // Verificar si el campo 'sede' está presente en la solicitud y agregarlo al array
         if ($request->has('sede')) {
             $ventaData['idSede'] = $request->input('sede')['idSede']; // Agregar idSede al array
@@ -70,11 +73,14 @@ class VentaController extends Controller
         if ($request->input('tipoVenta') == "contado") {
             $ventaData['montoPagado'] = $request->input('total'); // Asignar montoPagado
         } else{
+            $ventaData['montoPagado'] = $request->input('montoPagado'); // Asignar montoPagado
             $ventaData['estado'] = 0; 
         }
 
         // Crear la venta con todos los datos de $ventaData
         $venta = Venta::create($ventaData);
+
+
 
         // Crear los detalles de la venta
         $detallesData = $request->input('detalles');
@@ -90,16 +96,19 @@ class VentaController extends Controller
 
             $invProd = Inventario::where('idProducto', $detalle['producto']['idProducto'])->first();
 
-            MovInventario::create([
-                'tipo' => 'Salida',
-                'descripcion' => 'Venta Realizada',
-                'fecha' => $venta->fecha,
-                'cantidad' => $detalle['cantidad'],
-                'idInventario' => $invProd->idInventario
-            ]);
+            if($invProd){
+                MovInventario::create([
+                    'tipo' => 'Salida',
+                    'descripcion' => 'Venta Realizada',
+                    'fecha' => $venta->fecha,
+                    'cantidad' => $detalle['cantidad'],
+                    'idInventario' => $invProd->idInventario
+                ]);
+            }
+            
         }
 
-        $clienteId = $request->input('idCliente');
+        $clienteId = $request->input('cliente.idCliente');
 
         // Solo crear la cuenta por cobrar si la venta es a crédito
         if ($request->input('tipoVenta') == 'credito') {
@@ -124,6 +133,9 @@ class VentaController extends Controller
                 'motivo' => 'Venta',
                 'monto' => $montoDetalle, // La diferencia entre total y monto pagado
             ]);
+
+            $cuentaPorCobrar->montoTotal += $montoDetalle;
+            $cuentaPorCobrar->save();
         } 
 
         // Responder con los datos de la venta y sus detalles

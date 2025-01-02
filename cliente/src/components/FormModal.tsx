@@ -111,7 +111,7 @@ const FormModal = ({
   type: "create" | "update" | "delete";
   data?: any;
   id?: number;
-  onUpdate: () => void;
+  onUpdate?: () => void;
 }) => {
   const size = type === "create" ? "w-8 h-8" : "w-7 h-7";
   const bgColor =
@@ -125,7 +125,10 @@ const FormModal = ({
 
   const closeModal = () => {
     setOpen(false);
-    onUpdate(); // Actualizar lista al cerrar modal
+    if(onUpdate){
+      onUpdate(); // Actualizar lista al cerrar modal
+    }
+  
   };
 
 
@@ -159,7 +162,9 @@ const FormModal = ({
           }
     
           setOpen(false);
-          onUpdate(); // Actualiza la lista
+          if(onUpdate){
+            onUpdate(); // Actualizar lista al cerrar modal
+          }
         } catch (error: any) {
           console.error("❌ [Componente] Error al eliminar elemento:", error.message || error);
           toast.error("Error al eliminar elemento");
@@ -203,6 +208,7 @@ const FormModal = ({
       <button
         className={`${size} flex items-center justify-center rounded-full ${bgColor}`}
         onClick={() => setOpen(true)}
+        type="button"
       >
         <Image src={`/${type}.png`} alt="" width={16} height={16} />
       </button>

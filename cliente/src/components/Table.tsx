@@ -48,13 +48,13 @@ const Table = ({
   }, [data, sortConfig]);
 
   return (
-    <table className="w-full mt-4">
+    <table className="w-full mt-4 text-center">
       <thead>
       <tr className="text-left text-gray-500 text-sm">
         {columns.map((col) => (
           <th
             key={col.accessor}
-            className={`${col.className} ${col.width ? col.width : 'w-auto'}`}
+            className={`${col.className} ${col.width ? col.width : 'w-auto'} text-center`}
             onClick={() => handleSort(col.accessor)} // Añadimos el evento de clic
             style={{ cursor: 'pointer' }} // Opcional: para indicar que se puede hacer clic
           >

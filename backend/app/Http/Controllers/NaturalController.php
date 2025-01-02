@@ -17,6 +17,7 @@ class NaturalController extends Controller
     {
         // Valida los datos
         $request->validate([
+            'dni'=> 'required|string|size:8',
             'nombres' => 'required|string|max:255',
             'apellidos' => 'required|string|max:255',
             'idCliente' => 'required|exists:cliente,idCliente',
