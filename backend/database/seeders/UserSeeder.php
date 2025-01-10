@@ -22,7 +22,5 @@ class UserSeeder extends Seeder
             'password' => 'admin',
         ]);
 
-    
-
     }
 }

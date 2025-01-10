@@ -7,6 +7,7 @@ import { getAllSedes, saveTrabajador, updateTrabajador } from "@/services/trabaj
 import { toast } from "sonner";
 import { Sede, Trabajador } from "@/types";
 import { useEffect, useState } from "react";
+import useSedes from "@/hooks/useSedes";
 
 // Calcular la mayoría de edad (18 años)
 const isAdult = (dateString: string): boolean => {
@@ -51,7 +52,6 @@ const schema = z.object({
 
 type Inputs = z.infer<typeof schema>;
 
-// Desestructuración del contexto de las entidades
 
 const TrabajadorForm = ({
   type,
@@ -60,7 +60,7 @@ const TrabajadorForm = ({
   closeModal,
 }: {
   type: "create" | "update";
-  data?: Inputs;
+  data?: any;
   id?: number;
   closeModal: () => void,
 }) => {
@@ -68,6 +68,7 @@ const TrabajadorForm = ({
     register,
     handleSubmit,
     formState: { errors },
+    setValue
   } = useForm<Inputs>({
     resolver: zodResolver(schema),
     defaultValues: data
@@ -78,22 +79,20 @@ const TrabajadorForm = ({
     : { crearCuenta: false },
   });
 
+  const { sedes } = useSedes();
   const [sedeSeleccionada, setSedeSeleccionada] = useState<Sede>(); 
-  const [sedes, setSedes] = useState<Sede[]>();
 
-  const getSedes = async () =>{
-    try {
-      const response = await getAllSedes();
-      setSedes(response);
-    } catch {
-      console.error("Error al cargar las sedes");
+  useEffect(() => {
+    if (data?.sede?.idSede) {
+      const sedePorDefecto = sedes?.find(sede => sede.idSede === data.sede.idSede);
+      if (sedePorDefecto) {
+        setSedeSeleccionada(sedePorDefecto);  // Establece la sede seleccionada al cargar el formulario
+      }
+      setValue("sede", data.sede.idSede.toString());
     }
-  }
+  }, [data, sedes]);  // Este useEffect se ejecuta cuando `data` o `sedes` cambian
 
-  useEffect(()=>{
-    getSedes();
-  },[])
-
+  
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const sedeSeleccionada = sedes?.find(sede => sede.idSede === Number(event.target.value));
     if (sedeSeleccionada) {
@@ -116,8 +115,6 @@ const TrabajadorForm = ({
         salario: data.salario,
         sede: sedeSeleccionada
       };
-
-      console.log(trabajador);
 
       const requestData = {
         ...trabajador,
@@ -160,14 +157,12 @@ const TrabajadorForm = ({
     }
   });
 
-  
-
   return (
     <form className="flex flex-col gap-8" onSubmit={onSubmit}>
       <h1 className="text-xl font-semibold">
         {type === "create" ? "Crear Trabajador" : "Actualizar Trabajador"}
       </h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="flex flex-col md:grid grid-cols-4">
         <InputField
           label="Nombres"
           name="nombres"
@@ -198,9 +193,9 @@ const TrabajadorForm = ({
           register={register}
           error={errors?.dni}
         />
-        <div className="flex flex-col gap-2 w-full px-2">
-        <label className="text-sm font-medium text-gray-700">Sexo</label>
-        <select
+        <div className="flex flex-col gap-2 w-full px-2 mb-2">
+          <label className="text-sm font-medium text-gray-700">Sexo</label>
+          <select
             className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:ring focus:ring-blue-300 focus:outline-none"
             {...register("sexo")}
           >
@@ -211,9 +206,9 @@ const TrabajadorForm = ({
             <p className="text-sm text-red-500">{errors.sexo.message}</p>
           )}
         </div>
-        <div className="flex flex-col gap-2 px-2 w-full">
-        <label className="text-sm font-medium text-gray-700">Area</label>
-        <select
+        <div className="flex flex-col gap-2 px-2 w-full mb-2">
+          <label className="text-sm font-medium text-gray-700">Area</label>
+          <select
             className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:ring focus:ring-blue-300 focus:outline-none"
             {...register("area")}
           >
@@ -231,7 +226,7 @@ const TrabajadorForm = ({
           register={register}
           error={errors?.fechaNacimiento}
         />
-        <div className="flex flex-col gap-2 px-2 w-full">
+        <div className="flex flex-col gap-2 px-2 w-full mb-2">
           <label className="text-sm font-medium text-gray-700">Turno</label>
           <select
             className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:ring focus:ring-blue-300 focus:outline-none"
@@ -252,15 +247,15 @@ const TrabajadorForm = ({
           register={register}
           error={errors?.salario}
         />
-        <div className="flex flex-col gap-2 w-full px-2">
+        <div className="flex flex-col gap-2 w-full px-2 mb-2">
           <label className="text-sm font-medium text-gray-700">Sede</label>
           <select
             className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:ring focus:ring-blue-300 focus:outline-none"
             {...register("sede")}
-            value={sedeSeleccionada?.idSede} 
             onChange={handleChange}
+            value={sedeSeleccionada?.idSede}
           >
-            <option value="" selected>
+            <option value="">
               Selecciona una sede
             </option>
             {sedes?.map((sede) => (
@@ -274,7 +269,7 @@ const TrabajadorForm = ({
             <p className="text-sm text-red-500">{errors.sede.message}</p>
           )}
         </div>
-        <div className="flex flex-col justify-center gap-2 px-4 py-3 w-full col-span-2">
+        <div className="flex gap-2 px-4 py-3 w-full col-span-2">
           <label className="text-sm">
             <input type="checkbox" {...register("crearCuenta")} /> Crear cuenta en el sistema
           </label>

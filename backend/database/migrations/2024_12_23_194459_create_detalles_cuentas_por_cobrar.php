@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string("motivo");
             $table->date("fecha");
             $table->float("monto");
+            $table->float("saldo");
             $table->unsignedBigInteger('idCC');
             $table->foreign('idCC')
                     ->references('idCC') 

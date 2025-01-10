@@ -18,7 +18,16 @@ export const saveNatural = async (natural: Natural): Promise<void> => {
   try {
     await axiosInstance.post(API_URL, natural);
   } catch (error: any) {
-    throw new Error('Error al registrar el cliente natural');
+    if (error.response && error.response.status === 422) {
+      // Extraer los errores del backend
+      const validationErrors = error.response.data.errors;
+      // Lanzar un nuevo error con los errores de validación
+      throw new Error(JSON.stringify(validationErrors)); // O puedes manipular los errores de manera más específica si lo deseas
+    } else {
+      // Si el error no es de validación, lanzar un error genérico
+      throw new Error('Error al registrar el cliente natural');
+    }  
+
   }
 };
 

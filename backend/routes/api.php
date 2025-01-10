@@ -9,26 +9,22 @@ use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\SubcategoriaController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\VentaController;
-use App\Http\Controllers\RepresentanteController;
 use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\CuentasCobrarController;
+use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\NaturalController;
 use App\Http\Controllers\JuridicoController;
-use App\Models\Cliente;
+use App\Http\Controllers\ProveedorController;
 
-// Route::get('/user', function (Request $request) {
-//     return $request->user();
-// })->middleware('auth:sanctum');
+Route::post('/register', [AuthController::class, 'register'])->name('register');
+Route::post('/login', [AuthController::class, 'login'])->name('login');
 
-Route::group([
-    'middleware' => 'api',
-    'prefix' => 'auth'
-], function ($router) {
-    Route::post('/register', [AuthController::class, 'register'])->name('register');
-    Route::post('/login', [AuthController::class, 'login'])->name('login');
-    Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:api')->name('logout');
-    Route::post('/refresh', [AuthController::class, 'refresh'])->middleware('auth:api')->name('refresh');
-    Route::post('/me', [AuthController::class, 'me'])->middleware('auth:api')->name('me');
-    
+// Route::group(['middleware' => ['api', 'auth:api']], function () {
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::put('/updateProfile/{id}', [AuthController::class, 'updateProfile']);
+    Route::get('/getUser/{id}', [AuthController::class, 'getUser']);
+    Route::get('/refresh', [AuthController::class, 'refresh']);
+
     Route::get('/marcas', [MarcaController::class, 'index']);
     Route::post('/marcas', [MarcaController::class, 'store']);
     Route::get('/marcas/{id}', [MarcaController::class, 'show']);
@@ -66,24 +62,29 @@ Route::group([
     Route::get('modules', [UsersController::class, 'getAvailableModules']);
 
     Route::resource('ventas', VentaController::class);
+    Route::post('ventas/anular/{id}', [VentaController::class, 'anularVenta']);
 
     Route::resource('naturales', NaturalController::class);
     Route::resource('juridicos', JuridicoController::class);
+    Route::resource('cuentascobrar', CuentasCobrarController::class);
 
-    // Route::get('/naturales', [NaturalController::class, 'index']);
-    // Route::post('/naturales', [NaturalController::class, 'store']);
-    // Route::get('/naturales/{id}', [NaturalController::class, 'show']);
-    // Route::put('/naturales/{id}', [NaturalController::class, 'update']);
-    // Route::delete('/naturales/{id}', [NaturalController::class, 'destroy']);
-    
-    // Route::get('/juridicos', [JuridicoController::class, 'index']);
-    // Route::post('/juridicos', [JuridicoController::class, 'store']);
-    // Route::get('/juridicos/{id}', [JuridicoController::class, 'show']);
-    // Route::put('/juridicos/{id}', [JuridicoController::class, 'update']);
-    // Route::delete('/juridicos/{id}', [JuridicoController::class, 'destroy']);
+    Route::resource('cuentascobrar', CuentasCobrarController::class);
+    Route::post('cuentascobrar/registrarDetalleCC/{id}', [CuentasCobrarController::class, 'registrarDetalleCC']);
+
+    Route::resource('inventarios', InventarioController::class);
+    Route::post('inventarios/registrarMovInventario/{id}', [InventarioController::class, 'registrarMovInventario']);
+
+
     
 
     Route::get('/juridicos/cliente/{idCliente}', [JuridicoController::class, 'getByCliente']);
     Route::get('/naturales/cliente/{idCliente}', [NaturalController::class, 'getByCliente']);
 
-});
+
+    Route::get('/proveedores', [ProveedorController::class, 'index']); // Obtener todos los proveedores activos
+    Route::get('/proveedores/ruc/{ruc}', [ProveedorController::class, 'getByRuc']); // Obtener un proveedor por RUC (activo)
+    Route::post('/proveedores', [ProveedorController::class, 'store']); // Crear un proveedor
+    Route::put('/proveedores/{id}', [ProveedorController::class, 'update']); // Actualizar un proveedor
+    Route::delete('/proveedores/{id}', [ProveedorController::class, 'destroy']); // Eliminación lógica de un proveedor
+
+// });

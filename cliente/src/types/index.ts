@@ -68,6 +68,7 @@ export type Module = {
     idModule : number;
     name: string;
     slug: string;
+    icon: string;
 }
 
 
@@ -96,21 +97,21 @@ export type Cliente = {
 
 export type Natural = {
     idNatural?: number;
-    dni: string;          // ID único del cliente natural
-    nombres: string;             // Nombres del cliente natural
-    apellidos: string;           // Apellidos del cliente natural
+    dni?: string;          // ID único del cliente natural
+    nombres?: string;             // Nombres del cliente natural
+    apellidos?: string;           // Apellidos del cliente natural
     estado?: boolean;            // Activo (true) o Inactivo (false)
-    idCliente: number;           // ID del cliente principal
+    idCliente?: number;           // ID del cliente principal
   };
   
 
 export type Juridico = {
     idJuridico?: number;         // ID único del cliente jurídico
-    razonSocial: string;         // Razón social de la empresa
-    ruc: string;                 // RUC del cliente jurídico
-    representante: string;     // ID del representante (referencia al tipo `Representante`)
+    razonSocial?: string;         // Razón social de la empresa
+    ruc?: string;                 // RUC del cliente jurídico
+    representante?: string;     // ID del representante (referencia al tipo `Representante`)
     estado?: boolean;            // Activo (true) o Inactivo (false)
-    idCliente: number;           // ID del cliente principal
+    idCliente?: number;           // ID del cliente principal
 };
   
 
@@ -127,6 +128,7 @@ export type Producto = {
     precioXMayor: number;
     idSubcategoria: number;
     idMarca: number;
+    stockActual?: number;
     estado: boolean;
 };
 
@@ -158,3 +160,39 @@ export type Venta = {
     estado?: boolean; // Estado de la venta (activada/desactivada)
     detalles?: DetailVenta[];
 };
+
+
+// Cuenta X Cobrar
+export type CuentaCobrar = {
+    idCC?: number;
+    cliente: Cliente;
+    montoCuenta: number;
+    detalles?: DetalleCC[];
+}
+
+export type DetalleCC = {
+    idDetalleCC?: number;
+    motivo: string;
+    fecha: string;
+    monto: number;
+    saldo?: number;
+}
+
+export type Inventario = {
+    idInventario? : number;
+    stockMinimo?: number;
+    stockActual?: number;
+    producto?: Producto;
+    estado?: boolean;
+    movs_inventario?:MovInventario[];
+}
+
+export type MovInventario = {
+    idMovInventario?: number;
+    tipo: string;
+    descripcion: string;
+    fecha: string;
+    cantidad: number;
+    inventario?: Inventario;
+    estado?: boolean;
+}

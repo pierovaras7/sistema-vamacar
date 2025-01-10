@@ -33,7 +33,7 @@ export const updateUser = async (user: User, id: number): Promise<void> => {
       throw new Error(JSON.stringify(validationErrors)); // O puedes manipular los errores de manera más específica si lo deseas
     } else {
       // Si el error no es de validación, lanzar un error genérico
-      throw new Error('Error al registrar el trabajador');
+      throw new Error('Error al actualizar el usuario.');
     }   
   }
 };

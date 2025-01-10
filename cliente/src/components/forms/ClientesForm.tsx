@@ -8,6 +8,7 @@ import { saveJuridico, updateJuridico, getJuridicosByCliente, deleteJuridico } f
 import InputField from "../InputField";
 import { toast } from "sonner";
 import { Cliente, Natural, Juridico, Representante } from "@/types";
+import { showErrorsToast } from "@/lib/functions";
 
 const schema = z
   .object({
@@ -193,18 +194,23 @@ const ClientesForm = ({
           estado: true,
         };
 
-        if(idTipoJuridico){
-          await deleteJuridico(idTipoJuridico);
-          console.log("Cliente Juridico eliminado:");
+        if(type === "create"){
           await saveNatural(clienteNatural);
           console.log("Natural cliente guardado:", clienteNatural);
+        }else{
+          if(idTipoJuridico){
+            await deleteJuridico(idTipoJuridico);
+            console.log("Cliente Juridico eliminado:");
+            await saveNatural(clienteNatural);
+            console.log("Natural cliente guardado:", clienteNatural);
+          }
+
+          if(idTipoNatural){
+            await updateNatural(idTipoNatural, clienteNatural);
+            console.log("Natural cliente actualizado:", clienteNatural);
+          }
         }
 
-        if(idTipoNatural){
-          await updateNatural(idTipoNatural, clienteNatural);
-          console.log("Natural cliente actualizado:", clienteNatural);
-        }
-        
       }else {
         const clienteJuridico: Juridico = {
           razonSocial: data.razonSocial!,
@@ -214,18 +220,22 @@ const ClientesForm = ({
           estado: true,
         };
 
-        if(idTipoNatural){
-          await deleteNatural(idTipoNatural);
-          console.log("Cliente Natural eliminado:");
+        if(type === "create"){
           await saveJuridico(clienteJuridico);
           console.log("Juridico cliente guardado:", clienteJuridico);
-        }
+        }else{
+          if(idTipoNatural){
+            await deleteNatural(idTipoNatural);
+            console.log("Cliente Natural eliminado:");
+            await saveJuridico(clienteJuridico);
+            console.log("Juridico cliente guardado:", clienteJuridico);
+          }
 
-        if(idTipoJuridico){
-          await updateJuridico(idTipoJuridico, clienteJuridico);
-          console.log("Juridico cliente actualizado:", clienteJuridico);
+          if(idTipoJuridico){
+            await updateJuridico(idTipoJuridico, clienteJuridico);
+            console.log("Juridico cliente actualizado:", clienteJuridico);
+          }
         }
-        
       }
         
       toast.success(
@@ -233,8 +243,7 @@ const ClientesForm = ({
       );
       closeModal();
     } catch (error: any) {
-      console.error("Error en la actualización:", error);
-      toast.error(error.message || "Error desconocido");
+      showErrorsToast(error);
     }
   });
   
@@ -248,8 +257,9 @@ const ClientesForm = ({
       </h1>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="flex flex-col gap-2 w-full px-2">
-          <label className="text-xs text-gray-500">Tipo de Cliente</label>
-          <select className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full" {...register("tipoCliente")}>
+          <label className="text-sm font-medium text-gray-700">Tipo de Cliente</label>
+          <select className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:ring focus:ring-blue-300 focus:outline-none" 
+          {...register("tipoCliente")}>
             <option value="Natural">Natural</option>
             <option value="Juridico">Juridico</option>
           </select>

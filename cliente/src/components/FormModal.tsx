@@ -6,15 +6,8 @@ import { deleteRepresentante} from "@/services/representantesService";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useState } from "react";
-import { toast } from "sonner";
-import { deleteJuridico } from "@/services/juridicosService";
-import { deleteNatural } from "@/services/naturalesService";
+import { toast } from "react-toastify";
 import { deleteCliente } from "@/services/clientesService";
-
-// USE LAZY LOADING
-
-// import TeacherForm from "./forms/TeacherForm";
-// import StudentForm from "./forms/StudentForm";
 
 const TrabajadorForm = dynamic(() => import("./forms/TrabajadorForm"), {
   loading: () => <h1>Loading...</h1>,
@@ -35,6 +28,11 @@ const BrandForm = dynamic(() => import("./forms/BrandForm"), {
 });
 
 const ProductForm = dynamic(() => import("./forms/ProductForm"), {
+  loading: () => <h1>Loading...</h1>,
+  ssr: false,
+});
+
+const ProviderForm = dynamic(() => import("./forms/ProviderForm"), {
   loading: () => <h1>Loading...</h1>,
   ssr: false,
 });
@@ -88,6 +86,8 @@ const forms: {
         id={id}
         onSuccess={() => closeModal?.()}
       />,
+      provider: (type, data, id, closeModal) =>
+        <ProviderForm type={type} data={data} id={id} onSuccess={() => closeModal?.()} />,
 };
 
 
@@ -97,6 +97,7 @@ const FormModal = ({
   data,
   id,
   onUpdate,
+  onClick,
 }: {
   table:
     "trabajador"
@@ -108,10 +109,22 @@ const FormModal = ({
     | "representante"
     | "juridico"
     | "natural"
+    | "provider"
+    | "parent"
+    | "subject"
+    | "class"
+    | "lesson"
+    | "exam"
+    | "assignment"
+    | "result"
+    | "attendance"
+    | "event"
+    | "announcement";
   type: "create" | "update" | "delete";
   data?: any;
   id?: number;
   onUpdate?: () => void;
+  onClick?: (proveedor?: Proveedor) => void; // Cambiar el tipo de función
 }) => {
   const size = type === "create" ? "w-8 h-8" : "w-7 h-7";
   const bgColor =

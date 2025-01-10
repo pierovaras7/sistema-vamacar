@@ -27,7 +27,6 @@ class Trabajador extends Model
         'turno',
         'salario',
         'estado',
-        'idSede'
     ];
 
     protected $casts = [

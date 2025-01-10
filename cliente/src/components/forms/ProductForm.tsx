@@ -9,41 +9,55 @@ import InputField from "../InputField";
 import { createProduct, updateProduct } from "@/services/productoService";
 import { getBrands } from "@/services/marcaService";
 import { getSubcategories } from "@/services/subcategoriaService";
+import { showErrorsToast } from "@/lib/functions";
 
-const schema = z.object({
-  descripcion: z.string().min(1, { message: "La descripción es obligatoria." }),
-  codigo: z.string().min(1, { message: "El código es obligatorio." }),
-  uni_medida: z.string().min(1, { message: "La unidad de medida es obligatoria." }),
-  precioCosto: z.preprocess(
-    (value) => (typeof value === "string" ? parseFloat(value) : value),
-    z.number().positive({ message: "El precio debe ser positivo." })
-  ),
-  precioMinVenta: z.preprocess(
-    (value) => (typeof value === "string" ? parseFloat(value) : value),
-    z.number().positive({ message: "El precio debe ser positivo." })
-  ),
-  precioMaxVenta: z.preprocess(
-    (value) => (typeof value === "string" ? parseFloat(value) : value),
-    z.number().positive({ message: "El precio debe ser positivo." })
-  ),
-  precioXMayor: z.preprocess(
-    (value) => (typeof value === "string" ? parseFloat(value) : value),
-    z.number().positive({ message: "El precio debe ser positivo." })
-  ),
-  stockMinimo: z.preprocess(
-    (value) => (typeof value === "string" ? parseFloat(value) : value),
-    z.number().positive({ message: "El stock Minimo debe ser un valor mayor a 0." })
-  ),
-  stockInicial: z
-    .string() // Espera un string
-    .transform((val) => parseFloat(val)) // Convierte el string a un número
-    .refine((val) => !isNaN(val), { message: "El stock Actual es un campo requerido." }) // Asegúrate de que sea un número
-    .refine((val) => val >= 0, { message: "Stock Actual debe ser mayor o igual a 0." }),
-  idSubcategoria: z.number().positive({ message: "Seleccione una subcategoría válida." }),
-  idMarca: z.number().positive({ message: "Seleccione una marca válida." }),
-});
+const schema = (isEditing: string) => {
+  const isEditingBoolean = isEditing === "update"; // Convertir el string a booleano
 
-type Inputs = z.infer<typeof schema>;
+  return z.object({
+    descripcion: z.string().min(1, { message: "La descripción es obligatoria." }),
+    codigo: z.string().min(1, { message: "El código es obligatorio." }),
+    uni_medida: z.string().min(1, { message: "La unidad de medida es obligatoria." }),
+    precioCosto: z.preprocess(
+      (value) => (typeof value === "string" ? parseFloat(value) : value),
+      z.number().positive({ message: "El precio debe ser positivo." })
+    ),
+    precioMinVenta: z.preprocess(
+      (value) => (typeof value === "string" ? parseFloat(value) : value),
+      z.number().positive({ message: "El precio debe ser positivo." })
+    ),
+    precioMaxVenta: z.preprocess(
+      (value) => (typeof value === "string" ? parseFloat(value) : value),
+      z.number().positive({ message: "El precio debe ser positivo." })
+    ),
+    precioXMayor: z.preprocess(
+      (value) => (typeof value === "string" ? parseFloat(value) : value),
+      z.number().positive({ message: "El precio debe ser positivo." })
+    ),
+    stockMinimo: z.preprocess(
+      (value) => (typeof value === "string" ? parseFloat(value) : value),
+      z.number().positive({ message: "El stock Minimo debe ser un valor mayor a 0." })
+    ),
+    stockInicial: isEditingBoolean
+      ? z
+          .string()
+          .optional() // Opcional en modo edición
+          // .transform((val) => (val ? parseFloat(val) : undefined)) // Convertir solo si existe
+          // .refine((val) => val === undefined || val >= 0, {
+          //   message: "Stock Actual debe ser mayor o igual a 0.",
+          // })
+      : z
+          .string()
+          .nonempty({ message: "El stock Actual es un campo requerido." }) // Requerido en modo creación
+          .transform((val) => parseFloat(val))
+          .refine((val) => val >= 0, { message: "Stock Actual debe ser mayor o igual a 0." }),
+    idSubcategoria: z.number().positive({ message: "Seleccione una subcategoría válida." }),
+    idMarca: z.number().positive({ message: "Seleccione una marca válida." }),
+  });
+};
+
+type Inputs = z.infer<ReturnType<typeof schema>>; // Inferir el tipo basado en el esquema dinámico
+
 
 const ProductForm = ({
   type,
@@ -62,7 +76,7 @@ const ProductForm = ({
     setValue,
     formState: { errors },
   } = useForm<Inputs>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schema(type)),
     defaultValues: {
       descripcion: data?.descripcion || "",
       codigo: data?.codigo || "",
@@ -71,7 +85,7 @@ const ProductForm = ({
       precioMinVenta: data?.precioMinVenta || 0,
       precioMaxVenta: data?.precioMaxVenta || 0,
       precioXMayor: data?.precioXMayor || 0,
-      stockMinimo: data?.stockMinimo || 0,
+      stockMinimo: data?.inventario.stockMinimo || 0,
       idSubcategoria: data?.idSubcategoria || 0,
       idMarca: data?.idMarca || 0,
     },
@@ -166,11 +180,12 @@ const paginatedData = filteredData.slice(startIndex, startIndex + ITEMS_PER_PAGE
         toast.success("Producto creado exitosamente");
       } else if (type === "update" && data?.idProducto) {
         await updateProduct(data.idProducto, formData);
+        console.log(formData);
         toast.success("Producto actualizado exitosamente");
       }
       onSuccess?.();
     } catch (error) {
-      toast.error("Hubo un error al procesar la operación.");
+      showErrorsToast(error);
     } finally {
       setLoading(false);
     }

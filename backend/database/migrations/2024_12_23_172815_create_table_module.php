@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id('idModule');
             $table->string('name');
             $table->string('slug')->unique();
+            $table->string('icon');
             $table->timestamps(false);
         });
     }

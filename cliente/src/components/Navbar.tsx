@@ -1,4 +1,3 @@
-import { useAuth } from "@/context/AuthContext"
 import { User } from "@/types"
 import Image from "next/image"
 

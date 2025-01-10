@@ -3,35 +3,37 @@
 import Link from "next/link";
 import Image from "next/image";
 import { role } from "@/lib/data";
-import { logout } from "@/services/authService"; // Ajusta la ruta según sea necesario
 import { Module } from "@/types";
+import useAuthStore from "@/stores/AuthStore";
 
 interface MenuProps {
   modules: Module[];
 }
 
-const menuItems = [
-  {
-    title: "OTROS",
-    items: [
-      {
-        icon: "/profile.png",
-        label: "Profile",
-        href: "/profile",
-        visible: ["admin", "teacher", "student", "parent"],
-      },
-      {
-        icon: "/logout.png",
-        label: "Logout",
-        href: "#",
-        visible: ["admin", "teacher", "student", "parent"],
-        onClick: logout,
-      },
-    ],
-  },
-];
-
 const Menu: React.FC<MenuProps> = ({ modules }) => {
+  const { logout } = useAuthStore(); // Llamar a useAuthStore dentro del componente
+
+  const menuItems = [
+    {
+      title: "OTROS",
+      items: [
+        {
+          icon: "/profile.png",
+          label: "Profile",
+          href: "/profile",
+          visible: ["admin", "teacher", "student", "parent"],
+        },
+        {
+          icon: "/logout.png",
+          label: "Logout",
+          href: "#",
+          visible: ["admin", "teacher", "student", "parent"],
+          onClick: logout, // Llamar a la función de logout desde aquí
+        },
+      ],
+    },
+  ];
+
   return (
     <div className="mt-4 text-sm">
       {/* Renderiza los módulos */}
@@ -43,13 +45,13 @@ const Menu: React.FC<MenuProps> = ({ modules }) => {
               key={module.idModule}
               className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-md hover:bg-lamaSkyLight"
             >
-            <Image 
-              src={`/${module.name.toLowerCase()}.png`} 
-              alt={`Imagen de ${module.name}`} 
-              width={20} 
-              height={20} 
-            />
-            <span className="hidden lg:block">{module.name}</span>
+              <Image
+                src={`/${module.icon}.png`}
+                alt={`Imagen de ${module.name}`}
+                width={20}
+                height={20}
+              />
+              <span className="hidden lg:block">{module.name}</span>
             </Link>
           ))}
         </div>
@@ -75,6 +77,7 @@ const Menu: React.FC<MenuProps> = ({ modules }) => {
                 </Link>
               );
             }
+            return null;
           })}
         </div>
       ))}

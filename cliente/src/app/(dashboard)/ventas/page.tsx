@@ -8,10 +8,11 @@ import { useEffect, useState, useMemo } from "react";
 import { getAllTrabajadores } from "@/services/trabajadoresService";
 import useAuthStore from "@/stores/AuthStore";
 import PrivateRoute from "@/components/PrivateRouter";
-import { getAllVentas } from "@/services/ventaService";
+import { anularVenta, getAllVentas } from "@/services/ventaService";
 import { PlusCircleIcon } from "@heroicons/react/16/solid";
 import { useRouter } from "next/navigation"; // Para redirigir si no hay módulos
 import { Router } from "next/router";
+import { toast } from "sonner";
 
 
 
@@ -54,6 +55,15 @@ const VentasPage = () => {
     refreshVentas();
   }, []);
 
+  const anularVenta = async( idVenta : number) => {
+    try{
+      await anularVenta(idVenta);
+      toast.success("Venta anulada correctamente.")
+    }catch(error:any){
+      console.log(error);
+    }
+  }
+
   // Filtrar trabajadores según el término de búsqueda
 //   useEffect(() => {
 //     const filtered = ventas.filter((venta) =>
@@ -71,12 +81,33 @@ const VentasPage = () => {
       className="text-center border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
     >
       <td className="text-center hidden md:table-cell p-4">{item.fecha}</td>
-      <td className="text-center hidden md:table-cell">{item.cliente?.juridico?.razonSocial ?? item.cliente?.natural?.nombres}</td>
-      <td className="text-center hidden md:table-cell">{item.total}</td>
-      <td className="text-center hidden md:table-cell">{item.tipoVenta}</td>
-      <td className="text-center hidden md:table-cell">{item.metodoPago}</td>
-      <td className="text-center hidden md:table-cell">{item.estado}</td>
-      <td className="text-center hidden md:table-cell">Opciones</td>
+      <td>
+        {
+            item.cliente?.natural
+            ? `${item.cliente.natural.nombres} ${item.cliente.natural.apellidos}`
+            : item.cliente?.juridico?.razonSocial || "Sin cliente"
+        }
+      </td>      
+      <td className="text-center hidden md:table-cell">S/. {item.total}</td>
+      <td className="text-center hidden md:table-cell">{item.tipoVenta.toUpperCase()}</td>
+      <td className="text-center hidden md:table-cell">{item.metodoPago.toUpperCase()}</td>
+      <td>
+        { item.estado ?
+          <span className="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded">Cancelada</span>
+          :
+          <span className="px-2 py-1 text-xs font-semibold text-yellow-700 bg-yellow-100 rounded">Inactiva</span>
+ 
+        }
+      </td>      
+      <td className="text-center hidden md:table-cell">
+      <button
+        onClick={() => anularVenta(item.idVenta || 0)} // Esta es la corrección
+        className="bg-green-400"
+      >
+        Anular
+      </button>
+
+      </td>
     </tr>
   );
 

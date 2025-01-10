@@ -6,6 +6,7 @@ use App\Models\Sede;
 use App\Models\Trabajador;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class TrabajadorController extends Controller
@@ -16,8 +17,9 @@ class TrabajadorController extends Controller
     public function index()
     {
         //corregir
-        $trabajadores = Trabajador::where("estado", "=", 1)->get();
+        $trabajadores = Trabajador::where("estado", "=", 1)->with('sede')->get();
 
+        
         if ($trabajadores->isEmpty()) {
             return response()->json([
                 'message' => 'No se encontraron trabajadores.'
@@ -142,7 +144,7 @@ class TrabajadorController extends Controller
 
             if($request->crearCuenta){
                 User::create([
-                    'name' => $request->nombres,
+                    'name' => $request->nombres . ' ' . $request->apellidos,
                     'username' => $request->dni,
                     'password' => bcrypt($request->dni), // Encriptar la contraseña
                     'idTrabajador' => $idTrabajador
@@ -285,28 +287,51 @@ class TrabajadorController extends Controller
      * Elimina un trabajador.
      */
     public function destroy($id)
-    {
-        $trabajador = Trabajador::find($id);
+{
+    // Buscar al trabajador por su ID
+    $trabajador = Trabajador::find($id);
 
-        if (!$trabajador) {
-            return response()->json([
-                'message' => 'Trabajador no encontrado.'
-            ], 404);  // Código 404: No encontrado
-        }
-
-        try {
-            // Eliminar el trabajador
-            $trabajador->estado = 0;
-            $trabajador->save();
-
-            return response()->json([
-                'message' => 'Trabajador eliminado correctamente.'
-            ], 200);  // Código 200: OK
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Error al eliminar el trabajador.',
-                'error' => $e->getMessage()
-            ], 500);  // Código 500: Error interno del servidor
-        }
+    // Verificar si el trabajador existe
+    if (!$trabajador) {
+        return response()->json([
+            'message' => 'Trabajador no encontrado.'
+        ], 404);  // Código 404: No encontrado
     }
+
+    // Iniciar una transacción para asegurar la consistencia
+    DB::beginTransaction();
+
+    try {
+        // Borrado lógico del trabajador
+        $trabajador->estado = 0;  // Marcamos el trabajador como inactivo
+        $trabajador->save();
+
+        // Buscar al usuario asociado con el trabajador
+        $usuario = User::where('idTrabajador', $id)->first();
+
+        // Verificar si el usuario existe
+        if ($usuario) {
+            // Borrado lógico del usuario asociado
+            $usuario->estado = 0;  // Marcamos el usuario como inactivo
+            $usuario->save();
+        }
+
+        // Confirmar la transacción
+        DB::commit();
+
+        return response()->json([
+            'message' => 'Trabajador y usuario eliminados correctamente (borrado lógico).'
+        ], 200);  // Código 200: OK
+
+    } catch (\Exception $e) {
+        // Si ocurre un error, revertir la transacción
+        DB::rollBack();
+
+        return response()->json([
+            'message' => 'Error al eliminar el trabajador y su usuario asociado.',
+            'error' => $e->getMessage()
+        ], 500);  // Código 500: Error interno del servidor
+    }
+}
+
 }

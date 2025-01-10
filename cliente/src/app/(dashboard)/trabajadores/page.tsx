@@ -1,26 +1,21 @@
 "use client";
-import { Sede, Trabajador } from "@/types";
+import { Trabajador } from "@/types";
 import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
 import { useEffect, useState, useMemo } from "react";
-import { getAllSedes, getAllTrabajadores } from "@/services/trabajadoresService";
-import Image from "next/image";
-import { useAuth } from "@/context/AuthContext";
-import useAuthStore from "@/stores/AuthStore";
+import { getAllTrabajadores } from "@/services/trabajadoresService";
 import PrivateRoute from "@/components/PrivateRouter";
 
 const columns = [
-  { header: "Nombres", accessor: "nombres", className: "pl-4", width: "w-3/12" },
+  { header: "Nombres", accessor: "nombres", className: "pl-4", width: "w-2/12" },
   { header: "DNI", accessor: "dni", className: "hidden md:table-cell", width: "w-1/12" },
   { header: "Teléfono", accessor: "telefono", className: "hidden md:table-cell", width: "w-1/12" },
   { header: "Área", accessor: "area", className: "hidden md:table-cell", width: "w-1/12" },
   { header: "Dirección", accessor: "direccion", className: "hidden md:table-cell", width: "w-3/12" },
-  { header: "Opciones", accessor: "opciones", width: "w-1/12" },
+  { header: "Opciones", accessor: "opciones", width: "w-2/12" },
 ];
-
-
 
 const TrabajadoresPage = () => {
   const [trabajadores, setTrabajadores] = useState<Trabajador[]>([]);
@@ -29,37 +24,24 @@ const TrabajadoresPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage] = useState(10);
   const [loading, setLoading] = useState(true); // Estado de carga
-  const { user } = useAuthStore()
-  const [sedes, setSedes] = useState<Sede[]>();
 
   const refreshTrabajadores = async () => {
-    setLoading(true); // Comienza la carga
+    setLoading(true); 
     try {
       const response = await getAllTrabajadores();
       setTrabajadores(response);
-      setFilteredTrabajadores(response); // Inicializa con todos los trabajadores
+      setFilteredTrabajadores(response); 
     } catch (error) {
       console.error("Error al obtener trabajadores:", error);
     } finally {
-      setLoading(false); // Finaliza la carga
-    }
-  };
-
-  const getSedes = async () => {
-    try {
-      const response = await getAllSedes();
-      setSedes(response);
-    } catch (error) {
-      console.error("Error al obtener sedes:", error);
+      setLoading(false); 
     }
   };
 
   useEffect(() => {
     refreshTrabajadores();
-    getSedes();
   }, []);
 
-  // Filtrar trabajadores según el término de búsqueda
   useEffect(() => {
     const filtered = trabajadores.filter((trabajador) =>
       `${trabajador.nombres} ${trabajador.apellidos}`
@@ -75,18 +57,13 @@ const TrabajadoresPage = () => {
       key={item.idTrabajador}
       className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
     >
-      <td className="flex flex-col md:flex-row md:items-center gap-4 p-4">
-        <div className="flex flex-col">
-          <h3 className="font-semibold">{item.nombres + " " + item.apellidos}</h3>
-          <p className="md:hidden text-gray-500">{item.dni}</p>
-        </div>
-      </td>
+      <td className="font-semibold p-4">{item.nombres + " " + item.apellidos}</td>
       <td className="hidden md:table-cell">{item.dni}</td>
       <td className="hidden md:table-cell">{item.telefono}</td>
-      <td className="hidden md:table-cell">{item.area}</td>
-      <td className="hidden md:table-cell">{item.direccion}</td>
+      <td className="hidden md:table-cell">{item.area.toUpperCase()}</td>
+      <td className="hidden md:table-cell text-center">{item.direccion}</td>
       <td>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 justify-center">
           <FormModal
             table="trabajador"
             type="update"

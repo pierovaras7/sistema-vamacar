@@ -16,9 +16,9 @@ type Brand = {
 };
 
 const columns = [
-  { header: "ID", accessor: "idMarca", className: "pl-4", width: "w-3/12" },
-  { header: "Marca", accessor: "marca", width: "w-6/12" },
-  { header: "Acciones", accessor: "actions", width: "w-3/12" },
+  { header: "ID", accessor: "idMarca", className: "hidden md:table-cell pl-4", width: "w-2/12" },
+  { header: "Marca", accessor: "marca", width: "w-4/12" },
+  { header: "Acciones", accessor: "actions", width: "w-4/12" },
 ];
 
 const BrandListPage = () => {
@@ -62,7 +62,7 @@ const BrandListPage = () => {
       await deleteBrand(selectedBrand.idMarca);
       setIsDeleteModalOpen(false);
       fetchBrands();
-      toast.success("Marca eliminada exitosamente");
+      toast.success("Marca eliminada exitosamente.");
     } catch (error: any) {
       console.error("Error al eliminar marca:", error.message);
     } finally {
@@ -76,10 +76,10 @@ const BrandListPage = () => {
 
   const renderRow = (item: Brand) => (
     <tr key={item.idMarca} className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-gray-100">
-      <td className="p-4">{item.idMarca}</td>
-      <td>{item.marca}</td>
+      <td className="hidden md:table-cell p-4">{item.idMarca}</td>
+      <td className="">{item.marca}</td>
       <td>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full justify-center">
           <FormModal
             table="brand"
             type="update"

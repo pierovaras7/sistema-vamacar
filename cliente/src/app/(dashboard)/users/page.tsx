@@ -1,6 +1,7 @@
 "use client"
 import InputSearch from "@/components/InputSearch";
 import PrivateRoute from "@/components/PrivateRouter";
+import useModules from "@/hooks/useModules";
 import { getAllUsers, getModules, updateUser } from "@/services/usersService";
 import useDashboardStore from "@/stores/DashboardStore";
 import { User, Module } from "@/types";
@@ -11,7 +12,7 @@ import { toast } from "sonner";
 const UsersPage = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
-  const { modules } = useDashboardStore(); 
+  const { modules } = useModules(); 
   const [selectedUser, setSelectedUser] = useState<User | undefined>();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -47,7 +48,6 @@ const UsersPage = () => {
   };
 
   useEffect(() => {
-    // fetchModules();
     fetchUsers();
   }, []);
 
@@ -140,13 +140,14 @@ const UsersPage = () => {
 
   return (
     <PrivateRoute slug="/users">
-      <div className="bg-white p-4 rounded-lg flex m-4 mt-0">
-        <div className="w-1/4 bg-white border-r border-gray-300 rounded-lg">
+      <div className="bg-white p-4 rounded-lg flex flex-col md:flex-row m-4 mt-0">
+        {/* Lista de Usuarios */}
+        <div className="w-full md:w-1/4 bg-white border-r border-gray-300 rounded-lg mb-4 md:mb-0">
           <h2 className="text-sm md:text-xl font-bold p-4 border-b border-gray-300">Lista de Usuarios</h2>
           <div className="p-4">
             <InputSearch 
               handleSearch={handleSearch} 
-              placeholder={`Buscar por nombre`}  // El placeholder es dinámico
+              placeholder={`Buscar por nombre`} 
             />
           </div>
           <ul className="divide-y divide-gray-200">
@@ -174,11 +175,12 @@ const UsersPage = () => {
             ))}
           </ul>
         </div>
-
-        <div className="w-3/4 p-6">
+  
+        {/* Detalles del Usuario */}
+        <div className="w-full md:w-3/4 p-4 md:p-6">
           {selectedUser ? (
             <div>
-              <h2 className="text-2xl font-bold mb-4 flex items-center">
+              <h2 className="text-lg md:text-2xl font-bold mb-4 flex items-center">
                 Detalles del Usuario
                 <button
                   onClick={handleEditToggle}
@@ -187,7 +189,7 @@ const UsersPage = () => {
                   <FaPen size={20} />
                 </button>
               </h2>
-
+  
               <form>
                 <div className="mb-4">
                   <label className="text-xs text-gray-500 font-semibold">Nombre:</label>
@@ -200,7 +202,7 @@ const UsersPage = () => {
                     className={`w-full p-2 border ${isEditing ? "border-gray-400" : "border-transparent"} rounded`}
                   />
                 </div>
-
+  
                 <div className="mb-4">
                   <label className="text-xs text-gray-500 font-semibold">Username:</label>
                   <input
@@ -212,7 +214,7 @@ const UsersPage = () => {
                     className={`w-full p-2 border ${isEditing ? "border-gray-400" : "border-transparent"} rounded`}
                   />
                 </div>
-
+  
                 <div className="mb-4">
                   <label className="text-xs text-gray-500 font-semibold">Password:</label>
                   <input
@@ -224,9 +226,9 @@ const UsersPage = () => {
                     className={`w-full p-2 border ${isEditing ? "border-gray-400" : "border-transparent"} rounded`}
                   />
                 </div>
-
-                <h3 className="text-xl font-bold mb-2">Módulos Accesibles</h3>
-                <div className="grid md:grid-cols-2 gap-4 mb-4 px-8 py-3">
+  
+                <h3 className="text-lg md:text-xl font-bold mb-2">Módulos Accesibles</h3>
+                <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mb-4 px-2 md:px-8 py-3">
                   {modules.map((module) => (
                     <label key={module.idModule} className="flex items-center text-sm">
                       <input
@@ -240,13 +242,13 @@ const UsersPage = () => {
                     </label>
                   ))}
                 </div>
-
+  
                 {isEditing && (
-                  <div className="flex flex-col  items-end w-full">
+                  <div className="flex flex-col items-center md:items-end w-full">
                     <button
                       type="button"
                       onClick={handleUpdate}
-                      className="px-4 py-2 w-1/6 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs"
+                      className="px-4 py-2 w-full md:w-1/6 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs"
                     >
                       Guardar Cambios
                     </button>
@@ -261,6 +263,7 @@ const UsersPage = () => {
       </div>
     </PrivateRoute>
   );
+  
 };
 
 export default UsersPage;

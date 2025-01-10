@@ -75,6 +75,8 @@ const ProductListPage = () => {
     }
   };
 
+  
+
   useEffect(() => {
     fetchProducts();
   }, []);

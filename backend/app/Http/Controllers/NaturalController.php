@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Natural;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class NaturalController extends Controller
 {
@@ -15,14 +16,36 @@ class NaturalController extends Controller
 
     public function store(Request $request)
     {
-        // Valida los datos
-        $request->validate([
-            'dni'=> 'required|string|size:8',
+        // Validación de datos
+        $validator = Validator::make($request->all(), [
+            'dni' => 'required|string|size:8|unique:natural,dni', // Validar que el dni sea único
             'nombres' => 'required|string|max:255',
             'apellidos' => 'required|string|max:255',
             'idCliente' => 'required|exists:cliente,idCliente',
             'estado' => 'required|boolean',
+        ], [
+            'dni.unique' => 'El DNI ya está registrado.',
+            'dni.size' => 'El DNI debe tener 8 caracteres.',
+            'dni.required' => 'El campo DNI es obligatorio.',
+            'nombres.required' => 'El campo nombres es obligatorio.',
+            'nombres.string' => 'El campo nombres debe ser una cadena de texto.',
+            'nombres.max' => 'El campo nombres no debe exceder los 255 caracteres.',
+            'apellidos.required' => 'El campo apellidos es obligatorio.',
+            'apellidos.string' => 'El campo apellidos debe ser una cadena de texto.',
+            'apellidos.max' => 'El campo apellidos no debe exceder los 255 caracteres.',
+            'idCliente.required' => 'El campo idCliente es obligatorio.',
+            'idCliente.exists' => 'El cliente no existe.',
+            'estado.required' => 'El campo estado es obligatorio.',
+            'estado.boolean' => 'El campo estado debe ser un valor booleano.',
         ]);
+
+        // Comprobar si la validación falla
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Error en la validación de datos.',
+                'errors' => $validator->errors(),
+            ], 422);  // Código 422: Unprocessable Entity
+        }
 
         // Crea un nuevo registro de Natural
         $natural = Natural::create($request->all());
@@ -44,13 +67,36 @@ class NaturalController extends Controller
 
     public function update(Request $request, $id)
     {
-        // Valida los datos
-        $request->validate([
+        // Validación de datos
+        $validator = Validator::make($request->all(), [
+            'dni' => 'required|string|size:8|unique:natural,dni,' . $id . ',idNatural',  // Validar que el dni sea único, exceptuando el registro actual
             'nombres' => 'required|string|max:255',
             'apellidos' => 'required|string|max:255',
             'idCliente' => 'required|exists:cliente,idCliente',
             'estado' => 'required|boolean',
+        ], [
+            'dni.unique' => 'El DNI ya está registrado.',
+            'dni.size' => 'El DNI debe tener 8 caracteres.',
+            'dni.required' => 'El campo DNI es obligatorio.',
+            'nombres.required' => 'El campo nombres es obligatorio.',
+            'nombres.string' => 'El campo nombres debe ser una cadena de texto.',
+            'nombres.max' => 'El campo nombres no debe exceder los 255 caracteres.',
+            'apellidos.required' => 'El campo apellidos es obligatorio.',
+            'apellidos.string' => 'El campo apellidos debe ser una cadena de texto.',
+            'apellidos.max' => 'El campo apellidos no debe exceder los 255 caracteres.',
+            'idCliente.required' => 'El campo idCliente es obligatorio.',
+            'idCliente.exists' => 'El cliente no existe.',
+            'estado.required' => 'El campo estado es obligatorio.',
+            'estado.boolean' => 'El campo estado debe ser un valor booleano.',
         ]);
+
+        // Comprobar si la validación falla
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Error en la validación de datos.',
+                'errors' => $validator->errors(),
+            ], 422);  // Código 422: Unprocessable Entity
+        }
 
         $natural = Natural::find($id);
 
@@ -63,6 +109,7 @@ class NaturalController extends Controller
 
         return response()->json($natural);
     }
+
 
     public function destroy($id)
     {

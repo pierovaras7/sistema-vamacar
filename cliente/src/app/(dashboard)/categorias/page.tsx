@@ -7,7 +7,7 @@ import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
 import { getCategories, deleteCategory } from "@/services/categoriaService";
 import { FiTrash, FiEye } from "react-icons/fi";
-import SubcategoriesModal from "./subcategoria/page";
+import SubcategoriesModal from "./subcategorias/page";
 import Image from "next/image";
 import { toast } from 'sonner';
 
@@ -18,9 +18,9 @@ type Category = {
 };
 
 const columns = [
-  { header: "ID", accessor: "idCategoria", className: "pl-4", width: "w-2/12" },
+  { header: "ID", accessor: "idCategoria", className: "hidden text-center md:table-cell pl-4", width: "w-2/12" },
   { header: "Categoría", accessor: "categoria", width: "w-4/12" },
-  { header: "Subcategorías", accessor: "subcategories", className: "hidden md:table-cell", width: "w-3/12" },
+  { header: "Subcategorías", accessor: "subcategories", width: "w-3/12" },
   { header: "Acciones", accessor: "actions", width: "w-3/12" },
 ];
 
@@ -91,10 +91,10 @@ const CategoriesPage = () => {
       key={item.idCategoria}
       className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
     >
-      <td className="p-4">{item.idCategoria}</td>
+      <td className="hidden text-center md:table-cell p-4">{item.idCategoria}</td>
       <td className="">{item.categoria}</td>
-      <td className="hidden md:table-cell">
-        <div className="items-center hidden md:flex gap-2">
+      <td>
+        <div className="items-center flex gap-2 justify-center">
           <button
             className="text-blue-500 hover:text-blue-700"
             onClick={() => setShowSubcategoriesModal({ idCategoria: item.idCategoria, isOpen: true })}
@@ -110,7 +110,7 @@ const CategoriesPage = () => {
         </div>
       </td>
       <td>
-        <div className="flex gap-2">
+        <div className="flex gap-2 justify-center">
           <FormModal
             table="category"
             type="update"

@@ -19,6 +19,7 @@ class DetalleCC extends Model
         'motivo', 
         'fecha', 
         'monto', 
+        'saldo',
         'idCC'
     ];
 

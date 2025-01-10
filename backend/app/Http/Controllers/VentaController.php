@@ -20,9 +20,13 @@ class VentaController extends Controller
     // Mostrar todos las ventas
     public function index()
     {
-        $ventas = Venta::with(['trabajador', 'sede', 'cliente'])->get();
+        $ventas = Venta::with(['trabajador', 'sede', 'cliente' => function ($query) {
+            $query->with(['natural', 'juridico']); // Cargar las relaciones 'natural' y 'juridico'
+        }])->get();
+        
         return response()->json($ventas);
     }
+
 
     // Mostrar una venta específica
     public function show($id)
@@ -105,7 +109,6 @@ class VentaController extends Controller
                     'idInventario' => $invProd->idInventario
                 ]);
             }
-            
         }
 
         $clienteId = $request->input('cliente.idCliente');
@@ -132,15 +135,51 @@ class VentaController extends Controller
                 'fecha' => $request->input('fecha'),
                 'motivo' => 'Venta',
                 'monto' => $montoDetalle, // La diferencia entre total y monto pagado
+                'saldo' => $cuentaPorCobrar->montoCuenta + $montoDetalle
             ]);
 
-            $cuentaPorCobrar->montoTotal += $montoDetalle;
+            $cuentaPorCobrar->montoCuenta += $montoDetalle;
             $cuentaPorCobrar->save();
         } 
 
         // Responder con los datos de la venta y sus detalles
         return response()->json(['venta' => $venta, 'detalles' => $detallesData], 201);
     }
+
+    public function anularVenta($idVenta)
+    {
+        // Buscar la venta y los detalles asociados
+        $venta = Venta::find($idVenta);
+        if (!$venta) {
+            return response()->json(['error' => 'Venta no encontrada'], 404);
+        }
+
+        // Verificar si la venta tiene una cuenta por cobrar asociada
+        $cuentaPorCobrar = CuentaPorCobrar::where('idCliente', $venta->idCliente)->first();
+        if (!$cuentaPorCobrar) {
+            return response()->json(['error' => 'Cuenta por cobrar no encontrada'], 404);
+        }
+
+        // Calcular el monto de la venta a revertir
+        $montoAnulado = $venta->total - $venta->montoPagado; // La diferencia entre el total y el monto pagado
+
+        // Registrar la compensación en el DetalleCC (detalle de la cuenta por cobrar)
+        DetalleCC::create([
+            'idCC' => $cuentaPorCobrar->idCC, // Asociar el detalle con la cuenta por cobrar
+            'fecha' => now(),
+            'motivo' => 'Anulación de Venta',
+            'monto' => $montoAnulado, // El monto se coloca como negativo para revertir
+            'saldo' => $cuentaPorCobrar->montoCuenta - $montoAnulado, // Nuevo saldo de la cuenta por cobrar
+        ]);
+
+        // Actualizar el saldo de la cuenta por cobrar
+        $cuentaPorCobrar->montoCuenta -= $montoAnulado; // Reducir el monto de la cuenta por cobrar
+        $cuentaPorCobrar->save();
+
+        // Responder con éxito
+        return response()->json(['message' => 'Venta anulada y saldo actualizado correctamente'], 200);
+    }
+
 
 
     // Actualizar una venta

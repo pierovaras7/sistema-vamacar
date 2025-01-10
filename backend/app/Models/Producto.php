@@ -37,6 +37,12 @@ class Producto extends Model
     ];
 
 
+    // Relación con Inventario (supongamos que un producto tiene un inventario asociado)
+    public function inventario()
+    {
+        return $this->hasOne(Inventario::class, 'idProducto');
+    }
+
     public function subcategoria()
     {
         return $this->belongsTo(Subcategoria::class, 'idSubcategoria', 'idSubcategoria');

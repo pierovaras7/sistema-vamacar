@@ -9,6 +9,7 @@ import {
 } from "@/services/subcategoriaService";
 import { FiEdit, FiTrash } from "react-icons/fi";
 import { toast } from 'sonner';
+import Image from "next/image";
 
 type Subcategory = {
   idSubcategoria: number;
@@ -69,7 +70,7 @@ const SubcategoriesModal = ({
       await deleteSubcategory(selectedSubcategory.idSubcategoria);
       setShowDeleteModal(false);
       setSelectedSubcategory(null);
-      toast.success("Subcategoria eliminada exitosamente");
+      toast.success("Subcategoria eliminada exitosamente.");
 
       // Actualizamos el estado local
       setSubcategories((prev) =>
@@ -95,6 +96,7 @@ const SubcategoriesModal = ({
         });
         setShowEditModal(false);
         await fetchSubcategories();
+        toast.success("Subcategoria actualizada exitosamente.")
       }
     } catch (error) {
       console.error("Error al actualizar subcategoría:", error);
@@ -119,17 +121,17 @@ const SubcategoriesModal = ({
   };
 
   const columns = [
-    { header: "ID", className: "pl-4",accessor: "idSubcategoria" },
-    { header: "Subcategoria", accessor: "subcategoria" },
-    { header: "Acciones", accessor: "actions" },
+    { header: "ID",accessor: "idSubcategoria", className: "hidden text-center md:table-cell pl-4" },
+    { header: "Subcategoria", accessor: "subcategoria", className: "text-center"},
+    { header: "Acciones", accessor: "actions",  className: "text-center"},
   ];
 
   const renderRow = (item: Subcategory) => (
-    <tr key={item.idSubcategoria} className="border-b border-gray-200">
-      <td className="p-4">{item.idSubcategoria}</td>
-      <td>{item.subcategoria}</td>
+    <tr key={item.idSubcategoria} className="border-b border-gray-200 text-sm">
+      <td className="hidden md:table-cell text-center p-4">{item.idSubcategoria}</td>
+      <td  className= "p-2 text-center">{item.subcategoria}</td>
       <td>
-        <div className="flex gap-2">
+        <div className="flex gap-2 justify-center">
           <button
             className="text-green-500 hover:text-green-700"
             onClick={() => {
@@ -165,7 +167,7 @@ const SubcategoriesModal = ({
             placeholder="Buscar subcategorías..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border rounded-md text-sm md:text-md"
           />
         </div>
         {/* Tabla */}
@@ -181,15 +183,15 @@ const SubcategoriesModal = ({
           <button
             disabled={currentPage === 1}
             onClick={handlePreviousPage}
-            className={`px-4 py-2 rounded-md ${currentPage === 1 ? "bg-gray-300" : "bg-blue-500 text-white hover:bg-blue-700"}`}
+            className={`px-4 py-2 text-xs rounded-md ${currentPage === 1 ? "bg-gray-300" : "bg-blue-500 text-white hover:bg-blue-700"}`}
           >
             Anterior
           </button>
-          <span>Página {currentPage}</span>
+          <span className="text-xs">Página {currentPage}</span>
           <button
             disabled={currentPage * ITEMS_PER_PAGE >= filteredSubcategories.length}
             onClick={handleNextPage}
-            className={`px-4 py-2 rounded-md ${
+            className={`px-4 py-2 text-xs rounded-md ${
               currentPage * ITEMS_PER_PAGE >= filteredSubcategories.length
                 ? "bg-gray-300"
                 : "bg-blue-500 text-white hover:bg-blue-700"
@@ -198,12 +200,10 @@ const SubcategoriesModal = ({
             Siguiente
           </button>
         </div>
-        <button
-          className="absolute top-4 right-4 text-gray-600 hover:text-gray-900"
-          onClick={onClose}
-        >
-          X
-        </button>
+        <div className="absolute top-4 right-4 cursor-pointer" onClick={onClose} 
+          > 
+          <Image src="/close.png" alt="Cerrar" width={14} height={14} /> 
+        </div>
       </div>
       {showEditModal && selectedSubcategory && (
         <div className="w-screen h-screen absolute left-0 top-0 bg-black bg-opacity-60 z-50 flex items-center justify-center">

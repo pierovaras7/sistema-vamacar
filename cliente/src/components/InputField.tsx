@@ -13,6 +13,7 @@ type InputFieldProps = {
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
   className?: string;
   onInput?: React.FormEventHandler<HTMLInputElement>; // Añadir esta propiedad
+  onChange?: React.ChangeEventHandler<HTMLInputElement>;
 };
 
 const InputField = ({
@@ -27,7 +28,8 @@ const InputField = ({
   value,
   className,
   disabled,
-  onInput // Recibir la función onInput
+  onInput, // Recibir la función onInput
+  onChange
 }: InputFieldProps) => {
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -43,7 +45,7 @@ const InputField = ({
   };
 
   return (
-    <div className={`flex flex-col gap-2 px-2 w-full`}>
+    <div className={`flex flex-col gap-2 px-2 mb-2 w-full`}>
       <label className="text-sm font-medium text-gray-700">{label}</label>
       <input
         type={type}
@@ -55,6 +57,7 @@ const InputField = ({
         defaultValue={defaultValue}
         onKeyDown={type === "number" ? handleKeyDown : undefined} // Apply the handler only if the type is "number"
         onInput={onInput} // Usamos onInput aquí
+        onChange={onChange}
       />
       {error?.message && (
         <p className="text-sm text-red-500">{error.message.toString()}</p>

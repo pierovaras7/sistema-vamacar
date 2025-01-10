@@ -1,41 +1,51 @@
 "use client";
-
 import Menu from "@/components/Menu";
 import Navbar from "@/components/Navbar";
-import { AuthProvider, useAuth } from "@/context/AuthContext";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Toaster } from "sonner";
-import useAuthStore from "@/stores/AuthStore";
-import useDashboardStore from "@/stores/DashboardStore";
 import { useRouter } from "next/navigation"; // Para redirigir si no hay módulos
+import useAuthStore from "@/stores/AuthStore";
+import useModules from "@/hooks/useModules";
 
 export default function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { user } = useAuthStore();
-  const { modules, isLoading, fetchModules } = useDashboardStore();
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // Estado para el menú lateral en pantallas pequeñas
-  const router = useRouter(); // Para redirigir si no hay módulos
+  const { user, isAdmin, modules: userModules, isHydrated, reloadModules } = useAuthStore(); 
+  const { modules: fetchedModules, isLoading} = useModules(); 
+  const [isMenuOpen, setIsMenuOpen] = useState(false); 
+  const router = useRouter(); 
 
-  // Cargar los módulos cuando el componente se monta
   useEffect(() => {
-    if (!modules.length) {
-      fetchModules(); // Solo lo llamamos si no tenemos módulos
+    if (isHydrated && !user) {
+      router.push("/login"); 
     }
-  }, [modules, fetchModules]);
+  }, [isHydrated, user, router]);
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center w-full h-screen flex-col">
-        <Image src="/logo.png" alt="logo" width={80} height={80} priority />
-        <p className="mt-4 text-gray-500 text-sm text-center">Loading...</p>
-      </div>
+  useEffect(() => {
+    if (user) {
+      reloadModules(user.idUser);
+    }
+  }, [])
+
+  const filteredModules = isAdmin  ? fetchedModules : fetchedModules.filter((module) => {
+    const isMatch = Array.isArray(userModules) && userModules.some(
+      (userModule) => userModule.idModule === module.idModule
     );
+    return isMatch;
+  });
+
+  if(!user){
+    return null;
   }
+  
+  if (!isHydrated || isLoading) {
+    return null;
+  }
+
 
   return (
     <>
@@ -50,10 +60,10 @@ export default function DashboardLayout({
             href="/"
             className="flex items-center justify-center lg:justify-start gap-2 mb-6"
           >
-            <Image src="/logo.png" alt="logo" width={32} height={32} priority/>
+            <Image src="/logo.png" alt="logo" width={32} height={32} priority />
             <span className="hidden lg:block font-bold">SchooLama</span>
           </Link>
-          <Menu modules={modules} />
+          <Menu modules={filteredModules} /> {/* Pasa los módulos filtrados */}
         </div>
 
         {/* HAMBURGER MENU TOGGLE */}
@@ -68,7 +78,7 @@ export default function DashboardLayout({
 
         {/* RIGHT */}
         <div className="flex-1 bg-[#F7F8FA] overflow-scroll flex flex-col">
-          <Navbar user={user} />
+          <Navbar user={user} /> {/* Enviar user al Navbar */}
           <main className="flex-1">{children}</main>
         </div>
       </div>
@@ -76,4 +86,3 @@ export default function DashboardLayout({
     </>
   );
 }
-

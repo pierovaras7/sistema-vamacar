@@ -18,31 +18,67 @@ class ModuleSeeder extends Seeder
         Module::create([
             'name' => 'Trabajadores',
             'slug' => '/trabajadores',
+            'icon' => 'trabajadores',
         ]);
 
         Module::create([
             'name' => 'Usuarios',
             'slug' => '/users',
+            'icon' => 'usuarios',
         ]);
 
         Module::create([
             'name' => 'Marcas',
             'slug' => '/marcas',
+            'icon' => 'marcas',
         ]);
 
         Module::create([
             'name' => 'Categorias',
             'slug' => '/categorias',
+            'icon' => 'categorias',
         ]);
 
         Module::create([
             'name' => 'Productos',
             'slug' => '/productos',
+            'icon' => 'productos',
         ]);
 
         Module::create([
             'name' => 'Ventas',
             'slug' => '/ventas',
+            'icon' => 'ventas',
+        ]);
+
+        Module::create([
+            'name' => 'Proveedores',
+            'slug' => '/proveedores',
+            'icon' => 'proveedores',
+        ]);
+
+        Module::create([
+            'name' => 'Compras',
+            'slug' => '/compras',
+            'icon' => 'compras',
+        ]);
+
+        Module::create([
+            'name' => 'Cuentas por Cobrar',
+            'slug' => '/cuentasxcobrar',
+            'icon' => 'cuentasxcobrar',
+        ]);
+
+        Module::create([
+            'name' => 'Cuentas por Pagar',
+            'slug' => '/cuentasxpagar',
+            'icon' => 'cuentasxpagar',
+        ]);
+
+        Module::create([
+            'name' => 'Clientes',
+            'slug' => '/clientes',
+            'icon' => 'clientes',
         ]);
 
     }

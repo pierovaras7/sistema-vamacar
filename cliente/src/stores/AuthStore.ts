@@ -1,98 +1,86 @@
-// stores/authStore.ts
+// useAuthStore.ts
 import { create } from "zustand";
-import { login, logout as authLogout, checkAuth } from "@/services/authService";
-import { User, Module } from "@/types";
+import { persist, createJSONStorage } from "zustand/middleware";
+import { Module, User } from "@/types"; // Ajusta el path según tu proyecto
+import { checkAuth, login, logout as LogoutSesion, refreshToken, updateProfile } from "@/services/authService"; // Asegúrate de importar los servicios correctamente
 
-// Definir la interfaz para el estado
 interface AuthState {
+  isHydrated: boolean;
   user: User | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
-  modules: Module[]; // Aquí añadimos los módulos del usuario
+  modules: Module[];
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
-  checkAuth: () => void;
-  updateUser: (updatedUser: User) => void;
+  updateProfile: (id: number, perfil: any) => Promise<void>;
+  reloadModules: (id: number) => Promise<void>; // Nueva función para recargar los módulos
+  setHydrated: (hydrated: boolean) => void;
 }
 
-// Crear la tienda con Zustand
-const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  isAuthenticated: false,
-  isAdmin: false,
-  modules: [], // Iniciar los módulos como un arreglo vacío
-
-  login: async (username, password) => {
-    try {
-      const responseLogin = await login(username, password);
-      const userData = responseLogin.user;
-      const modules = userData.modules || []; // Suponiendo que la respuesta tiene los módulos
-      const isAdminResponse = responseLogin.isAdmin;
-      // Guardar los datos del usuario y los módulos en localStorage
-      localStorage.setItem("user", JSON.stringify(userData));
-      localStorage.setItem("isAuthenticated", "true");
-      localStorage.setItem("isAdmin", isAdminResponse);
-      localStorage.setItem("modules", JSON.stringify(modules));
-
-      // Actualizar el estado global
-      set({
-        user: userData,
-        isAuthenticated: true,
-        isAdmin: isAdminResponse,
-        modules: modules,
-      });
-    } catch (error) {
-      set({
-        user: null,
-        isAuthenticated: false,
-        isAdmin: false,
-        modules: [],
-      });
-      throw error;
-    }
-  },
-
-  logout: () => {
-    authLogout();
-
-    // Limpiar los datos del usuario y los módulos en localStorage
-    localStorage.removeItem("user");
-    localStorage.removeItem("isAuthenticated");
-    localStorage.removeItem("isAdmin");
-    localStorage.removeItem("modules");
-
-    // Actualizar el estado global
-    set({
+const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
       user: null,
       isAuthenticated: false,
       isAdmin: false,
       modules: [],
-    });
-  },
-
-  checkAuth: () => {
-    const user = localStorage.getItem("user");
-    const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
-    const isAdmin = localStorage.getItem("isAdmin") === "true";
-    const modules = JSON.parse(localStorage.getItem("modules") || "[]");
-
-    if (user && isAuthenticated) {
-      set({
-        user: JSON.parse(user),
-        isAuthenticated,
-        isAdmin,
-        modules,
-      });
+      isHydrated: false,
+      login: async (username, password) => {
+        try {
+          const { user, isAdmin } = await login(username, password);
+          set({
+            user,
+            isAuthenticated: true,
+            isAdmin,
+            modules: user.modules,
+          });
+          console.log("Login exitoso");
+        } catch (error) {
+          console.error("Error en login:", error);
+          throw error;
+        }
+      },
+      logout: async () => {
+        await LogoutSesion();
+        set({
+          user: null,
+          isAuthenticated: false,
+          isAdmin: false,
+          modules: [],
+        });
+      },
+      setHydrated: (hydrated) => set({ isHydrated: hydrated }),
+      updateProfile: async (id: number, perfil: any) => {
+        try {
+          await updateProfile(id, perfil);
+          const updatedUser = await checkAuth(id);
+          set({ user: updatedUser });
+        } catch (error) {
+          throw error;
+        }
+      },
+      reloadModules: async (id: number) => {
+        try {
+          const userLogeado = await checkAuth(id); 
+          set({
+            user: userLogeado,
+            modules: userLogeado.modules, 
+          });
+        } catch (error) {
+          console.error("Error al recargar los módulos:", error);
+          throw error;
+        }
+      },
+    }),
+    {
+      name: 'auth-storage',
+      storage: createJSONStorage(() => localStorage),
+      onRehydrateStorage: () => (state) => {
+        if (state) state.setHydrated(true);
+      },
     }
-  },
-
-  updateUser: (updatedUser) => {
-    set({ user: updatedUser });
-    localStorage.setItem("user", JSON.stringify(updatedUser));
-  },
-}));
-
-// Verificar la autenticación al iniciar
-useAuthStore.getState().checkAuth();
+  )
+);
 
 export default useAuthStore;
+
