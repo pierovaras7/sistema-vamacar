@@ -22,9 +22,10 @@ export const findCliente = async (valor: string): Promise<Cliente> => {
   }
 };
 
-export const saveVenta = async (venta: Venta): Promise<void> => {
+export const saveVenta = async (venta: Venta): Promise<Venta> => {
     try {
-      await axiosInstance.post(API_URL, venta);
+      const response = await axiosInstance.post(API_URL, venta);
+      return response.data.venta;
     } catch (error: any) {
       if (error.response && error.response.status === 422) {
         // Extraer los errores del backend
@@ -38,9 +39,10 @@ export const saveVenta = async (venta: Venta): Promise<void> => {
     }
 };
 
-export const anularVenta = async (id: number): Promise<void> => {
+export const anularVenta = async (id?: number): Promise<void> => {
   try {
-    const response = await axiosInstance.post(`${API_URL}/anular/${id}`);
+    if(id)
+      await axiosInstance.post(`${API_URL}/anular/${id}`);
   } catch (error: any) {
     if (error.response && error.response.status === 422) {
       // Extraer los errores del backend

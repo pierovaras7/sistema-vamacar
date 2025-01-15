@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('descripcion');
             $table->string('fecha');
             $table->decimal('cantidad');
+            $table->decimal('stockRestante');
             $table->unsignedBigInteger('idInventario');
             $table->foreign('idInventario')
                     ->references('idInventario') 

@@ -12,7 +12,11 @@ class InventarioController extends Controller
 {
     public function index()
 {
-    $inventarios = Inventario::with(['producto', 'movsInventario'])->get();
+    $inventarios = Inventario::with(['producto',
+        'movsInventario' => function ($query) {
+            $query->orderBy('fecha', 'desc'); // Ordenar los detalles por fecha descendente
+        },
+     ])->get();
     return response()->json($inventarios, 200);
 }
     
@@ -92,6 +96,7 @@ class InventarioController extends Controller
             'tipo' => $tipo,
             'descripcion' => $descripcion,
             'cantidad' => $cantidad,
+            'stockRestante' => $inventario->stockActual,
             'fecha' => $fecha,
         ]);
 

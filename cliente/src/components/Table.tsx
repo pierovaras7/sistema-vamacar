@@ -50,7 +50,7 @@ const Table = ({
   return (
     <table className="w-full mt-4 text-center">
       <thead>
-      <tr className="text-left text-gray-500 text-sm">
+      <tr className="text-left text-gray-500 text-xs md:text-sm">
         {columns.map((col) => (
           <th
             key={col.accessor}

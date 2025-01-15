@@ -18,7 +18,7 @@ class ProductoController extends Controller
             // Agregamos el stock al resultado
             $productosConStock = $productos->map(function ($producto) {
                 // Si el producto tiene inventario, agregamos el stock
-                $producto->stock = $producto->inventario ? $producto->inventario->stockActual : 0; // Si no tiene inventario, asignamos 0
+                $producto->stockActual = $producto->inventario ? $producto->inventario->stockActual : 0; // Si no tiene inventario, asignamos 0
                 return $producto;
             });
 

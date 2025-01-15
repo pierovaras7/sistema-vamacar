@@ -16,12 +16,11 @@ export const getAllClientes = async (): Promise<Cliente[]> => {
 };
 
 // Guardar un nuevo cliente
-export const saveCliente = async (cliente: Cliente): Promise<{ idCliente: number, clienteSaved: Cliente }> => {
+export const saveCliente = async (cliente: Cliente): Promise<Cliente> => {
   try {
     const response = await axiosInstance.post(API_URL, cliente);
-    
     // Asumiendo que el backend retorna el cliente con su id (como { idCliente: number })
-    return { idCliente: response.data.idCliente, clienteSaved : response.data }; 
+    return response.data;
   } catch (error: any) {
     if (error.response && error.response.status === 422) {
       const validationErrors = error.response.data.errors;
@@ -46,7 +45,8 @@ export const getClienteById = async (id: number): Promise<Cliente> => {
 // Actualizar un cliente por ID
 export const updateCliente = async (id: number, cliente: Cliente): Promise<void> => {
   try {
-    await axiosInstance.put(`${API_URL}/${id}`, cliente);
+    const response = await axiosInstance.put(`${API_URL}/${id}`, cliente);
+    return response.data;
   } catch (error: any) {
     if (error.response && error.response.status === 422) {
       const validationErrors = error.response.data.errors;

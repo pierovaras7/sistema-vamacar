@@ -55,12 +55,8 @@ class AuthController extends Controller
             if ($user->estado == 0) {
                 return response()->json(['error' => 'Usuario inactivo.'], 403);  // Error 403: Forbidden
             }
-            // Cargar el trabajador relacionado
-            $user->load('modules');
 
-            $user->load('trabajador');
-
-            $user->load('trabajador.sede');
+            $user->load(['modules', 'trabajador.sede']);
 
             // Crear la cookie HttpOnly para almacenar el token
             $cookie = cookie('token', $token, 60 * 24, '/', null, true, true);
@@ -202,12 +198,8 @@ class AuthController extends Controller
                 return response()->json(['message' => 'Usuario no encontrado'], 401);
             }
 
-            // Cargar el trabajador relacionado
-            $user->load('modules');
-
-            // Cargar información adicional si es necesario
-            $user->load('trabajador');  // Ejemplo de carga de relaciones, puedes agregar más
-
+            $user->load(['modules', 'trabajador.sede']);
+            
             return response()->json([
                 'user' => $user,
                 'message' => 'Usuario autenticado exitosamente',

@@ -12,6 +12,7 @@ import CrearCuentaCobrarModal from "@/components/CrearCuentaCobrar";
 import { getInventarios } from "@/services/inventariosService";
 import MovimientosInventario from "@/components/MovimientosInventario";
 import RegistrarMovimientoInventarioModal from "@/components/RegistrarMovimientoInventarioModal";
+import PrivateRoute from "@/components/PrivateRouter";
 
 const columns = [
   { header: "Cod Producto", accessor: "producto.cod", width: "w-3/12" },
@@ -64,7 +65,7 @@ const InventariosPage = () => {
   const handlePageChange = (page: number) => setCurrentPage(page);
 
   const renderRow = (item: Inventario) => (
-    <tr key={item.idInventario} className="border-b border-gray-200 even:bg-slate-50 sm:text-sm md:text-md hover:bg-lamaPurpleLight">
+    <tr key={item.idInventario} className="border-b border-gray-200 even:bg-slate-50 text-xs md:text-md hover:bg-lamaPurpleLight">
       <td className="p-4">{item.producto?.codigo}</td>
       <td>{item.producto?.descripcion}</td>
       <td>{item.stockMinimo}</td>
@@ -81,27 +82,29 @@ const InventariosPage = () => {
   }, []);
 
   return (
-    <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="hidden md:block text-lg font-semibold">Inventarios</h1>
-        <div className="flex items-center gap-4 w-full md:w-auto">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => handleSearch(e.target.value)}
-            placeholder="Buscar producto..."
-            className="border rounded-md p-2"
-          />
+    <PrivateRoute slug="/inventarios">
+      <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="hidden md:block text-lg font-semibold">Inventarios</h1>
+          <div className="flex items-center gap-4 w-full md:w-auto">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => handleSearch(e.target.value)}
+              placeholder="Buscar producto..."
+              className="border rounded-md p-2 text-sm md:text-md"
+            />
+          </div>
         </div>
+
+        {/* Tabla de inventarios */}
+        <Table columns={columns} renderRow={renderRow} data={currentInventarios} />
+
+        {/* Paginación */}
+        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+
       </div>
-
-      {/* Tabla de inventarios */}
-      <Table columns={columns} renderRow={renderRow} data={currentInventarios} />
-
-      {/* Paginación */}
-      <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
-
-    </div>
+    </PrivateRoute>
   );
 };
 

@@ -8,6 +8,8 @@ import { Toaster } from "sonner";
 import { useRouter } from "next/navigation"; // Para redirigir si no hay módulos
 import useAuthStore from "@/stores/AuthStore";
 import useModules from "@/hooks/useModules";
+import useInventarios from "@/hooks/useInventarios";
+import useNotificaciones from "@/hooks/useNotificaciones";
 
 export default function DashboardLayout({
   children,
@@ -15,8 +17,10 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }>) {
   const { user, isAdmin, modules: userModules, isHydrated, reloadModules } = useAuthStore(); 
+  const { notificaciones } = useNotificaciones()
   const { modules: fetchedModules, isLoading} = useModules(); 
   const [isMenuOpen, setIsMenuOpen] = useState(false); 
+  const [loaded, setLoaded] = useState(false); 
   const router = useRouter(); 
 
   useEffect(() => {
@@ -25,11 +29,7 @@ export default function DashboardLayout({
     }
   }, [isHydrated, user, router]);
 
-  useEffect(() => {
-    if (user) {
-      reloadModules(user.idUser);
-    }
-  }, [])
+  
 
   const filteredModules = isAdmin  ? fetchedModules : fetchedModules.filter((module) => {
     const isMatch = Array.isArray(userModules) && userModules.some(
@@ -37,6 +37,14 @@ export default function DashboardLayout({
     );
     return isMatch;
   });
+
+  useEffect(() => {
+    if (user && !loaded) {
+      console.log("reload");
+      reloadModules(user.idUser);
+      setLoaded(true);  // Marcar como cargado para que no vuelva a ejecutarse
+    }
+  }, [user, loaded, reloadModules]); // Dependencias del useEffect
 
   if(!user){
     return null;
@@ -78,7 +86,7 @@ export default function DashboardLayout({
 
         {/* RIGHT */}
         <div className="flex-1 bg-[#F7F8FA] overflow-scroll flex flex-col">
-          <Navbar user={user} /> {/* Enviar user al Navbar */}
+          <Navbar user={user} notificaciones={notificaciones} /> {/* Enviar user al Navbar */}
           <main className="flex-1">{children}</main>
         </div>
       </div>

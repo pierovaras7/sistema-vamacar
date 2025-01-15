@@ -60,7 +60,7 @@ const CuentasXCobrarPage = () => {
   const handlePageChange = (page: number) => setCurrentPage(page);
 
   const renderRow = (item: CuentaCobrar) => (
-    <tr key={item.idCC} className="border-b border-gray-200 even:bg-slate-50 sm:text-sm md:text-md hover:bg-lamaPurpleLight">
+    <tr key={item.idCC} className="border-b border-gray-200 even:bg-slate-50 text-sm md:text-md hover:bg-lamaPurpleLight">
       <td>
         {item.cliente?.natural
           ? `${item.cliente.natural.nombres} ${item.cliente.natural.apellidos}`
@@ -74,7 +74,7 @@ const CuentasXCobrarPage = () => {
           <span className="px-2 py-1 text-xs font-semibold text-yellow-700 bg-yellow-100 rounded">Inactiva</span>
         )}
       </td>
-      <td className="flex justify-around items-center px-4 py-2">
+      <td className="flex flex-row gap-2 justify-around items-center px-4 py-2">
         <RegistrarPagoModal cuentaCobrar={item} onUpdate={fetchCuentas} />
         {item.detalles && <DetallesCuentaCobrar data={item.detalles} />}
       </td>
@@ -87,15 +87,15 @@ const CuentasXCobrarPage = () => {
 
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="hidden md:block text-lg font-semibold">Cuentas por Cobrar</h1>
-        <div className="flex items-center gap-4 w-full md:w-auto">
+      <div className="flex flex-col md:flex-row items-center justify-between">
+          <h1 className="text-lg font-semibold w-full justify-start m-2">Cuentas por Cobrar</h1>
+          <div className="flex items-center gap-4 w-full md:w-auto">
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
             placeholder="Buscar cliente..."
-            className="border rounded-md p-2"
+            className="border rounded-md p-2 text-sm md:text-md w-full"
           />
           {/* Botón para abrir el modal */}
           <button

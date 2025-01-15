@@ -9,6 +9,7 @@ import { getProveedores, deleteProveedor } from "@/services/proveedorService";
 import { getRepresentante } from "@/services/representanteService";
 import { FiTrash, FiEdit } from "react-icons/fi";
 import { toast } from "react-toastify";
+import PrivateRoute from "@/components/PrivateRouter";
 
 type Proveedor = {
   idProveedor: number;
@@ -127,6 +128,8 @@ const ProvidersPage = () => {
   
 
   return (
+    <PrivateRoute slug="/proveedores">
+
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       <div className="grid grid-cols-12 gap-4">
         <h1 className="col-span-12 md:col-span-9 text-lg font-semibold">Proveedores</h1>
@@ -166,6 +169,8 @@ const ProvidersPage = () => {
         </div>
       )}
     </div>
+    </PrivateRoute>
+
   );
 };
 

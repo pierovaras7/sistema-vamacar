@@ -21,6 +21,7 @@ class MovInventario extends Model
         'fecha',
         'cantidad',
         'idInventario',
+        'stockRestante',
         'estado'
     ];
 

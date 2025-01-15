@@ -129,6 +129,7 @@ const VentasForm = ({
   const [tipoCliente, setTipoCliente] = useState<String>();
   const [isEditing, setIsEditing] = useState(true);
   const [thereCliente, setThereCliente] = useState(false);
+  
 
   const getSedes = async () =>{
     try {
@@ -376,7 +377,7 @@ const VentasForm = ({
 
   const handleAgregarDetalle = () => {
     if (selectedProducto) {
-      const stockDisponible = Math.max(selectedProducto.stock || 0, 0);
+      const stockDisponible = Math.max(selectedProducto.stockActual || 0, 0);
       const precioVenta = Math.max(selectedProducto.precioMaxVenta || 0, 0);
   
       if (precioVenta === 0) {

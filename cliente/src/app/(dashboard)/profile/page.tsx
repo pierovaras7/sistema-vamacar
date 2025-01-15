@@ -102,7 +102,7 @@ const PaginaPerfil: React.FC = () => {
   };
 
   return (
-    <div className="container w-full rounded-xl mx-2 p-2 md:px-8 md:py-4 bg-white">
+    <div className="container w-full rounded-xl md:mx-2 p-4 md:px-8 md:py-4 bg-white">
       <h1 className="text-2xl font-semibold mb-6">Actualizar Perfil</h1>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         {/* Datos de Usuario */}

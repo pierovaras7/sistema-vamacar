@@ -106,7 +106,6 @@ const ClientesForm = ({
 
   const [clienteNatural, setClienteNatural] = useState<Natural | null>(null);
   const [clienteJuridico, setClienteJuridico] = useState<Juridico | null>(null);
-  const [idTipoCliente, setidTipoCliente] = useState<number | null>(null);
 
 
   useEffect(() => {
@@ -151,104 +150,63 @@ const ClientesForm = ({
   }, [type, id, data, setValue]);
 
   const tipoCliente = watch("tipoCliente");
-
+  
   const onSubmit = handleSubmit(async (data) => {
-    console.log("Submitting form with data:", data);
-    const idTipoNatural = clienteNatural?.idNatural;
-    const idTipoJuridico = clienteJuridico?.idJuridico;
-
     try {
-      const cliente: Cliente = {
+      // Variable para almacenar el cliente relacionado
+      let clienteRelacionado: Natural | Juridico | null = null;
+  
+      // Crear el cliente base
+      const clienteNuevo: Cliente = {
         tipoCliente: data.tipoCliente,
         telefono: data.telefono,
         correo: data.correo,
         direccion: data.direccion,
         estado: true,
       };
-
-      let idCliente;
-
-      if (type === "create") {
-        const savedCliente = await saveCliente(cliente);
-        console.log("Cliente creado:", savedCliente);
-        idCliente = savedCliente.idCliente;
-      } else {
-        if (!id) {
-          console.log("ID del cliente no proporcionado para actualización.");
-          return;
-        }else{
-          updateCliente(id, cliente);
-          idCliente = id;
-        }
-      }
-
-      console.log(idCliente, idTipoNatural, idTipoJuridico);
-
-      // Si es Natural
-      if (data.tipoCliente === "Natural" ) {
-        const clienteNatural: Natural = {
+  
+      // Asignar cliente relacionado dependiendo del tipo de cliente
+      if (data.tipoCliente === 'Natural') {
+        console.log("aki estoy NATURAL")
+        clienteRelacionado = {
           nombres: data.nombres!,
           apellidos: data.apellidos!,
           dni: data.dni!,
-          idCliente,
           estado: true,
         };
-
-        if(type === "create"){
-          await saveNatural(clienteNatural);
-          console.log("Natural cliente guardado:", clienteNatural);
-        }else{
-          if(idTipoJuridico){
-            await deleteJuridico(idTipoJuridico);
-            console.log("Cliente Juridico eliminado:");
-            await saveNatural(clienteNatural);
-            console.log("Natural cliente guardado:", clienteNatural);
-          }
-
-          if(idTipoNatural){
-            await updateNatural(idTipoNatural, clienteNatural);
-            console.log("Natural cliente actualizado:", clienteNatural);
-          }
-        }
-
-      }else {
-        const clienteJuridico: Juridico = {
+  
+        // Asignar el cliente relacionado de tipo Natural
+        clienteNuevo.natural = clienteRelacionado;
+      } else if (data.tipoCliente === 'Juridico') {
+        console.log("aki estoy juridico")
+        clienteRelacionado = {
           razonSocial: data.razonSocial!,
           ruc: data.ruc!,
-          idCliente,
           representante: data.representante!,
           estado: true,
         };
-
-        if(type === "create"){
-          await saveJuridico(clienteJuridico);
-          console.log("Juridico cliente guardado:", clienteJuridico);
-        }else{
-          if(idTipoNatural){
-            await deleteNatural(idTipoNatural);
-            console.log("Cliente Natural eliminado:");
-            await saveJuridico(clienteJuridico);
-            console.log("Juridico cliente guardado:", clienteJuridico);
-          }
-
-          if(idTipoJuridico){
-            await updateJuridico(idTipoJuridico, clienteJuridico);
-            console.log("Juridico cliente actualizado:", clienteJuridico);
-          }
-        }
+  
+        // Asignar el cliente relacionado de tipo Juridico
+        clienteNuevo.juridico = clienteRelacionado;
       }
-        
-      toast.success(
-        `${type === "create" ? "Cliente creado" : "Cliente actualizado"} exitosamente`
-      );
+      if(type==="create"){
+        console.log("Creando cliente ENVIANDO: ", clienteNuevo);
+        const savedCliente = await saveCliente(clienteNuevo);
+        console.log('Cliente creado:', savedCliente);
+        toast.success("Cliente creado exitosamente.");
+      }
+      else if(type === "update"){
+        console.log(`Actualizando cliente ENVIANDO: ${id}`, clienteNuevo);
+        const updatedCliente = await updateCliente(id!,clienteNuevo);
+        console.log('Cliente actualizado:', updatedCliente);
+        toast.success("Cliente actualizado exitosamente.");
+      }
       closeModal();
     } catch (error: any) {
       showErrorsToast(error);
     }
   });
   
-  
-  console.log("Errores:", errors);
 
   return (
     <form className="flex flex-col gap-8" onSubmit={onSubmit}>

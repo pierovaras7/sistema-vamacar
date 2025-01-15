@@ -16,10 +16,7 @@ const detailCCSchema = z.object({
         .transform((val) => parseFloat(val)) // Convierte el string a un número
         .refine((val) => !isNaN(val), { message: "El monto es un campo requerido." }) // Asegúrate de que sea un número
         .refine((val) => val > 0, { message: "El monto debe ser mayor a 0." }),
-    fecha: z.string().refine(
-        (date) => !isNaN(new Date(date).getTime()),
-        "Fecha inválida"
-    ),
+        fecha: z.string().min(1, { message: "Fecha de venta es requerida." }),
 });
 
 type Inputs = z.infer<typeof detailCCSchema>;
@@ -55,7 +52,7 @@ const RegistrarPagoModal = ({
         const hours = String(now.getHours()).padStart(2, "0");
         const minutes = String(now.getMinutes()).padStart(2, "0");
         const seconds = String(now.getSeconds()).padStart(2, "0");
-        return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     };
 
     const handleOpenModal = () => {
@@ -95,7 +92,7 @@ const RegistrarPagoModal = ({
                 <CurrencyDollarIcon className="h-5 w-5 text-white" />
             </button>
             {visible && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
                     <div className="bg-white rounded-lg shadow-lg w-96 p-6">
                         <h2 className="text-xl font-semibold mb-4">Registrar Detalle</h2>
                         <form onSubmit={onSubmit}>

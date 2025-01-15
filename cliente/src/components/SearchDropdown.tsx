@@ -20,7 +20,7 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
 
   useEffect(() => {
     setFilteredProductos(
-      productos.filter((producto) =>
+      productos?.filter((producto) =>
         producto.descripcion.toLowerCase().includes(searchTerm.toLowerCase())
       )
     );
@@ -41,6 +41,8 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
     setIsListOpen(false); // Cierra la lista al seleccionar un producto
   };
 
+  console.log("Productos desde search", productos);
+
   return (
     <div className="relative">
       <input
@@ -55,7 +57,7 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
       />
       {isListOpen && searchTerm && (
         <ul className="absolute w-full bg-white border border-gray-200 mt-1 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-          {filteredProductos.map((producto) => (
+          {filteredProductos?.map((producto) => (
             <li
               key={producto.idProducto}
               onClick={() => handleSelectProducto(producto)}  // Llama a la función de selección

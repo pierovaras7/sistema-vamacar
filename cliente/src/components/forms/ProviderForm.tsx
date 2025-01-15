@@ -81,6 +81,9 @@ const ProviderForm = ({
   return (
     <form className="flex flex-col gap-6" onSubmit={onSubmit}>
       {/* Todos los inputs en un solo contenedor */}
+      <h1 className="text-xl font-semibold">
+        {type === "create" ? "Crear Proveedor" : "Actualizar Proveedor"}
+      </h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <InputField 
           label="RUC" 

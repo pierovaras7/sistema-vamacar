@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('detalles_CC', function (Blueprint $table) {
             $table->id("idDetalleCC");
             $table->string("motivo");
-            $table->date("fecha");
+            $table->dateTime("fecha");
             $table->float("monto");
             $table->float("saldo");
             $table->unsignedBigInteger('idCC');

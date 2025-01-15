@@ -16,22 +16,10 @@ class ModuleSeeder extends Seeder
     {
         // Crear registros manualmente
         Module::create([
-            'name' => 'Trabajadores',
-            'slug' => '/trabajadores',
-            'icon' => 'trabajadores',
-        ]);
-
-        Module::create([
-            'name' => 'Usuarios',
-            'slug' => '/users',
-            'icon' => 'usuarios',
-        ]);
-
-        Module::create([
             'name' => 'Marcas',
             'slug' => '/marcas',
             'icon' => 'marcas',
-        ]);
+        ]); 
 
         Module::create([
             'name' => 'Categorias',
@@ -46,9 +34,21 @@ class ModuleSeeder extends Seeder
         ]);
 
         Module::create([
+            'name' => 'Clientes',
+            'slug' => '/clientes',
+            'icon' => 'clientes',
+        ]);
+
+        Module::create([
             'name' => 'Ventas',
             'slug' => '/ventas',
             'icon' => 'ventas',
+        ]);
+
+        Module::create([
+            'name' => 'Cuentas por Cobrar',
+            'slug' => '/cuentasxcobrar',
+            'icon' => 'cobrar',
         ]);
 
         Module::create([
@@ -63,22 +63,29 @@ class ModuleSeeder extends Seeder
             'icon' => 'compras',
         ]);
 
-        Module::create([
-            'name' => 'Cuentas por Cobrar',
-            'slug' => '/cuentasxcobrar',
-            'icon' => 'cuentasxcobrar',
-        ]);
 
         Module::create([
             'name' => 'Cuentas por Pagar',
             'slug' => '/cuentasxpagar',
-            'icon' => 'cuentasxpagar',
+            'icon' => 'pagar',
         ]);
 
         Module::create([
-            'name' => 'Clientes',
-            'slug' => '/clientes',
-            'icon' => 'clientes',
+            'name' => 'Inventarios',
+            'slug' => '/inventarios',
+            'icon' => 'inventarios',
+        ]);
+
+        Module::create([
+            'name' => 'Trabajadores',
+            'slug' => '/trabajadores',
+            'icon' => 'trabajadores',
+        ]);
+
+        Module::create([
+            'name' => 'Usuarios',
+            'slug' => '/users',
+            'icon' => 'usuarios',
         ]);
 
     }

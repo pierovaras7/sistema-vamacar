@@ -15,18 +15,21 @@ use Illuminate\Support\Facades\Validator;
 class CuentasCobrarController extends Controller
 {
     public function index()
-{
-    $cuentas = CuentaPorCobrar::with(['detalles', 'cliente' => function ($query) {
-        $query->with(['natural', 'juridico']); // Cargar las relaciones 'natural' y 'juridico'
-    }])
-    ->leftJoin('detalles_cc as dcc', 'cuentas_por_cobrar.idCC', '=', 'dcc.idCC') // Relacionar detalles
-    ->select('cuentas_por_cobrar.*', DB::raw('MAX(dcc.fecha) as max_fecha')) // Seleccionar la fecha más reciente
-    ->groupBy('cuentas_por_cobrar.idCC') // Agrupar por la cuenta
-    ->orderBy('max_fecha', 'desc') // Ordenar por la fecha más reciente
-    ->get();
+    {
+        $cuentas = CuentaPorCobrar::with([
+            'detalles' => function ($query) {
+                $query->orderBy('fecha', 'desc'); // Ordenar los detalles por fecha descendente
+            },
+            'cliente' => function ($query) {
+                $query->with(['natural', 'juridico']); // Cargar las relaciones 'natural' y 'juridico'
+            }
+        ])
+        ->orderBy('idCC', 'desc') // Opcional, ordena las cuentas por su ID o cualquier otro criterio
+        ->get();
 
-    return response()->json($cuentas, 200);
-}
+        return response()->json($cuentas, 200);
+    }
+
     
 
     public function store(Request $request)
