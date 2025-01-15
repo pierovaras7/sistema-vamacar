@@ -1,15 +1,13 @@
 "use client";
 
 import { deleteTrabajador } from "@/services/trabajadoresService";
+import { deleteRepresentante} from "@/services/representantesService";
+
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useState } from "react";
-import { toast } from "sonner";
-
-// USE LAZY LOADING
-
-// import TeacherForm from "./forms/TeacherForm";
-// import StudentForm from "./forms/StudentForm";
+import { toast } from "react-toastify";
+import { deleteCliente } from "@/services/clientesService";
 
 const TrabajadorForm = dynamic(() => import("./forms/TrabajadorForm"), {
   loading: () => <h1>Loading...</h1>,
@@ -34,6 +32,20 @@ const ProductForm = dynamic(() => import("./forms/ProductForm"), {
   ssr: false,
 });
 
+const ProviderForm = dynamic(() => import("./forms/ProviderForm"), {
+  loading: () => <h1>Loading...</h1>,
+  ssr: false,
+});
+
+const ClientesForm = dynamic(() => import("./forms/ClientesForm"), {
+  loading: () => <h1>Loading...</h1>,
+  ssr: false,
+});
+
+const RepresentanteForm = dynamic(() => import("./forms/RepresentanteForm"), {
+  loading: () => <h1>Loading...</h1>,
+  ssr: false,
+});
 
 
 // Mapeo de formularios por tabla
@@ -48,10 +60,18 @@ const forms: {
     const handleClose = closeModal || (() => {});
     return <TrabajadorForm type={type} data={data} id={id} closeModal={handleClose} />;
   },
+  cliente: (type, data, id, closeModal) => {
+    const handleClose = closeModal || (() => {});
+    return <ClientesForm type={type} data={data} id={id} closeModal={handleClose} />;
+  },
+  representante: (type, data, id, closeModal) => {
+    const handleClose = closeModal || (() => {});
+    return <RepresentanteForm type={type} data={data} id={id} closeModal={handleClose} />;
+  },
   category: (type, data, id, closeModal) =>
     <CategoryForm type={type} data={data} id={id} onSuccess={() => closeModal?.()} />,
   subcategory: (type, data, id, closeModal) =>
-    <SubcategoryForm type={type} data={data}       idCategoria={data?.idCategoria || id}  onSuccess={() => closeModal?.()} />,
+    <SubcategoryForm type={type} data={data} idCategoria={data?.idCategoria || id}  onSuccess={() => closeModal?.()} />,
   brand: (type, data, id, closeModal) =>
     <BrandForm
       type={type}
@@ -66,6 +86,8 @@ const forms: {
         id={id}
         onSuccess={() => closeModal?.()}
       />,
+      provider: (type, data, id, closeModal) =>
+        <ProviderForm type={type} data={data} id={id} onSuccess={() => closeModal?.()} />,
 };
 
 
@@ -75,6 +97,7 @@ const FormModal = ({
   data,
   id,
   onUpdate,
+  onClick,
 }: {
   table:
     "trabajador"
@@ -82,10 +105,26 @@ const FormModal = ({
     | "brand"
     | "subcategory"
     | "product"
+    | "cliente"
+    | "representante"
+    | "juridico"
+    | "natural"
+    | "provider"
+    | "parent"
+    | "subject"
+    | "class"
+    | "lesson"
+    | "exam"
+    | "assignment"
+    | "result"
+    | "attendance"
+    | "event"
+    | "announcement";
   type: "create" | "update" | "delete";
   data?: any;
   id?: number;
-  onUpdate: () => void;
+  onUpdate?: () => void;
+  onClick?: (proveedor?: Proveedor) => void; // Cambiar el tipo de función
 }) => {
   const size = type === "create" ? "w-8 h-8" : "w-7 h-7";
   const bgColor =
@@ -99,23 +138,54 @@ const FormModal = ({
 
   const closeModal = () => {
     setOpen(false);
-    onUpdate(); // Actualizar lista al cerrar modal
+    if(onUpdate){
+      onUpdate(); // Actualizar lista al cerrar modal
+    }
+  
   };
 
 
   const Form = () => {
     const handleDelete = async () => {
-      if(id){
+      if (id) {
         try {
-          await deleteTrabajador(id);
+          console.log(`🛠️ [Componente] Eliminando elemento de la tabla: ${table}, ID: ${id}`);
+          
+          switch (table) {
+            case "trabajador":
+              await deleteTrabajador(id);
+              toast.success("El trabajador fue eliminado exitosamente");
+              break;
+            
+            case "representante":
+              await deleteRepresentante(id);
+              toast.success("El representante fue desactivado exitosamente");
+              break;
+            
+            case "cliente":
+              await deleteCliente(id);
+              toast.success("El registro  fue eliminado exitosamente");
+            
+              break;
+    
+            
+            default:
+              console.warn("⚠️ [Componente] Tabla no reconocida para eliminación:", table);
+              break;
+          }
+    
           setOpen(false);
-          toast.success("El trabajador fue eliminado exitosamente");
-          onUpdate();
-        } catch (error) {
-          console.error("Error deleting item:", error);
+          if(onUpdate){
+            onUpdate(); // Actualizar lista al cerrar modal
+          }
+        } catch (error: any) {
+          console.error("❌ [Componente] Error al eliminar elemento:", error.message || error);
+          toast.error("Error al eliminar elemento");
         }
       }
     };
+    
+    
     return type === "delete" && id ? (
       <div>
         <h2 className="text-lg font-semibold mb-4">Confirmar eliminación</h2>
@@ -151,12 +221,13 @@ const FormModal = ({
       <button
         className={`${size} flex items-center justify-center rounded-full ${bgColor}`}
         onClick={() => setOpen(true)}
+        type="button"
       >
         <Image src={`/${type}.png`} alt="" width={16} height={16} />
       </button>
       {open && (
         <div className="fixed inset-0 px-4 bg-black bg-opacity-60 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg shadow-lg relative w-full max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl p-6 overflow-y-auto max-h-[80vh]">
+          <div className="bg-white rounded-lg shadow-lg relative w-full md:w-2/3 p-6 overflow-y-auto max-h-[80vh]">
             <Form />
             <div
               className="absolute top-4 right-4 cursor-pointer"

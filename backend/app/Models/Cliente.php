@@ -26,4 +26,16 @@ class Cliente extends Model
     protected $casts = [
         'estado' => 'boolean',
     ];
+
+    // Relación con Natural
+    public function natural()
+    {
+        return $this->hasOne(Natural::class, 'idCliente', 'idCliente');
+    }
+
+    // Relación con Juridico
+    public function juridico()
+    {
+        return $this->hasOne(Juridico::class, 'idCliente', 'idCliente');
+    }
 }

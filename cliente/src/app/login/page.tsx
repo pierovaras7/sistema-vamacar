@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation'; // Importamos useRouter de Next.js
 import { toast, Toaster } from 'sonner';
 import useAuthStore from '@/stores/AuthStore';
+import { showErrorsToast } from '@/lib/functions';
 
 const LoginPage = () => {
   const { login } = useAuthStore();
@@ -11,18 +12,16 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  // Función para manejar el envío del formulario
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault();  
     try {
-      await login(username, password);
-      toast.success('Inicio de sesión exitoso');
-      setTimeout(() => {
-        router.push('/trabajadores'); // Redirigimos después de que pase el tiempo
-      }, 3000); // 5000 milisegundos = 5 segundos   
-
+      await login(username, password); // Llamamos al método login del store
+      toast.success("Inicio de sesión exitoso");
+        setTimeout(() => {
+        router.push("/home");
+      }, 1000); 
     } catch (error: any) {
-      toast.error(error.message);
+      showErrorsToast(error);
     }
   };
 

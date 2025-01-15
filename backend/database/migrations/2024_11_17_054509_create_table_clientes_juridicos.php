@@ -16,15 +16,11 @@ return new class extends Migration
             $table->string('razonSocial');
             $table->string('ruc');
             $table->unsignedBigInteger('idCliente');
-            $table->unsignedBigInteger('idRepresentante');
+            $table->string('representante');
             $table->foreign('idCliente')
                     ->references('idCliente') 
                     ->on('cliente')
                     ->onDelete('restrict'); 
-            $table->foreign('idRepresentante')
-                    ->references('idRepresentante') 
-                    ->on('representante')
-                    ->onDelete('restrict');
             $table->boolean('estado')->default(1);  
          
         });

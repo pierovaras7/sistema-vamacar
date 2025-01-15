@@ -1,12 +1,11 @@
 import axiosInstance from "@/lib/axiosInstance";
-import { LoginResponse, PerfilPayload } from "@/types";
+import { LoginResponse } from "@/types";
 import axios from "axios";
+
 
 export const login = async (username: string, password: string): Promise<any> => {
     try {
       const response : LoginResponse = (await axiosInstance.post('/login', { username, password })).data;
-      //const token = response.data.token;
-      //localStorage.setItem('token', token);
       return response;
     } catch (error: any) {
       if (axios.isAxiosError(error)) {
@@ -18,44 +17,47 @@ export const login = async (username: string, password: string): Promise<any> =>
     }
 };
 
-// Función para cerrar sesión
 export const logout = async () => {
-
     try {
-      // Realiza la solicitud de logout
       await axiosInstance.post("/logout");
-      window.location.href = "/"; // O usa cualquier redirección que prefieras
     } catch (error) {
       console.error("Error al cerrar sesión", error);
     }
   };
 
-// Función para verificar si el usuario está autenticado
-export const checkAuth = async () => {
+export const checkAuth = async (id: number) => {
     try {
-      const response = await axiosInstance.get("/user");
-      return response.data.user; // Deberías recibir los datos del usuario si está autenticado
+      const response = await axiosInstance.get(`/getUser/${id}`);
+      return response.data.user; 
     } catch (error) {
-      // Si ocurre un error, probablemente no está autenticado
       throw new Error("No autenticado");
     }
   };
 
-  export const updatePerfil = async (id: number, perfil: any): Promise<void> => {
+  export const refreshToken = async () => {
+      try {
+        const response = await axiosInstance.get('/refresh');
+        return response.data.user;
+      } catch (error: any) {
+          console.error('Error al refrescar el token:', error.response.data);
+      }
+  };
+
+
+  export const updateProfile = async (id: number, perfil: any): Promise<void> => {
     try {
-      await axiosInstance.put(`/perfil/${id}`, perfil); // Reemplaza `/usuarios/${id}` con la ruta correcta de tu API
+      await axiosInstance.put(`/updateProfile/${id}`, perfil); 
     } catch (error: any) {
       if (error.response && error.response.status === 422) {
-        // Extraer los errores del backend
-        const validationErrors = error.response.data.errors;
-        // Lanzar un nuevo error con los errores de validación
-        throw new Error(JSON.stringify(validationErrors)); // O puedes manipular los errores de manera más específica si lo deseas
-      } else {
-        // Si el error no es de validación, lanzar un error genérico
-        throw new Error('Error al registrar el trabajador');
-      }   
+        if (error.response && error.response.status === 422) {
+          const validationErrors = error.response.data.errors;
+          throw new Error(JSON.stringify(validationErrors)); 
+        } else {
+          throw new Error('Error al actualizar el perfil del usuario.');
+        }   
     }
   };
   
+}
 
 

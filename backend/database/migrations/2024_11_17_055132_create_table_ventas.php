@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('venta', function (Blueprint $table) {
             $table->id('idVenta');
-            $table->date('fecha');
+            $table->dateTime('fecha');
             $table->decimal('total');
+            $table->decimal('montoPagado');
             $table->string('tipoVenta');
-            $table->string('metodoPago');
-            $table->unsignedBigInteger('idTrabajador');
+            $table->string('metodoPago')->nullable();
+            $table->unsignedBigInteger('idTrabajador')->nullable();
             $table->unsignedBigInteger('idSede');
             $table->unsignedBigInteger('idCliente');
 

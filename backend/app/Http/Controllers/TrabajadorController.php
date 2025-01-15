@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Sede;
 use App\Models\Trabajador;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class TrabajadorController extends Controller
@@ -15,8 +17,9 @@ class TrabajadorController extends Controller
     public function index()
     {
         //corregir
-        $trabajadores = Trabajador::where("estado", "=", 1)->get();
+        $trabajadores = Trabajador::where("estado", "=", 1)->with('sede')->get();
 
+        
         if ($trabajadores->isEmpty()) {
             return response()->json([
                 'message' => 'No se encontraron trabajadores.'
@@ -24,6 +27,20 @@ class TrabajadorController extends Controller
         }
 
         return response()->json($trabajadores, 200);
+    }
+
+    public function getAvailableSedes()
+    {
+        //corregir
+        $sedes = Sede::where("estado", "=", 1)->get();
+
+        if ($sedes->isEmpty()) {
+            return response()->json([
+                'message' => 'No se encontraron sedes.'
+            ], 404);
+        }
+
+        return response()->json($sedes, 200);
     }
 
     /**
@@ -43,6 +60,7 @@ class TrabajadorController extends Controller
             'fechaNacimiento' => 'required|date',
             'turno' => 'nullable|string|max:50',
             'salario' => 'required|numeric|min:0',
+            'sede' => 'required'
         ];
         
         $messages = [
@@ -102,8 +120,22 @@ class TrabajadorController extends Controller
         }
 
         try {
-            // Si la validación pasa, crear el trabajador
-            $trabajador = Trabajador::create($validator->validated());
+            // Si `sede` es un objeto, verifica y obtén el ID de la sede
+            $sedeId = $request->input('sede.idSede');
+
+            // dd($sedeId);
+
+            if (!$sedeId || !Sede::find($sedeId)) {
+                return response()->json([
+                    'message' => 'La sede proporcionada no existe.'
+                ], 422);
+            }
+
+            // Crear el trabajador
+            $trabajador = Trabajador::create(array_merge(
+                $validator->validated(),
+                ['idSede' => $sedeId] // Agregar la relación con la sede
+            ));
             $trabajador->estado = 1;
             $trabajador->save();
 
@@ -112,12 +144,14 @@ class TrabajadorController extends Controller
 
             if($request->crearCuenta){
                 User::create([
-                    'name' => $request->nombres,
+                    'name' => $request->nombres . ' ' . $request->apellidos,
                     'username' => $request->dni,
                     'password' => bcrypt($request->dni), // Encriptar la contraseña
                     'idTrabajador' => $idTrabajador
                 ]);
             }
+            
+            $trabajador->load('sede');
 
             return response()->json([
                 'message' => 'Trabajador creado exitosamente.',
@@ -173,6 +207,7 @@ class TrabajadorController extends Controller
             'fechaNacimiento' => 'required|date', // Obligatorio, debe ser una fecha válida
             'turno' => 'nullable|string|max:50', // Opcional, máximo 50 caracteres
             'salario' => 'required|numeric|min:0', // Obligatorio, debe ser un número mayor o igual a 0
+            'sede' => 'required'
         ];
         
 
@@ -230,6 +265,12 @@ class TrabajadorController extends Controller
             // Si la validación pasa, actualizar el trabajador
             $trabajador->update($validator->validated());
 
+            // Asociar la sede
+            if ($request->has('sede')) {
+                $trabajador->idSede = $request->input('sede.idSede');
+                $trabajador->save();
+            }
+            
             return response()->json([
                 'message' => 'Trabajador actualizado exitosamente.',
                 'trabajador' => $trabajador
@@ -246,28 +287,51 @@ class TrabajadorController extends Controller
      * Elimina un trabajador.
      */
     public function destroy($id)
-    {
-        $trabajador = Trabajador::find($id);
+{
+    // Buscar al trabajador por su ID
+    $trabajador = Trabajador::find($id);
 
-        if (!$trabajador) {
-            return response()->json([
-                'message' => 'Trabajador no encontrado.'
-            ], 404);  // Código 404: No encontrado
-        }
-
-        try {
-            // Eliminar el trabajador
-            $trabajador->estado = 0;
-            $trabajador->save();
-
-            return response()->json([
-                'message' => 'Trabajador eliminado correctamente.'
-            ], 200);  // Código 200: OK
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Error al eliminar el trabajador.',
-                'error' => $e->getMessage()
-            ], 500);  // Código 500: Error interno del servidor
-        }
+    // Verificar si el trabajador existe
+    if (!$trabajador) {
+        return response()->json([
+            'message' => 'Trabajador no encontrado.'
+        ], 404);  // Código 404: No encontrado
     }
+
+    // Iniciar una transacción para asegurar la consistencia
+    DB::beginTransaction();
+
+    try {
+        // Borrado lógico del trabajador
+        $trabajador->estado = 0;  // Marcamos el trabajador como inactivo
+        $trabajador->save();
+
+        // Buscar al usuario asociado con el trabajador
+        $usuario = User::where('idTrabajador', $id)->first();
+
+        // Verificar si el usuario existe
+        if ($usuario) {
+            // Borrado lógico del usuario asociado
+            $usuario->estado = 0;  // Marcamos el usuario como inactivo
+            $usuario->save();
+        }
+
+        // Confirmar la transacción
+        DB::commit();
+
+        return response()->json([
+            'message' => 'Trabajador y usuario eliminados correctamente (borrado lógico).'
+        ], 200);  // Código 200: OK
+
+    } catch (\Exception $e) {
+        // Si ocurre un error, revertir la transacción
+        DB::rollBack();
+
+        return response()->json([
+            'message' => 'Error al eliminar el trabajador y su usuario asociado.',
+            'error' => $e->getMessage()
+        ], 500);  // Código 500: Error interno del servidor
+    }
+}
+
 }

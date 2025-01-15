@@ -18,6 +18,7 @@ class Venta extends Model
     protected $fillable = [
         'fecha',
         'total',
+        'montoPagado',
         'tipoVenta',
         'metodoPago',
         'idTrabajador',
@@ -43,5 +44,10 @@ class Venta extends Model
     public function cliente()
     {
         return $this->belongsTo(Cliente::class, 'idCliente', 'idCliente');
+    }
+
+    public function detalles()
+    {
+        return $this->hasMany(DetalleVenta::class, 'idVenta', 'idVenta');
     }
 }

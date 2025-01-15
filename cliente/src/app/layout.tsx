@@ -2,7 +2,6 @@
 
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
-import { AuthProvider } from "@/context/AuthContext"; // Tu contexto de autenticación
 import "./globals.css";  // Asegúrate de que los estilos estén importados
 
 
@@ -23,11 +22,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <AuthProvider>
       <html lang="en">
         <body className={poppins.className}>{children}</body>
       </html>
-    </AuthProvider>
   );
 }
 

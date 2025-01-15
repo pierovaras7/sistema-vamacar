@@ -8,6 +8,7 @@ import TableSearch from "@/components/TableSearch";
 import { getBrands, deleteBrand } from "@/services/marcaService";
 import Image from "next/image";
 import { toast } from 'sonner';
+import PrivateRoute from "@/components/PrivateRouter";
 
 type Brand = {
   idMarca: number;
@@ -16,9 +17,9 @@ type Brand = {
 };
 
 const columns = [
-  { header: "ID", accessor: "idMarca", className: "pl-4", width: "w-3/12" },
-  { header: "Marca", accessor: "marca", width: "w-6/12" },
-  { header: "Acciones", accessor: "actions", width: "w-3/12" },
+  { header: "ID", accessor: "idMarca", className: "hidden md:table-cell pl-4", width: "w-2/12" },
+  { header: "Marca", accessor: "marca", width: "w-4/12" },
+  { header: "Acciones", accessor: "actions", width: "w-4/12" },
 ];
 
 const BrandListPage = () => {
@@ -62,7 +63,7 @@ const BrandListPage = () => {
       await deleteBrand(selectedBrand.idMarca);
       setIsDeleteModalOpen(false);
       fetchBrands();
-      toast.success("Marca eliminada exitosamente");
+      toast.success("Marca eliminada exitosamente.");
     } catch (error: any) {
       console.error("Error al eliminar marca:", error.message);
     } finally {
@@ -76,10 +77,10 @@ const BrandListPage = () => {
 
   const renderRow = (item: Brand) => (
     <tr key={item.idMarca} className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-gray-100">
-      <td className="p-4">{item.idMarca}</td>
-      <td>{item.marca}</td>
+      <td className="hidden md:table-cell p-4">{item.idMarca}</td>
+      <td className="">{item.marca}</td>
       <td>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full justify-center">
           <FormModal
             table="brand"
             type="update"
@@ -102,54 +103,57 @@ const BrandListPage = () => {
   );
 
   return (
-    <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
-      <div className="flex items-center justify-between">
-        <h1 className="hidden md:block text-lg font-semibold">Marcas</h1>
-        <div className="flex items-center gap-4 w-full md:w-auto">
-          <TableSearch onSearch={handleSearch} />
-          <FormModal
-            table="brand"
-            type="create"
-            onUpdate={fetchBrands}
-          />
-        </div>
-      </div>
-      {loading ? (
-        <div className="text-center py-4">Cargando...</div>
-      ) : (
-        <Table columns={columns} renderRow={renderRow} data={currentBrands} />
-      )}
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
-      {/* Modal de Confirmación para Eliminar */}
-      {isDeleteModalOpen && selectedBrand && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-md shadow-lg mx-4">
-            <h2 className="text-lg font-semibold mb-4">Confirmar eliminación</h2>
-            <p className="mb-6">
-              ¿Estás seguro de que deseas eliminar la marca "{selectedBrand.marca}"?
-            </p>
-            <div className="flex gap-4 justify-end">
-              <button
-                className="bg-gray-300 text-black px-4 py-2 rounded-md"
-                onClick={() => setIsDeleteModalOpen(false)}
-              >
-                Cancelar
-              </button>
-              <button
-                className="bg-red-500 text-white px-4 py-2 rounded-md"
-                onClick={handleDeleteBrand}
-              >
-                Confirmar
-              </button>
-            </div>
+    <PrivateRoute slug="/marcas">
+      <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
+        <div className="flex flex-col md:flex-row items-center justify-between">
+          <h1 className="text-lg font-semibold w-full justify-start m-2">Marcas</h1>
+          <div className="flex items-center gap-4 w-full md:w-auto">
+            <TableSearch onSearch={handleSearch} />
+            <FormModal
+              table="brand"
+              type="create"
+              onUpdate={fetchBrands}
+            />
           </div>
         </div>
-      )}
-    </div>
+        {loading ? (
+          <div className="text-center py-4">Cargando...</div>
+        ) : (
+          <Table columns={columns} renderRow={renderRow} data={currentBrands} />
+        )}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+        {/* Modal de Confirmación para Eliminar */}
+        {isDeleteModalOpen && selectedBrand && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div className="bg-white p-6 rounded-md shadow-lg mx-4">
+              <h2 className="text-lg font-semibold mb-4">Confirmar eliminación</h2>
+              <p className="mb-6">
+                ¿Estás seguro de que deseas eliminar la marca "{selectedBrand.marca}"?
+              </p>
+              <div className="flex gap-4 justify-end">
+                <button
+                  className="bg-gray-300 text-black px-4 py-2 rounded-md"
+                  onClick={() => setIsDeleteModalOpen(false)}
+                >
+                  Cancelar
+                </button>
+                <button
+                  className="bg-red-500 text-white px-4 py-2 rounded-md"
+                  onClick={handleDeleteBrand}
+                >
+                  Confirmar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </PrivateRoute>
+
   );
 };
 

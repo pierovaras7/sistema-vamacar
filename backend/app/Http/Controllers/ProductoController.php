@@ -2,21 +2,32 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Inventario;
 use App\Models\Producto;
 use Illuminate\Http\Request;
 
 class ProductoController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $productos = Producto::with(['subcategoria', 'marca'])->get();
-            return response()->json($productos, 200);
+            // Usamos eager loading para obtener los productos junto con su inventario
+            $productos = Producto::with(['subcategoria', 'marca', 'inventario'])->get();
+
+            // Agregamos el stock al resultado
+            $productosConStock = $productos->map(function ($producto) {
+                // Si el producto tiene inventario, agregamos el stock
+                $producto->stockActual = $producto->inventario ? $producto->inventario->stockActual : 0; // Si no tiene inventario, asignamos 0
+                return $producto;
+            });
+
+            return response()->json($productosConStock, 200);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error al listar los productos.', 'error' => $e->getMessage()], 500);
         }
     }
+
 
 
     public function store(Request $request)
@@ -71,6 +82,13 @@ class ProductoController extends Controller
                 'estado' => true, // Estado por defecto
             ]);
     
+            // Crear inventario asociado
+            Inventario::create([
+                'idProducto' => $producto->idProducto,
+                'stockMinimo'  => $request->input('stockMinimo'), 
+                'stockActual' => $request->input('stockInicial'),
+            ]);
+
             return response()->json([
                 'message' => 'Producto creado exitosamente.',
                 'producto' => $producto,
@@ -122,10 +140,16 @@ class ProductoController extends Controller
 
             $producto->update($request->all());
 
+            // Crear inventario asociado
+            $inventario = Inventario::where("idProducto", "=", $id)->first();
+            $inventario->stockMinimo = $request->input('stockMinimo');
+            $inventario->save();
+
             return response()->json([
                 'message' => 'Producto actualizado exitosamente.',
                 'producto' => $producto,
             ], 200);
+
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['message' => 'Error de validación.', 'errors' => $e->errors()], 422);
         } catch (\Exception $e) {

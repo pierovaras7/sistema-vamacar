@@ -5,10 +5,10 @@ import CountChart from "@/components/CountChart";
 import EventCalendar from "@/components/EventCalendar";
 import FinanceChart from "@/components/FinanceChart";
 import UserCard from "@/components/UserCard";
-import { useAuth } from "@/context/AuthContext";
+import useAuthStore from "@/stores/AuthStore";
 
 const AdminPage = () => {
-  const { user } = useAuth(); // Accedemos a la función `login` del AuthContext
+  const { user } = useAuthStore(); // Accedemos a la función `login` del AuthContext
 
   return (
     <div className="p-4 flex gap-4 flex-col md:flex-row">

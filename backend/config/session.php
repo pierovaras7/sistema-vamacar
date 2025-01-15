@@ -169,7 +169,8 @@ return [
     |
     */
 
-    'secure' => env('SESSION_SECURE_COOKIE'),
+    'secure' => env('SESSION_SECURE_COOKIE', true), // Asegúrate de que esté en `true` si usas HTTPS.
+    'same_site' => 'None', // Asegúrate de que esté en 'None' si estás usando CORS.
 
     /*
     |--------------------------------------------------------------------------
@@ -199,7 +200,6 @@ return [
     |
     */
 
-    'same_site' => env('SESSION_SAME_SITE', 'lax'),
 
     /*
     |--------------------------------------------------------------------------

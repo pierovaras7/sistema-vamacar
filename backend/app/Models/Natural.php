@@ -16,6 +16,7 @@ class Natural extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'dni',
         'nombres',
         'apellidos',
         'idCliente',

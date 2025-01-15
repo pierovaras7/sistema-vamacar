@@ -19,7 +19,7 @@ class Juridico extends Model
         'razonSocial',
         'ruc',
         'idCliente',
-        'idRepresentante',
+        'representante',
         'estado',
     ];
 

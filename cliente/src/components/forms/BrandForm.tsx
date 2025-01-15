@@ -44,10 +44,10 @@ const BrandForm = ({
     try {
       if (type === "create") {
         await createBrand(formData);
-        toast.success("Marca creada exitosamente");
+        toast.success("Marca creada exitosamente.");
       } else if (type === "update" && data?.idMarca) {
         await updateBrand(data.idMarca, formData);
-        toast.success("Marca editada exitosamente");
+        toast.success("Marca editada exitosamente.");
       }
       setErrorMessage("");
       onSuccess?.();

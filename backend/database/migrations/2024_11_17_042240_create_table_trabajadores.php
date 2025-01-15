@@ -23,6 +23,11 @@ return new class extends Migration
             $table->date('fechaNacimiento')->nullable();
             $table->string('turno')->nullable();
             $table->decimal('salario')->nullable();
+            $table->unsignedBigInteger('idSede')->nullable();
+            $table->foreign('idSede')
+                    ->references('idSede') 
+                    ->on('sede')
+                    ->onDelete('restrict');
             $table->boolean('estado')->default(1);  
         });
     }

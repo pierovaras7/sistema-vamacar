@@ -1,5 +1,5 @@
 import axiosInstance from '@/lib/axiosInstance';
-import { Trabajador } from '@/types';
+import { Sede, Trabajador } from '@/types';
 
 // Definir la URL base para los trabajadores
 const API_URL = '/trabajadores'; // Cambia la URL según tu API
@@ -10,6 +10,15 @@ export const getAllTrabajadores = async (): Promise<Trabajador[]> => {
     return response.data;
   } catch (error) {
     throw new Error('Error al obtener los trabajadores');
+  }
+};
+
+export const getAllSedes = async (): Promise<Sede[]> => {
+  try {
+    const response = await axiosInstance.get('/sedes');
+    return response.data;
+  } catch (error) {
+    throw new Error('Error al obtener los sedes');
   }
 };
 

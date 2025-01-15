@@ -116,8 +116,6 @@ class UsersController extends Controller
         // Validar que el usuario existe
         $user = User::find($id);
 
-       
-
         if (!$user) {
             return response()->json([
                 'message' => 'Usuario no encontrado.',
@@ -135,6 +133,7 @@ class UsersController extends Controller
             'name.max' => 'El nombre es no puede exceder los 40 caracteres.',
             'username.max' => 'El username no puede exceder los 30 caracteres.',
             'username.unique' => 'El username ya existe en el sistema, intente otra opcion.',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
         ];
 
         // Crear el validador
@@ -155,6 +154,11 @@ class UsersController extends Controller
                 if ($request->has($key) && in_array($key, ['name', 'username'])) { // Solo los campos permitidos
                     $user->{$key} = $value;
                 }
+            }
+
+             // Verificar y actualizar la contraseña si es proporcionada
+            if ($request->has('password') && $request->password) {
+                $user->password = bcrypt($request->password);  // Encriptar la nueva contraseña
             }
 
             // Actualizar los módulos si se proporcionan

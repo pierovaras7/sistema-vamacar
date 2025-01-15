@@ -3,9 +3,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import InputField from "../InputField";
-import { saveTrabajador, updateTrabajador } from "@/services/trabajadoresService";
+import { getAllSedes, saveTrabajador, updateTrabajador } from "@/services/trabajadoresService";
 import { toast } from "sonner";
-import { Trabajador } from "@/types";
+import { Sede, Trabajador } from "@/types";
+import { useEffect, useState } from "react";
+import useSedes from "@/hooks/useSedes";
 
 // Calcular la mayoría de edad (18 años)
 const isAdult = (dateString: string): boolean => {
@@ -28,6 +30,7 @@ const schema = z.object({
     .length(9, { message: "El teléfono debe tener exactamente 9 caracteres." })
     .regex(/^\d+$/, { message: "El teléfono debe contener solo números." }),
   sexo: z.enum(["M", "F"], { message: "Sexo es un campo requerido." }),
+  sede: z.string().nonempty({ message: "Sede es un campo requerido." }),
   direccion: z.string().min(1, { message: "Dirección es requerida." }),
   dni: z
     .string()
@@ -40,33 +43,32 @@ const schema = z.object({
   .refine(isAdult, { message: "Debe ser mayor de edad." }),  
   turno: z.enum(['mañana', 'tarde'], { message: "Turno es un campo requerido." }),
   salario: z
-    .coerce
-    .number({
-      invalid_type_error: "Salario debe ser un número.",
-    })
-    .positive({ message: "Salario debe ser mayor a 0." }),
+    .string() // Espera un string
+    .transform((val) => parseFloat(val)) // Convierte el string a un número
+    .refine((val) => !isNaN(val), { message: "Salario debe ser un número." }) // Asegúrate de que sea un número
+    .refine((val) => val >= 0, { message: "Salario debe ser mayor o igual a 0." }),
   crearCuenta: z.boolean().optional(),
 });
 
 type Inputs = z.infer<typeof schema>;
 
-// Desestructuración del contexto de las entidades
 
 const TrabajadorForm = ({
   type,
   data,
   id,
-  closeModal
+  closeModal,
 }: {
   type: "create" | "update";
-  data?: Inputs;
+  data?: any;
   id?: number;
-  closeModal: () => void
+  closeModal: () => void,
 }) => {
   const {
     register,
     handleSubmit,
     formState: { errors },
+    setValue
   } = useForm<Inputs>({
     resolver: zodResolver(schema),
     defaultValues: data
@@ -77,6 +79,27 @@ const TrabajadorForm = ({
     : { crearCuenta: false },
   });
 
+  const { sedes } = useSedes();
+  const [sedeSeleccionada, setSedeSeleccionada] = useState<Sede>(); 
+
+  useEffect(() => {
+    if (data?.sede?.idSede) {
+      const sedePorDefecto = sedes?.find(sede => sede.idSede === data.sede.idSede);
+      if (sedePorDefecto) {
+        setSedeSeleccionada(sedePorDefecto);  // Establece la sede seleccionada al cargar el formulario
+      }
+      setValue("sede", data.sede.idSede.toString());
+    }
+  }, [data, sedes]);  // Este useEffect se ejecuta cuando `data` o `sedes` cambian
+
+  
+  const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const sedeSeleccionada = sedes?.find(sede => sede.idSede === Number(event.target.value));
+    if (sedeSeleccionada) {
+      setSedeSeleccionada(sedeSeleccionada);
+    }
+  };
+   
   const onSubmit = handleSubmit(async (data) => {
     try {
       const trabajador: Trabajador = {
@@ -90,6 +113,7 @@ const TrabajadorForm = ({
         fechaNacimiento: new Date(data.fechaNacimiento).toISOString(),
         turno: data.turno,
         salario: data.salario,
+        sede: sedeSeleccionada
       };
 
       const requestData = {
@@ -138,7 +162,7 @@ const TrabajadorForm = ({
       <h1 className="text-xl font-semibold">
         {type === "create" ? "Crear Trabajador" : "Actualizar Trabajador"}
       </h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="flex flex-col md:grid grid-cols-4">
         <InputField
           label="Nombres"
           name="nombres"
@@ -169,30 +193,30 @@ const TrabajadorForm = ({
           register={register}
           error={errors?.dni}
         />
-        <div className="flex flex-col gap-2 w-full px-2">
-          <label className="text-xs text-gray-500">Sexo</label>
+        <div className="flex flex-col gap-2 w-full px-2 mb-2">
+          <label className="text-sm font-medium text-gray-700">Sexo</label>
           <select
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:ring focus:ring-blue-300 focus:outline-none"
             {...register("sexo")}
           >
             <option value="M">Masculino</option>
             <option value="F">Femenino</option>
           </select>
           {errors.sexo?.message && (
-            <p className="text-xs text-red-400">{errors.sexo.message}</p>
+            <p className="text-sm text-red-500">{errors.sexo.message}</p>
           )}
         </div>
-        <div className="flex flex-col gap-2 px-2 w-full">
-          <label className="text-xs text-gray-500">Area</label>
+        <div className="flex flex-col gap-2 px-2 w-full mb-2">
+          <label className="text-sm font-medium text-gray-700">Area</label>
           <select
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:ring focus:ring-blue-300 focus:outline-none"
             {...register("area")}
           >
             {type === "create" ? <option value="">Seleccionar una opción</option> : ""}
             <option value="atencion">Atencion</option>
           </select>
           {errors.area?.message && (
-            <p className="text-xs text-red-400">{errors.area.message}</p>
+            <p className="text-sm text-red-500">{errors.area.message}</p>
           )}
         </div>
         <InputField
@@ -202,17 +226,17 @@ const TrabajadorForm = ({
           register={register}
           error={errors?.fechaNacimiento}
         />
-        <div className="flex flex-col gap-2 px-2 w-full">
-          <label className="text-xs text-gray-500">Turno</label>
+        <div className="flex flex-col gap-2 px-2 w-full mb-2">
+          <label className="text-sm font-medium text-gray-700">Turno</label>
           <select
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:ring focus:ring-blue-300 focus:outline-none"
             {...register("turno")}
           >
             <option value="mañana">Mañana</option>
             <option value="tarde">Tarde</option>
           </select>
           {errors.turno?.message && (
-            <p className="text-xs text-red-400">{errors.turno.message}</p>
+            <p className="text-sm text-red-500">{errors.turno.message}</p>
           )}
         </div>
         <InputField
@@ -223,12 +247,34 @@ const TrabajadorForm = ({
           register={register}
           error={errors?.salario}
         />
-        <div className="flex flex-col justify-center gap-2 px-2 w-full col-span-2">
+        <div className="flex flex-col gap-2 w-full px-2 mb-2">
+          <label className="text-sm font-medium text-gray-700">Sede</label>
+          <select
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:ring focus:ring-blue-300 focus:outline-none"
+            {...register("sede")}
+            onChange={handleChange}
+            value={sedeSeleccionada?.idSede}
+          >
+            <option value="">
+              Selecciona una sede
+            </option>
+            {sedes?.map((sede) => (
+              <option key={sede.idSede} value={sede.idSede}>
+                {sede.direccion}
+              </option>
+            ))}
+          </select>
+
+          {errors.sede?.message && (
+            <p className="text-sm text-red-500">{errors.sede.message}</p>
+          )}
+        </div>
+        <div className="flex gap-2 px-4 py-3 w-full col-span-2">
           <label className="text-sm">
             <input type="checkbox" {...register("crearCuenta")} /> Crear cuenta en el sistema
           </label>
           {errors.crearCuenta && (
-            <p className="text-xs text-red-400">{errors.crearCuenta.message}</p>
+            <p className="text-sm text-red-500">{errors.crearCuenta.message}</p>
           )}
         </div>
       </div>

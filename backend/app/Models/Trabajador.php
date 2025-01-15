@@ -34,4 +34,9 @@ class Trabajador extends Model
         'salario' => 'decimal:2',
         'estado' => 'boolean',
     ];
+
+    public function sede()
+    {
+        return $this->belongsTo(Sede::class, 'idSede', 'idSede');
+    }
 }
