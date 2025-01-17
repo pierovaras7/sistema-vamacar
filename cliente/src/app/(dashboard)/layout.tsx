@@ -42,9 +42,9 @@ export default function DashboardLayout({
     if (user && !loaded) {
       console.log("reload");
       reloadModules(user.idUser);
-      setLoaded(true);  // Marcar como cargado para que no vuelva a ejecutarse
+      setLoaded(true);  
     }
-  }, [user, loaded, reloadModules]); // Dependencias del useEffect
+  }, [user, loaded, reloadModules]); 
 
   if(!user){
     return null;
