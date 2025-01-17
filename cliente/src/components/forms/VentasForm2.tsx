@@ -178,11 +178,7 @@ const VentasForm2 = ({
     }
   };
 
-  // useEffect(()=>{
-  //   console.log("prods actualizados",productos)
-  //   fetchProductos()
-  // },[productos])
-  console.log("prods fuera",productos)
+
 
   const handleInputChangeDataCliente = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = event.target;

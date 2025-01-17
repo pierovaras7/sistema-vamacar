@@ -33,6 +33,9 @@ const VentasPage = () => {
   const [perPage] = useState(10);
   const [loading, setLoading] = useState(true); // Estado de carga
   const router = useRouter(); // Para redirigir si no hay módulos
+  const [fechaInicio, setFechaInicio] = useState<string>("");
+  const [fechaFin, setFechaFin] = useState<string>("");
+
 
   const refreshVentas = async () => {
     setLoading(true); // Comienza la carga
@@ -65,21 +68,50 @@ const VentasPage = () => {
   useEffect(() => {
     const filtered = ventas.filter((venta) => {
       const search = searchTerm.toLowerCase();
-    
+  
       // Verifica si es cliente natural
       const clienteNatural =
         venta.cliente?.natural?.nombres?.toLowerCase().includes(search) ||
         venta.cliente?.natural?.apellidos?.toLowerCase().includes(search);
-    
+  
       // Verifica si es cliente jurídico
       const clienteJuridico =
         venta.cliente?.juridico?.razonSocial?.toLowerCase().includes(search);
+  
+      // Filtro por fechas
+      const ventaFecha = new Date(venta.fecha);
+  
+      const parseLocalDate = (dateStr: any) => {
+        if (!dateStr) return null;
+        const [year, month, day] = dateStr.split('-').map(Number);
+        return new Date(year, month - 1, day, 0, 0, 0); // Configura 00:00:00
+      };
+  
+      const inicioFecha = parseLocalDate(fechaInicio);
+      const finFecha = parseLocalDate(fechaFin);
+  
+      console.log("Fecha inicio (original): ", fechaInicio);
+      console.log("Inicio Fecha (formateada): ", inicioFecha ? formatDate(inicioFecha) : null);
+  
+      const fechaValida =
+        (!inicioFecha || ventaFecha >= inicioFecha) && (!finFecha || ventaFecha <= finFecha);
+  
       // Retorna true si alguna de las condiciones es verdadera
-      return clienteNatural || clienteJuridico ;
+      return (clienteNatural || clienteJuridico) && fechaValida;
     });
-    
+  
     setFilteredVentas(filtered);
-  }, [searchTerm, ventas]);
+  }, [searchTerm, ventas, fechaInicio, fechaFin]);
+  
+  const formatDate = (date: any) => {
+    if (!date) return null;
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  
+  
 
   const renderRow = (item: Venta) => (
     <tr
@@ -152,18 +184,51 @@ const VentasPage = () => {
     setCurrentPage(page);
   };
 
+  const getMinDate = (fechaInicio: string): string => {
+    const date = new Date(fechaInicio);
+    date.setDate(date.getDate() + 1); // Sumar un día
+    return date.toISOString().split("T")[0]; // Formato YYYY-MM-DD
+  };
+
   return (
     <PrivateRoute slug="/ventas">
       <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
-      <div className="flex flex-col md:flex-row items-center justify-between">
-          <h1 className="text-lg font-semibold w-full justify-start m-2">Ventas</h1>
-          <div className="flex items-center gap-4 w-full md:w-auto">
-            <TableSearch onSearch={(term) => setSearchTerm(term)} />
-            <span onClick={() => {router.push('/ventas/create')}} className="cursor-pointer">
-                <PlusCircleIcon className="w-6 h-6 text-gray-800" />
-            </span>
-        </div>
-      </div>
+      <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8 justify-between w-full my-6">
+  <h1 className="text-lg font-semibold md:w-auto w-full text-center md:text-left m-2">Ventas</h1>
+
+  <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+    <div className="flex flex-col w-full md:w-auto">
+      <label htmlFor="fechaInicio" className="text-xs font-semibold">Fecha de Inicio</label>
+      <input
+        type="date"
+        id="fechaInicio"
+        value={fechaInicio}
+        onChange={(e) => setFechaInicio(e.target.value)}
+        className="border p-2 rounded text-xs"
+      />
+    </div>
+
+    <div className="flex flex-col w-full md:w-auto">
+      <label htmlFor="fechaFin" className="text-xs font-semibold">Fecha de Fin</label>
+      <input
+        type="date"
+        id="fechaFin"
+        value={fechaFin}
+        min={fechaInicio ? getMinDate(fechaInicio) : undefined}
+        onChange={(e) => setFechaFin(e.target.value)}
+        className="border p-2 rounded text-xs"
+      />
+    </div>
+  </div>
+
+  <div className="flex items-center gap-4 w-full md:w-auto">
+    <TableSearch onSearch={(term) => setSearchTerm(term)} />
+    <span onClick={() => {router.push('/ventas/create')}} className="cursor-pointer">
+      <PlusCircleIcon className="w-6 h-6 text-gray-800" />
+    </span>
+  </div>
+</div>
+
 
 
         <div className="overflow-x-auto">

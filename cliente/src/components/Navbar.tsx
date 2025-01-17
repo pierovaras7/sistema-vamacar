@@ -30,7 +30,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, notificaciones }) => {
       {isDropdownOpen && (
         <div className="absolute top-14 right-0 bg-white shadow-lg rounded-md w-64 md:w-96 p-2 z-50">
           <h3 className="text-sm font-bold mb-2">Notificaciones</h3>
-          <ul className="space-y-2">
+          <ul className="space-y-2 max-h-[25vh] overflow-y-auto">
             {notificaciones && notificaciones.length > 0 ? (
               notificaciones.map((notificacion, index) => (
                 <li
