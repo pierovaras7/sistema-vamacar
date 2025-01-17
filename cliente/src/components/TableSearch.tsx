@@ -10,7 +10,6 @@ const TableSearch = ({ onSearch }: { onSearch: (term: string) => void }) => {
         className="w-[200px] p-2 bg-transparent outline-none"
         onChange={(e) => {
           onSearch(e.target.value)
-          console.log(e.target.value)
         }} // Captura el texto ingresado
       />
     </div>

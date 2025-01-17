@@ -18,19 +18,43 @@ use Illuminate\Support\Facades\DB;
 
 class VentaController extends Controller
 {
-    // Mostrar todos las ventas
-    public function index()
+    // Mostrar todos las ventas, con opción de filtrar por rango de fechas
+    public function index(Request $request)
     {
-        $ventas = Venta::with(['trabajador', 'detalles.producto','sede', 'cliente' => function ($query) {
-            $query->with(['natural', 'juridico']); // Cargar las relaciones 'natural' y 'juridico'
-        }])
-        ->orderBy('fecha', 'desc') // Ordenar por la columna 'fecha' en orden descendente
-        ->get();
-        
+        $fechaInicio = $request->input('fechaInicio'); // Obtener el parámetro de fecha inicio
+        $fechaFin = $request->input('fechaFin');       // Obtener el parámetro de fecha fin
+
+        // Crear una consulta base con las relaciones necesarias
+        $query = Venta::with([
+            'trabajador', 
+            'detalles.producto', 
+            'sede', 
+            'cliente' => function ($query) {
+                $query->with(['natural', 'juridico']); // Cargar las relaciones 'natural' y 'juridico'
+            }
+        ]);
+
+
+
+        if ($fechaInicio && $fechaFin) {
+            // Si ambos parámetros están presentes, usar whereBetween
+            $query->whereBetween('fecha', [$fechaInicio, $fechaFin]);
+        } elseif ($fechaInicio) {
+            // Si solo se proporciona fechaInicio, filtrar desde esa fecha
+            $query->where('fecha', '>=', $fechaInicio);
+        } elseif ($fechaFin) {
+            // Si solo se proporciona fechaFin, filtrar hasta esa fecha
+            $query->where('fecha', '<=', $fechaFin);
+        } else {
+            // Si no se proporcionan fechas, traer ventas del último mes
+            $query->where('fecha', '>=', now()->subMonth());
+        }        
+
+        // Ordenar por fecha en orden descendente
+        $ventas = $query->orderBy('fecha', 'desc')->get();
+
         return response()->json($ventas);
     }
-
-
 
     // Mostrar una venta específica
     public function show($id)

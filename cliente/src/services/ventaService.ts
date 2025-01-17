@@ -4,9 +4,13 @@ import { Cliente, Venta } from '@/types';
 // Definir la URL base para los trabajadores
 const API_URL = '/ventas'; // Cambia la URL según tu API
 
-export const getAllVentas = async (): Promise<Venta[]> => {
+
+export const getAllVentas = async (fechaInicio?: string, fechaFin?: string): Promise<Venta[]> => {
   try {
-    const response = await axiosInstance.get(API_URL);
+    const params: any = {};
+    if (fechaInicio) params.fechaInicio = fechaInicio;
+    if (fechaFin) params.fechaFin = fechaFin;
+    const response = await axiosInstance.get(API_URL, {params});
     return response.data;
   } catch (error) {
     throw new Error('Error al obtener las ventas');
@@ -38,6 +42,8 @@ export const saveVenta = async (venta: Venta): Promise<Venta> => {
       }    
     }
 };
+
+
 
 export const anularVenta = async (id?: number): Promise<void> => {
   try {

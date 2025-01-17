@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 import { showErrorsToast } from "@/lib/functions";
 
 const schema = z.object({
-  ruc: z.string().min(11, "El RUC debe tener al menos 11 caracteres."),
+  ruc: z.string().length(11, "El RUC debe tener 11 caracteres."),
   razonSocial: z.string().min(1, "La razón social es obligatoria."),
   telefono: z.string().min(1, "El teléfono es obligatorio."),
   correo: z.string().email("Debe ser un correo válido."),
