@@ -8,7 +8,11 @@ use App\Models\Natural;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-
+use App\Models\Compra;
+use App\Models\Venta;
+use App\Models\Pago;
+use App\Models\Producto;
+use App\Models\Trabajador;
 class ClienteController extends Controller
 {
     public function index()

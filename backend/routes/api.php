@@ -15,6 +15,7 @@ use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\NaturalController;
 use App\Http\Controllers\JuridicoController;
 use App\Http\Controllers\ProveedorController;
+use App\Http\Controllers\IndicadoresController;
 
 Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/login', [AuthController::class, 'login'])->name('login');
@@ -88,3 +89,11 @@ Route::post('/login', [AuthController::class, 'login'])->name('login');
     Route::delete('/proveedores/{id}', [ProveedorController::class, 'destroy']); // Eliminación lógica de un proveedor
 
 // });
+
+Route::get('/ingreso-ventas', [IndicadoresController::class, 'ingresoVentas']);
+Route::get('/ingreso-compras', [IndicadoresController::class, 'ingresoCompras']);
+Route::get('/ventas-vs-compras-ultimos-5-meses', [IndicadoresController::class, 'ventasVsComprasUltimos5Meses']);
+Route::get('/productos-mas-vendidos', [IndicadoresController::class, 'productosMasVendidos']);
+Route::get('/marcas-mas-vendidas', [IndicadoresController::class, 'marcasMasVendidas']);
+Route::get('/cuentas-por-cobrar', [IndicadoresController::class, 'cuentasPorCobrar']);
+Route::get('/cuentas-por-pagar', [IndicadoresController::class, 'cuentasPorPagar']); 
