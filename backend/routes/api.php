@@ -13,6 +13,8 @@ use App\Http\Controllers\RepresentanteController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\NaturalController;
 use App\Http\Controllers\JuridicoController;
+use App\Http\Controllers\CompraController;
+use App\Http\Controllers\ProveedorController;
 use App\Models\Cliente;
 
 // Route::get('/user', function (Request $request) {
@@ -86,4 +88,20 @@ Route::group([
     Route::get('/juridicos/cliente/{idCliente}', [JuridicoController::class, 'getByCliente']);
     Route::get('/naturales/cliente/{idCliente}', [NaturalController::class, 'getByCliente']);
 
+    Route::get('/proveedores', [ProveedorController::class, 'index']);
+    Route::post('/proveedores', [ProveedorController::class, 'store']);
+    Route::get('/proveedores/{id}', [ProveedorController::class, 'show']);
+    Route::put('/proveedores/{id}', [ProveedorController::class, 'update']);
+    Route::delete('/proveedores/{id}', [ProveedorController::class, 'destroy']);
+    Route::get('/proveedores/ruc/{ruc}', [ProveedorController::class, 'getByRuc']);
+    Route::get('/proveedores/rs/{razonSocial}', [ProveedorController::class, 'getByRS']);
+
+
+    Route::get('/compras', [CompraController::class, 'index']);
+    Route::post('/compras', [CompraController::class, 'store']);
+    Route::get('/compras/{id}', [CompraController::class, 'show']);
+    Route::put('/compras/{id}', [CompraController::class, 'update']);
+    Route::delete('/compras/{id}', [CompraController::class, 'destroy']);
+    Route::get('/getEstado', [CompraController::class, 'getEstado']);
+    Route::put('/updateEstado/{idCompra}', [CompraController::class, 'updateEstado']);
 });

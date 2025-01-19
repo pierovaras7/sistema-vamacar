@@ -37,4 +37,9 @@ class Compra extends Model
     {
         return $this->belongsTo(Proveedor::class, 'idProveedor', 'idProveedor');
     }
+
+    public function detalleCompra()
+    {
+        return $this->hasMany(DetalleCompra::class, 'idCompra', 'idCompra');
+    }
 }

@@ -18,11 +18,7 @@ return new class extends Migration
             $table->string('telefono');
             $table->string('correo');
             $table->string('direccion');
-            $table->unsignedBigInteger('idRepresentante');
-            $table->foreign('idRepresentante')
-                    ->references('idRepresentante') 
-                    ->on('representante')
-                    ->onDelete('restrict'); 
+            $table->string('nombreRepresentante');
             $table->boolean('estado')->default(1);  
 
         });

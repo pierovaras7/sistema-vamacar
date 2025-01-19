@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class DetalleCompra extends Model
 {
@@ -14,6 +14,9 @@ class DetalleCompra extends Model
     public $incrementing = false;
 
     protected $primaryKey = null; 
+
+    public $timestamps = false; // Desactiva timestamps automáticos
+
 
     protected $fillable = [
         'idCompra',
@@ -36,6 +39,7 @@ class DetalleCompra extends Model
         return $this->belongsTo(Compra::class, 'idCompra', 'idCompra');
     }
 
+    
     public function producto()
     {
         return $this->belongsTo(Producto::class, 'idProducto', 'idProducto');

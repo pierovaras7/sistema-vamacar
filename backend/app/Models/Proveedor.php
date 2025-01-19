@@ -21,7 +21,7 @@ class Proveedor extends Model
         'telefono',
         'correo',
         'direccion',
-        'idRepresentante',
+        'nombreRepresentante',
         'estado',
     ];
 
@@ -29,9 +29,4 @@ class Proveedor extends Model
         'estado' => 'boolean',
     ];
 
-
-    public function representante()
-    {
-        return $this->belongsTo(Representante::class, 'idRepresentante', 'idRepresentante');
-    }
 }

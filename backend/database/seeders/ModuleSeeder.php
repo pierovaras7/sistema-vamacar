@@ -45,5 +45,10 @@ class ModuleSeeder extends Seeder
             'slug' => '/ventas',
         ]);
 
+        Module::create([
+            'name' => 'Compras',
+            'slug' => '/compras',
+        ]);
+
     }
 }
