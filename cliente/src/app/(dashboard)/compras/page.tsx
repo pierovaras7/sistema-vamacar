@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { getCompras, updateEstado, getEstados } from "@/services/comprasService";
+import { getCompras, updateEstado, getEstados,deleteCompra  } from "@/services/comprasService";
 import Table from "@/components/Table";
 import Pagination from "@/components/Pagination";
 import PrivateRoute from "@/components/PrivateRouter";
 import { useRouter } from "next/navigation";
 import { PlusCircleIcon } from "@heroicons/react/24/solid";
-import { EyeIcon, CurrencyDollarIcon } from "@heroicons/react/24/outline";
+import { EyeIcon, CurrencyDollarIcon,TrashIcon } from "@heroicons/react/24/outline";
 import Modal from "@/components/Modal";
 
 interface DetalleCompra {
@@ -25,6 +25,7 @@ interface Proveedor {
 interface Compra {
   idCompra: number;
   fechaPedido: string;
+  fechaPago: string;
   total: string;
   proveedor: Proveedor;
   detalle_compra: DetalleCompra[];
@@ -48,6 +49,8 @@ const ComprasPage = () => {
   const [loading, setLoading] = useState(true);
   const [selectedCompra, setSelectedCompra] = useState<Compra | null>(null);
   const router = useRouter();
+  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false); // Estado para el modal de confirmación
+  const [compraToDelete, setCompraToDelete] = useState<Compra | null>(null); // Compra a eliminar
 
   // Obtener compras y estados, luego cruzar datos
   const refreshData = async () => {
@@ -85,6 +88,18 @@ const ComprasPage = () => {
     }
   };
 
+  const handleEliminarCompra = async () => {
+    if (compraToDelete) {
+      try {
+        await deleteCompra(compraToDelete.idCompra); // Eliminar compra
+        await refreshData(); // Refrescar datos
+        setIsConfirmDeleteOpen(false); // Cerrar el modal de confirmación
+      } catch (error) {
+        console.error("Error al eliminar la compra:", error);
+      }
+    }
+  };
+
   // Cargar datos al montar el componente
   useEffect(() => {
     refreshData();
@@ -100,12 +115,15 @@ const ComprasPage = () => {
 
   // Formatear fecha al estilo DD/MM/YYYY
   const formatDate = (date: string): string => {
+
+
     const formattedDate = new Intl.DateTimeFormat("es-ES", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
     }).format(new Date(date));
     return formattedDate;
+    
   };
 
   // Renderizar filas de la tabla
@@ -129,17 +147,15 @@ const ComprasPage = () => {
           onClick={() => setSelectedCompra(compra)}
         >
           <EyeIcon className="w-5 h-5 mr-1" />
-          Ver Detalle
         </button>
-        {!compra.estado && ( // Mostrar botón de "Pagar" solo si no está pagado
-          <button
-            className="text-green-600 hover:underline flex items-center"
-            onClick={() => handlePagar(compra.idCompra)}
-          >
-            <CurrencyDollarIcon className="w-5 h-5 mr-1" />
-            Pagar
-          </button>
-        )}
+        <button
+          className="text-red-600 hover:underline flex items-center"
+          onClick={() => {setCompraToDelete(compra);; 
+            setIsConfirmDeleteOpen(true); // Abrir modal de confirmación
+          }}
+        >
+          <TrashIcon className="w-5 h-5 mr-1" />
+        </button>
       </td>
     </tr>
   );
@@ -210,6 +226,30 @@ const ComprasPage = () => {
           </table>
         </Modal>
       )}
+
+    {isConfirmDeleteOpen && (
+        <Modal
+          title="Confirmar Eliminación"
+          onClose={() => setIsConfirmDeleteOpen(false)}
+        >
+          <p>¿Estás seguro de que deseas eliminar esta compra?</p>
+          <div className="mt-4 flex justify-end space-x-4">
+            <button
+              className="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg"
+              onClick={() => setIsConfirmDeleteOpen(false)}
+            >
+              Cancelar
+            </button>
+            <button
+              className="px-4 py-2 bg-red-600 text-white rounded-lg"
+              onClick={handleEliminarCompra}
+            >
+              Eliminar
+            </button>
+          </div>
+        </Modal>
+      )}
+      
     </PrivateRoute>
   );
 };

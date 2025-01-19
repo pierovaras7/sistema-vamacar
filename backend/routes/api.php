@@ -104,4 +104,6 @@ Route::group([
     Route::delete('/compras/{id}', [CompraController::class, 'destroy']);
     Route::get('/getEstado', [CompraController::class, 'getEstado']);
     Route::put('/updateEstado/{idCompra}', [CompraController::class, 'updateEstado']);
+    Route::get('/cpp', [CompraController::class, 'getCuentasPorPagar']);
+
 });

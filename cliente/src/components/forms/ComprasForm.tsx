@@ -47,8 +47,6 @@ const CompraForm: React.FC<CompraFormProps> = ({ productosBase }) => {
   const [filteredProveedores, setFilteredProveedores] = useState<Proveedor[]>([]);
   const [showDropdown, setShowDropdown] = useState(false); // Control del desplegable
   const [fechaPedido, setFechaPedido] = useState("");
-  const [fechaRecibido, setFechaRecibido] = useState("");
-  const [fechaPago, setFechaPago] = useState("");
   const [detallesCompra, setDetallesCompra] = useState<DetalleCompra[]>([]);
   const [selectedProducto, setSelectedProducto] = useState<Producto | null>(null);
   const [resetDropdown, setResetDropdown] = useState(false);
@@ -58,6 +56,7 @@ const CompraForm: React.FC<CompraFormProps> = ({ productosBase }) => {
   const [isTyping, setIsTyping] = useState(false);
   const [isProveedorSelected, setIsProveedorSelected] = useState(false); // Estado para habilitar/deshabilitar campos
   const [isRUCSelected, setIsRUCSelected] = useState(false); // Estado específico para RUC
+  const [ventaTemporal, setVentaTemporal] = useState<any>(null);
 
   useEffect(() => {
     const fetchProveedores = async () => {
@@ -79,6 +78,37 @@ const CompraForm: React.FC<CompraFormProps> = ({ productosBase }) => {
   }, [searchTerm, productosBase]);
 
 
+  useEffect(() => {
+    const compraGuardada = localStorage.getItem("compraTemporal");
+    if (compraGuardada) {
+      const compraData = JSON.parse(compraGuardada);
+      setProveedor(compraData.proveedor || {});
+      setFechaPedido(compraData.fechaPedido || "");
+      setDetallesCompra(compraData.detallesCompra || []);
+      setVentaTemporal(compraData); // Para manejo global
+    } 
+    console.log(compraGuardada);
+  }, []);
+
+
+    const actualizarCompra = (nuevaCompra: Partial<any>) => {
+    setVentaTemporal((prevCompra: any) => {
+      const compraActualizada = {
+        ...prevCompra,
+        ...nuevaCompra,
+        detallesCompra: detallesCompra,
+      };
+      localStorage.setItem("compraTemporal", JSON.stringify(compraActualizada));
+      return compraActualizada;
+    });
+  };
+
+  useEffect(() => {
+    actualizarCompra({
+      proveedor,
+      fechaPedido,
+    });
+  }, [proveedor, fechaPedido]);
 
   const handleSelectProducto = (productoId: number) => {
     const producto = productosBase.find((p) => p.idProducto === productoId);
@@ -240,22 +270,35 @@ const CompraForm: React.FC<CompraFormProps> = ({ productosBase }) => {
     const compra = {
       idProveedor: proveedor.idProveedor,
       fechaPedido,
-      fechaRecibido,
-      fechaPago,
       detalle: detallesCompra.map((d) => ({
         idProducto: d.producto.idProducto,
         cantidad: d.cantidad,
         precioCosto: d.precio,
       })),
     };
-
+  
     try {
       await postCompra(compra);
       toast.success("Compra registrada con éxito.");
-    } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message;
   
+      // Limpia todos los estados
+      setProveedor({
+        idProveedor: null,
+        ruc: "",
+        razonSocial: "",
+        telefono: "",
+        correo: "",
+        direccion: "",
+        nombreRepresentante: "",
+      });
+      setFechaPedido("");
+      setDetallesCompra([]);
+      setSearchTerm("");
+  
+      // Limpia el Local Storage
+      localStorage.removeItem("compraTemporal");
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || "Error desconocido.";
       toast.error(errorMessage);
     }
   };
@@ -376,32 +419,7 @@ const CompraForm: React.FC<CompraFormProps> = ({ productosBase }) => {
               required
             />
           </div>
-          {/* Fecha Recibido */}
-          <div>
-            <label htmlFor="fechaRecibido" className="block text-gray-700 font-bold">
-              Fecha Recibido
-            </label>
-            <input
-              type="date"
-              id="fechaRecibido"
-              value={fechaRecibido}
-              onChange={(e) => setFechaRecibido(e.target.value)}
-              className="w-full px-4 py-2 border rounded-md"
-            />
-          </div>
-          {/* Fecha Pago */}
-          <div>
-            <label htmlFor="fechaPago" className="block text-gray-700 font-bold">
-              Fecha Pago
-            </label>
-            <input
-              type="date"
-              id="fechaPago"
-              value={fechaPago}
-              onChange={(e) => setFechaPago(e.target.value)}
-              className="w-full px-4 py-2 border rounded-md"
-            />
-          </div>
+
         </div>
       </div>
 

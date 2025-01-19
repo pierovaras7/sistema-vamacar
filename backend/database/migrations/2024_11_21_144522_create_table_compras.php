@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id('idCompra');
             $table->date('fechaPedido');
             $table->date('fechaRecibido');
-            $table->date('fechaPago');
+            $table->date('fechaPago')->nullable();
             $table->boolean('estado')->default(1);  
             $table->decimal('total', 10, 2)->default(0.00); 
             $table->unsignedBigInteger('idProveedor');

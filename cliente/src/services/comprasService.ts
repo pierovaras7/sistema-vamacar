@@ -93,3 +93,20 @@ export const updateEstado = async (
     throw new Error("Ha ocurrido un error inesperado.");
   }
 };
+
+
+export const getCuentasPorPagar = async (): Promise<any> => {
+  try {
+    const response = await axiosInstance.get("/cpp");
+    return response.data;
+  } catch (error: any) {
+    if (axios.isAxiosError(error)) {
+      const message =
+        error.response?.data?.message || "Error al obtener las cuentas por pagar.";
+      throw new Error(message);
+    }
+    throw new Error("Ha ocurrido un error inesperado.");
+  }
+};
+
+

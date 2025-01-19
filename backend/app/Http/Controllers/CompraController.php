@@ -16,16 +16,52 @@ class CompraController extends Controller
     public function index()
     {
         try {
+            // Obtener solo las compras con estado "true"
             $compras = Compra::with([
-                'proveedor', 
-                'detalleCompra.producto' // Asegúrate de que esta relación esté definida
-            ])->get();
+                'proveedor',
+                'detalleCompra.producto'
+            ])
+            ->where('estado', true) // Filtrar por estado true
+            ->get();
     
             return response()->json($compras, 200);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Error al listar las compras.', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'Error al listar las compras.',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
+    
+
+    public function getCuentasPorPagar()
+{
+    try {
+        // Obtener las cuentas por pagar con las relaciones necesarias
+        $cuentasPorPagar = CuentasPorPagar::with([
+            'compra.proveedor' // Relación para obtener el proveedor desde la compra
+        ])
+        ->get()
+        ->map(function ($cuenta) {
+            return [
+                'idCP' => $cuenta->idCP,
+                'idCompra' => $cuenta->idCompra,
+                'montoPago' => $cuenta->montoPago,
+                'estado' => $cuenta->estado,
+                'fechaPedido' => $cuenta->compra->fechaPedido ?? null,
+                'fechaPago' => $cuenta->compra->fechaPago ?? null,
+                'proveedor' => $cuenta->compra->proveedor->razonSocial ?? 'Proveedor no encontrado',
+            ];
+        });
+
+        return response()->json($cuentasPorPagar, 200);
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'Error al obtener las cuentas por pagar.',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
     
 
 
@@ -124,11 +160,14 @@ class CompraController extends Controller
                 $total += $detalle['cantidad'] * $detalle['precioCosto'];
             }
     
+            // Asignar 'fechaRecibido' igual a 'fechaPedido' si no se proporciona
+            $fechaRecibido = $request->fechaRecibido ?? $request->fechaPedido;
+    
             // Crear la compra
             $compra = Compra::create([
                 'fechaPedido' => $request->fechaPedido,
-                'fechaRecibido' => $request->fechaRecibido,
-                'fechaPago' => $request->fechaPago,
+                'fechaRecibido' => $fechaRecibido,
+                'fechaPago' => null, // Establecer fechaPago como null
                 'idProveedor' => $request->idProveedor,
                 'total' => $total,
             ]);
@@ -175,6 +214,7 @@ class CompraController extends Controller
             return response()->json(['message' => 'Error al crear la compra.', 'error' => $e->getMessage()], 500);
         }
     }
+    
     
     public function show($id)
     {
@@ -312,19 +352,52 @@ class CompraController extends Controller
     public function destroy($id)
     {
         try {
-            $compra = Compra::find($id);
-
+            // Buscar la compra
+            $compra = Compra::with('detalleCompra.producto')->find($id);
+    
             if (!$compra) {
                 return response()->json(['message' => 'Compra no encontrada.'], 404);
             }
-
+    
+            // Cambiar el estado de la compra a "false"
             $compra->estado = false;
             $compra->save();
 
+            $cuentaPorPagar = CuentasPorPagar::where('idCompra', $id)->first();
+
+            // Verificar si existe la cuenta por pagar
+            if ($cuentaPorPagar) {
+                // Eliminar la cuenta por pagar
+                $cuentaPorPagar->delete();
+            }
+    
+    
+            // Iterar sobre los detalles de la compra para actualizar el inventario y registrar movimientos
+            foreach ($compra->detalleCompra as $detalle) {
+                $inventario = Inventario::where('idProducto', $detalle->idProducto)->first();
+    
+                if ($inventario) {
+                    // Restar la cantidad del inventario
+                    $inventario->stockActual -= $detalle->cantidad;
+                    $inventario->save();
+    
+                    // Registrar el movimiento de inventario
+                    MovInventario::create([
+                        'tipo' => 'salida', // Movimiento de salida
+                        'descripcion' => 'Compra eliminada',
+                        'fecha' => now()->format('Y-m-d H:i:s'),
+                        'cantidad' => $detalle->cantidad,
+                        'idInventario' => $inventario->idInventario,
+                        'estado' => 1, // Estado activo
+                    ]);
+                }
+            }
+    
             return response()->json(['message' => 'Compra eliminada exitosamente.'], 200);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error al eliminar la compra.', 'error' => $e->getMessage()], 500);
         }
     }
+    
 }
 
