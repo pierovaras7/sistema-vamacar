@@ -47,6 +47,7 @@ const CompraForm: React.FC<CompraFormProps> = ({ productosBase }) => {
   const [filteredProveedores, setFilteredProveedores] = useState<Proveedor[]>([]);
   const [showDropdown, setShowDropdown] = useState(false); // Control del desplegable
   const [fechaPedido, setFechaPedido] = useState("");
+  const [fechaPago, setFechaPago] = useState("");
   const [detallesCompra, setDetallesCompra] = useState<DetalleCompra[]>([]);
   const [selectedProducto, setSelectedProducto] = useState<Producto | null>(null);
   const [resetDropdown, setResetDropdown] = useState(false);
@@ -77,13 +78,26 @@ const CompraForm: React.FC<CompraFormProps> = ({ productosBase }) => {
     fetchProveedores();
   }, [searchTerm, productosBase]);
 
+  const handleFechaPedidoChange = () => {
+    const now = new Date();
+    const fechaCompleta = now.toISOString().slice(0, 19).replace("T", " ");
+    setFechaPedido(fechaCompleta);
+  };
 
+  const handleFechaPagoChange = () => {
+    const now = new Date();
+    const fechaCompleta = now.toISOString().slice(0, 19).replace("T", " ");
+    setFechaPago(fechaCompleta);
+  };
+
+  
   useEffect(() => {
     const compraGuardada = localStorage.getItem("compraTemporal");
     if (compraGuardada) {
       const compraData = JSON.parse(compraGuardada);
       setProveedor(compraData.proveedor || {});
       setFechaPedido(compraData.fechaPedido || "");
+      setFechaPago(compraData.fechaPago || "");
       setDetallesCompra(compraData.detallesCompra || []);
       setVentaTemporal(compraData); // Para manejo global
     } 
@@ -107,8 +121,9 @@ const CompraForm: React.FC<CompraFormProps> = ({ productosBase }) => {
     actualizarCompra({
       proveedor,
       fechaPedido,
+      fechaPago,
     });
-  }, [proveedor, fechaPedido]);
+  }, [proveedor, fechaPedido,fechaPago]);
 
   const handleSelectProducto = (productoId: number) => {
     const producto = productosBase.find((p) => p.idProducto === productoId);
@@ -262,14 +277,16 @@ const CompraForm: React.FC<CompraFormProps> = ({ productosBase }) => {
       return;
     }
   
-    if (!fechaPedido || detallesCompra.length === 0) {
+    if (!fechaPedido || detallesCompra.length === 0 || !fechaPago) {
       toast.error("Completa todos los campos antes de guardar.");
       return;
     }
+
   
     const compra = {
       idProveedor: proveedor.idProveedor,
       fechaPedido,
+      fechaPago,
       detalle: detallesCompra.map((d) => ({
         idProducto: d.producto.idProducto,
         cantidad: d.cantidad,
@@ -292,6 +309,7 @@ const CompraForm: React.FC<CompraFormProps> = ({ productosBase }) => {
         nombreRepresentante: "",
       });
       setFechaPedido("");
+      setFechaPago("");
       setDetallesCompra([]);
       setSearchTerm("");
   
@@ -420,6 +438,20 @@ const CompraForm: React.FC<CompraFormProps> = ({ productosBase }) => {
             />
           </div>
 
+          {/* Fecha Pago */}
+          <div>
+            <label htmlFor="fechaPago" className="block text-gray-700 font-bold">
+              Fecha Pago
+            </label>
+            <input
+              type="date"
+              id="fechaPago"
+              value={fechaPago}
+              onChange={(e) => setFechaPago(e.target.value)}
+              className="w-full px-4 py-2 border rounded-md"
+              required
+            />
+          </div>
         </div>
       </div>
 

@@ -17,7 +17,6 @@ class Compra extends Model
 
     protected $fillable = [
         'fechaPedido',
-        'fechaRecibido',
         'fechaPago',
         'estado',
         'total',

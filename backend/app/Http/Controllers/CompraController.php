@@ -93,13 +93,6 @@ class CompraController extends Controller
             // Actualizar el estado en cuentas_por_pagar
             $cuenta->update(['estado' => $request->estado]);
     
-            // Si el estado es pagado, actualizar la fechaPago en compras
-            if ($request->estado) {
-                $compra = Compra::find($idCompra);
-                if ($compra) {
-                    $compra->update(['fechaPago' => now()]);
-                }
-            }
     
             return response()->json(['message' => 'Estado actualizado exitosamente.', 'cuenta' => $cuenta], 200);
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -115,7 +108,6 @@ class CompraController extends Controller
         try {
             $request->validate([
                 'fechaPedido' => 'required|date',
-                'fechaRecibido' => 'nullable|date',
                 'fechaPago' => 'nullable|date',
                 'idProveedor' => 'required|exists:proveedor,idProveedor',
                 'detalle' => 'required|array',
@@ -160,14 +152,10 @@ class CompraController extends Controller
                 $total += $detalle['cantidad'] * $detalle['precioCosto'];
             }
     
-            // Asignar 'fechaRecibido' igual a 'fechaPedido' si no se proporciona
-            $fechaRecibido = $request->fechaRecibido ?? $request->fechaPedido;
-    
             // Crear la compra
             $compra = Compra::create([
                 'fechaPedido' => $request->fechaPedido,
-                'fechaRecibido' => $fechaRecibido,
-                'fechaPago' => null, // Establecer fechaPago como null
+                'fechaPago' => $request->fechaPago,
                 'idProveedor' => $request->idProveedor,
                 'total' => $total,
             ]);

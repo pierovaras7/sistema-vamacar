@@ -3,9 +3,6 @@
 import { useEffect, useState } from "react";
 import { getCuentasPorPagar, updateEstado } from "@/services/comprasService";
 import { FaMoneyBillWave } from "react-icons/fa";
-import { format } from "date-fns"; // Importar date-fns
-import { es } from "date-fns/locale"; // Localización en español
-import { toZonedTime } from 'date-fns-tz';
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 
@@ -48,15 +45,7 @@ const CuentasPorPagarPage = () => {
     }
   };
 
-  const formatDate = (date: string | null) => {
-    if (!date) return 'No disponible';
-    try {
-      const peruTime = toZonedTime(new Date(date), 'America/Lima');
-      return format(peruTime, 'dd/MM/yyyy', { locale: es });
-    } catch {
-      return 'Formato inválido';
-    }
-  };
+
 
   
   const filteredCuentas = searchTerm
@@ -91,8 +80,8 @@ const CuentasPorPagarPage = () => {
           </span>
         )}
       </td>
-      <td>{formatDate(item.fechaPedido)}</td>
-      <td>{formatDate(item.fechaPago)}</td>
+      <td>{item.fechaPedido.split("T")[0]}</td>
+      <td>{item.fechaPago.split("T")[0]}</td>
       <td>
         {/* Mostrar botón "Pagar" solo si el estado es "Pendiente" */}
         {!item.estado && (

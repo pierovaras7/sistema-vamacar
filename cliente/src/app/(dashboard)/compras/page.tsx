@@ -34,6 +34,7 @@ interface Compra {
 
 const columns = [
   { header: "Fecha Pedido", accessor: "fechaPedido", width: "w-2/12" },
+  { header: "Fecha Pago", accessor: "fechaPago", width: "w-2/12" },
   { header: "Proveedor", accessor: "razonSocial", width: "w-2/12" },
   { header: "Total", accessor: "total", width: "w-1/12" },
   { header: "Estado", accessor: "estado", width: "w-1/12" },
@@ -113,23 +114,12 @@ const ComprasPage = () => {
     setFilteredCompras(filtered);
   }, [searchTerm, compras]);
 
-  // Formatear fecha al estilo DD/MM/YYYY
-  const formatDate = (date: string): string => {
-
-
-    const formattedDate = new Intl.DateTimeFormat("es-ES", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    }).format(new Date(date));
-    return formattedDate;
-    
-  };
 
   // Renderizar filas de la tabla
   const renderRow = (compra: Compra) => (
     <tr key={compra.idCompra} className="text-center border-b hover:bg-gray-100">
-      <td>{formatDate(compra.fechaPedido)}</td>
+      <td>{compra.fechaPedido.split("T")[0]}</td> {/* Mostrar solo la fecha */}
+      <td>{compra.fechaPago.split("T")[0]}</td>   {/* Mostrar solo la fecha */}
       <td>{compra.proveedor?.razonSocial}</td>
       <td>{compra.total}</td>
       <td>
@@ -142,21 +132,25 @@ const ComprasPage = () => {
         </span>
       </td>
       <td className="flex justify-center space-x-4">
-        <button
-          className="text-blue-600 hover:underline flex items-center"
-          onClick={() => setSelectedCompra(compra)}
-        >
-          <EyeIcon className="w-5 h-5 mr-1" />
-        </button>
-        <button
-          className="text-red-600 hover:underline flex items-center"
-          onClick={() => {setCompraToDelete(compra);; 
-            setIsConfirmDeleteOpen(true); // Abrir modal de confirmación
-          }}
-        >
-          <TrashIcon className="w-5 h-5 mr-1" />
-        </button>
-      </td>
+  <button
+    className="text-blue-600 hover:underline flex items-center"
+    onClick={() => setSelectedCompra(compra)}
+  >
+    <EyeIcon className="w-5 h-5 mr-1" />
+  </button>
+  {!compra.estado && ( // Mostrar el botón solo si el estado no es "Pagado"
+    <button
+      className="text-red-600 hover:underline flex items-center"
+      onClick={() => {
+        setCompraToDelete(compra);
+        setIsConfirmDeleteOpen(true); // Abrir modal de confirmación
+      }}
+    >
+      <TrashIcon className="w-5 h-5 mr-1" />
+    </button>
+  )}
+</td>
+
     </tr>
   );
 
