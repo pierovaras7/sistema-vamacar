@@ -2,11 +2,16 @@
 
 import React, { useState, useEffect } from "react";
 import { getProveedorByRUC, getProveedores } from "@/services/proveedorService";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { postCompra } from "@/services/comprasService";
 import { toast } from 'sonner';
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+
+
 
 type Proveedor = {
-  idProveedor: number | null; // Define explícitamente idProveedor
+  idProveedor?: number | null; // Define explícitamente idProveedor
   ruc: string;
   razonSocial: string;
   telefono: string;
@@ -33,7 +38,48 @@ type CompraFormProps = {
   proveedoresBase: { idProveedor: number; razonSocial: string }[]; // Proveedores con ID
 };
 
-const CompraForm: React.FC<CompraFormProps> = ({ productosBase }) => {
+const schema = z.object({
+  // Información del Proveedor
+  ruc: z
+    .string()
+    .min(11, "El RUC debe tener 11 caracteres")
+    .max(11, "El RUC debe tener 11 caracteres")
+    .regex(/^\d+$/, "El RUC solo debe contener números"),
+  razonSocial: z
+    .string()
+    .nonempty("La razón social es obligatoria"),
+  telefono: z
+    .string()
+    .min(7, "El teléfono debe tener al menos 7 dígitos")
+    .max(15, "El teléfono no puede tener más de 15 dígitos")
+    .regex(/^\d+$/, "El teléfono solo debe contener números"),
+  correo: z
+    .string()
+    .email("El correo electrónico no es válido"),
+  direccion: z
+    .string()
+    .nonempty("La dirección es obligatoria"),
+  
+  // Fechas
+  fechaPedido: z
+    .string()
+    .nonempty("La fecha del pedido es obligatoria")
+    .refine((date) => !isNaN(new Date(date).getTime()), "La fecha del pedido no es válida"),
+  fechaPago: z
+    .string()
+    .nonempty("La fecha de pago es obligatoria")
+    .refine((date) => !isNaN(new Date(date).getTime()), "La fecha de pago no es válida"),
+});
+
+type Inputs = z.infer<typeof schema>;
+
+const CompraForm = ({
+  data,
+  productosBase,
+}: {
+  data?: Inputs;
+  productosBase: Producto[];
+}) => {
   const [proveedor, setProveedor] = useState<Proveedor>({
     idProveedor: null as number | null,
     ruc: "",
@@ -84,6 +130,8 @@ const CompraForm: React.FC<CompraFormProps> = ({ productosBase }) => {
     setFechaPedido(fechaCompleta);
   };
 
+
+
   const handleFechaPagoChange = () => {
     const now = new Date();
     const fechaCompleta = now.toISOString().slice(0, 19).replace("T", " ");
@@ -96,6 +144,9 @@ const CompraForm: React.FC<CompraFormProps> = ({ productosBase }) => {
     if (compraGuardada) {
       const compraData = JSON.parse(compraGuardada);
       setProveedor(compraData.proveedor || {});
+      if (compraData.proveedor){
+        setIsProveedorSelected(true);
+      } 
       setFechaPedido(compraData.fechaPedido || "");
       setFechaPago(compraData.fechaPago || "");
       setDetallesCompra(compraData.detallesCompra || []);
@@ -112,6 +163,7 @@ const CompraForm: React.FC<CompraFormProps> = ({ productosBase }) => {
         ...nuevaCompra,
         detallesCompra: detallesCompra,
       };
+      console.log("actualice")
       localStorage.setItem("compraTemporal", JSON.stringify(compraActualizada));
       return compraActualizada;
     });
@@ -221,45 +273,48 @@ const CompraForm: React.FC<CompraFormProps> = ({ productosBase }) => {
           nombreRepresentante: "",
         });
         setIsRUCSelected(false);
+        setIsProveedorSelected(false); // Ignoramos Razón Social
       }
-    } else if (ruc.length === 0) {
-      setProveedor({
+    } 
+    else{
+      console.log("no hay")
+      setProveedor((prev) => ({ ...prev,  
         idProveedor: null,
-        ruc: "",
         razonSocial: "",
         telefono: "",
         correo: "",
         direccion: "",
         nombreRepresentante: "",
-      });
-      setIsRUCSelected(false); // Habilitamos campos al borrar RUC
+      }));
+
+      // setIsProveedorSelected(false); // Habilitamos campos al borrar RUC
     }
   };
 
-  const handleRazonSocialChange = (razonSocial: string) => {
-    setProveedor((prev) => ({ ...prev, razonSocial }));
+  // const handleRazonSocialChange = (razonSocial: string) => {
+  //   setProveedor((prev) => ({ ...prev, razonSocial }));
 
-    if (razonSocial.length > 0) {
-      const filtered = proveedores.filter((prov) =>
-        prov.razonSocial.toLowerCase().includes(razonSocial.toLowerCase())
-      );
-      setFilteredProveedores(filtered);
-      setIsProveedorSelected(false); // No está seleccionado aún, solo está escribiendo
-      setIsRUCSelected(false); // Si se usa Razón Social, se ignora RUC
-    } else {
-      setFilteredProveedores(proveedores);
-      setProveedor({
-        idProveedor: null,
-        ruc: "",
-        razonSocial: "",
-        telefono: "",
-        correo: "",
-        direccion: "",
-        nombreRepresentante: "",
-      });
-      setIsProveedorSelected(false); // Habilitamos los campos
-    }
-  };
+  //   if (razonSocial.length > 0) {
+  //     const filtered = proveedores.filter((prov) =>
+  //       prov.razonSocial.toLowerCase().includes(razonSocial.toLowerCase())
+  //     );
+  //     setFilteredProveedores(filtered);
+  //     setIsProveedorSelected(false); // No está seleccionado aún, solo está escribiendo
+  //     setIsRUCSelected(false); // Si se usa Razón Social, se ignora RUC
+  //   } else {
+  //     setFilteredProveedores(proveedores);
+  //     setProveedor({
+  //       idProveedor: null,
+  //       ruc: "",
+  //       razonSocial: "",
+  //       telefono: "",
+  //       correo: "",
+  //       direccion: "",
+  //       nombreRepresentante: "",
+  //     });
+  //     setIsProveedorSelected(false); // Habilitamos los campos
+  //   }
+  // };
 
   const selectProveedor = (prov: Proveedor) => {
     setProveedor(prov);
@@ -269,19 +324,15 @@ const CompraForm: React.FC<CompraFormProps> = ({ productosBase }) => {
     setIsRUCSelected(false); // Si seleccionamos por Razón Social, ignoramos RUC
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-  
-    if (!proveedor.idProveedor) {
-      toast.error("Selecciona un proveedor.");
-      return;
-    }
-  
-    if (!fechaPedido || detallesCompra.length === 0 || !fechaPago) {
-      toast.error("Completa todos los campos antes de guardar.");
-      return;
-    }
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<Inputs>({
+    resolver: zodResolver(schema),
+  });
 
+  const onSubmit = handleSubmit(async (data) => {
   
     const compra = {
       idProveedor: proveedor.idProveedor,
@@ -293,72 +344,46 @@ const CompraForm: React.FC<CompraFormProps> = ({ productosBase }) => {
         precioCosto: d.precio,
       })),
     };
+
+    console.log(compra);
   
-    try {
-      await postCompra(compra);
-      toast.success("Compra registrada con éxito.");
+    // try {
+    //   await postCompra(compra);
+    //   toast.success("Compra registrada con éxito.");
   
-      // Limpia todos los estados
-      setProveedor({
-        idProveedor: null,
-        ruc: "",
-        razonSocial: "",
-        telefono: "",
-        correo: "",
-        direccion: "",
-        nombreRepresentante: "",
-      });
-      setFechaPedido("");
-      setFechaPago("");
-      setDetallesCompra([]);
-      setSearchTerm("");
+    //   // Limpia todos los estados
+    //   setProveedor({
+    //     idProveedor: null,
+    //     ruc: "",
+    //     razonSocial: "",
+    //     telefono: "",
+    //     correo: "",
+    //     direccion: "",
+    //     nombreRepresentante: "",
+    //   });
+    //   setFechaPedido("");
+    //   setFechaPago("");
+    //   setDetallesCompra([]);
+    //   setSearchTerm("");
   
-      // Limpia el Local Storage
-      localStorage.removeItem("compraTemporal");
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || "Producto sin inventario !Revisar¡";
-      toast.error(errorMessage);
-    }
-  };
+    //   // Limpia el Local Storage
+    //   localStorage.removeItem("compraTemporal");
+    // } catch (error: any) {
+    //   const errorMessage = error.response?.data?.message || "Producto sin inventario !Revisar¡";
+    //   toast.error(errorMessage);
+    // }
+  });
   
   
   
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-4xl mx-auto">
+    <form onSubmit={onSubmit} className="w-full max-w-4xl mx-auto">
       {/* Sección del proveedor */}
       <div className="mb-6">
         <h3 className="text-lg font-bold mb-4">Información del Proveedor</h3>
         <div className="grid grid-cols-3 gap-4">
-          {/* Razón Social */}
-          <div className="relative">
-            <label htmlFor="razonSocial" className="block text-gray-700 font-bold">
-              Razón Social
-            </label>
-            <input
-              type="text"
-              id="razonSocial"
-              value={proveedor.razonSocial}
-              onChange={(e) => handleRazonSocialChange(e.target.value)}
-              onFocus={() => setShowDropdown(true)} // Muestra el desplegable al hacer clic
-              onBlur={() => setTimeout(() => setShowDropdown(false), 150)} // Esconde el desplegable al salir del input
-              className="w-full px-4 py-2 border rounded-md"
-              disabled={isRUCSelected} // Deshabilitado si se seleccionó un RUC válido
-            />
-            {showDropdown && filteredProveedores.length > 0 && (
-              <ul className="absolute z-10 bg-white border rounded-md w-full max-h-40 overflow-y-auto">
-                {filteredProveedores.map((prov, index) => (
-                  <li
-                    key={index}
-                    onClick={() => selectProveedor(prov)}
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                  >
-                    {prov.razonSocial}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+          
           {/* RUC */}
           <div>
             <label htmlFor="ruc" className="block text-gray-700 font-bold">
@@ -368,11 +393,31 @@ const CompraForm: React.FC<CompraFormProps> = ({ productosBase }) => {
               type="text"
               id="ruc"
               value={proveedor.ruc}
+              className="w-full px-4 py-2 border rounded-md" 
+              {...register("ruc")}
               onChange={(e) => handleRUCChange(e.target.value)}
-              className="w-full px-4 py-2 border rounded-md"
-              disabled={isProveedorSelected} // Campo deshabilitado si se seleccionó un proveedor
               required
             />
+             {errors.ruc?.message && (
+                <p className="text-xs text-red-400">{errors.ruc.message}</p>
+            )}
+          </div>
+          {/* Razón Social */}
+          <div className="relative">
+            <label htmlFor="razonSocial" className="block text-gray-700 font-bold">
+              Razón Social
+            </label>
+            <input
+              type="text"
+              id="razonSocial"
+              value={proveedor.razonSocial}
+              className="w-full px-4 py-2 border rounded-md"
+              {...register("razonSocial")}
+              disabled={isProveedorSelected || isRUCSelected} // Deshabilitado si se seleccionó un RUC válido
+            />
+             {errors.razonSocial?.message && (
+                <p className="text-xs text-red-400">{errors.razonSocial.message}</p>
+            )}
           </div>
           {/* Teléfono */}
           <div>
@@ -383,10 +428,14 @@ const CompraForm: React.FC<CompraFormProps> = ({ productosBase }) => {
               type="text"
               id="telefono"
               value={proveedor.telefono}
+              {...register("telefono")}
               onChange={(e) => setProveedor({ ...proveedor, telefono: e.target.value })}
               className="w-full px-4 py-2 border rounded-md"
               disabled={isProveedorSelected || isRUCSelected} // Deshabilitado si se seleccionó un proveedor
             />
+             {errors.telefono?.message && (
+                <p className="text-xs text-red-400">{errors.telefono.message}</p>
+            )}
           </div>
           {/* Correo */}
           <div>
@@ -397,10 +446,14 @@ const CompraForm: React.FC<CompraFormProps> = ({ productosBase }) => {
               type="email"
               id="correo"
               value={proveedor.correo}
+              {...register("correo")}
               onChange={(e) => setProveedor({ ...proveedor, correo: e.target.value })}
               className="w-full px-4 py-2 border rounded-md"
               disabled={isProveedorSelected || isRUCSelected} // Deshabilitado si se seleccionó un proveedor
             />
+             {errors.correo?.message && (
+                <p className="text-xs text-red-400">{errors.correo.message}</p>
+            )}
           </div>
           {/* Dirección */}
           <div>
@@ -411,10 +464,14 @@ const CompraForm: React.FC<CompraFormProps> = ({ productosBase }) => {
               type="text"
               id="direccion"
               value={proveedor.direccion}
+              {...register("direccion")}
               onChange={(e) => setProveedor({ ...proveedor, direccion: e.target.value })}
               className="w-full px-4 py-2 border rounded-md"
               disabled={isProveedorSelected || isRUCSelected} // Deshabilitado si se seleccionó un proveedor
             />
+             {errors.direccion?.message && (
+                <p className="text-xs text-red-400">{errors.direccion.message}</p>
+            )}
           </div>
         </div>
       </div>
@@ -432,10 +489,13 @@ const CompraForm: React.FC<CompraFormProps> = ({ productosBase }) => {
               type="date"
               id="fechaPedido"
               value={fechaPedido}
+              {...register("fechaPedido")}
               onChange={(e) => setFechaPedido(e.target.value)}
               className="w-full px-4 py-2 border rounded-md"
-              required
             />
+             {errors.fechaPedido?.message && (
+                <p className="text-xs text-red-400">{errors.fechaPedido.message}</p>
+            )}
           </div>
 
           {/* Fecha Pago */}
@@ -447,10 +507,13 @@ const CompraForm: React.FC<CompraFormProps> = ({ productosBase }) => {
               type="date"
               id="fechaPago"
               value={fechaPago}
+              {...register("fechaPago")}
               onChange={(e) => setFechaPago(e.target.value)}
               className="w-full px-4 py-2 border rounded-md"
-              required
             />
+            {errors.fechaPago?.message && (
+                <p className="text-xs text-red-400">{errors.fechaPago.message}</p>
+            )}
           </div>
         </div>
       </div>
