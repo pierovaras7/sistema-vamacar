@@ -132,13 +132,6 @@ class CompraController extends Controller
                 // Calcular el nuevo stock
                 $nuevoStock = $inventario->stockActual + $detalle['cantidad'];
     
-                // Validar si el nuevo stock excede el stock mínimo
-                if ($nuevoStock > $inventario->stockMinimo) {
-                    return response()->json([
-                        'message' => "La compra excede el stock mínimo permitido para el producto con ID {$detalle['idProducto']}.",
-                        'idProducto' => $detalle['idProducto']
-                    ], 400);
-                }
     
                 // Agregar el producto como válido
                 $productosValidos[] = [

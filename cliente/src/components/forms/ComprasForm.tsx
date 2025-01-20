@@ -316,7 +316,7 @@ const CompraForm: React.FC<CompraFormProps> = ({ productosBase }) => {
       // Limpia el Local Storage
       localStorage.removeItem("compraTemporal");
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || "Error desconocido.";
+      const errorMessage = error.response?.data?.message || "Producto sin inventario !Revisar¡";
       toast.error(errorMessage);
     }
   };
