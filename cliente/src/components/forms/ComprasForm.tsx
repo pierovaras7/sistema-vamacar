@@ -115,6 +115,7 @@ const CompraForm = ({
         console.error("Error al obtener proveedores:", error);
       }
     };
+
     const filtered = productosBase.filter((producto) =>
       producto.descripcion.toLowerCase().includes(searchTerm.toLowerCase()) ||
       producto.codigo.toLowerCase().includes(searchTerm.toLowerCase())
@@ -139,12 +140,13 @@ const CompraForm = ({
   };
 
   
+  
   useEffect(() => {
     const compraGuardada = localStorage.getItem("compraTemporal");
     if (compraGuardada) {
       const compraData = JSON.parse(compraGuardada);
       setProveedor(compraData.proveedor || {});
-      if (compraData.proveedor){
+      if (!!compraData.proveedor.idProveedor){
         setIsProveedorSelected(true);
       } 
       setFechaPedido(compraData.fechaPedido || "");
@@ -236,7 +238,6 @@ const CompraForm = ({
     );
   };
 
-
   const calcularTotal = () => {
     return detallesCompra.reduce((total, detalle) => total + detalle.cantidad * detalle.precio, 0);
   };
@@ -263,15 +264,14 @@ const CompraForm = ({
       } catch (error) {
         console.error("Error al buscar el proveedor por RUC:", error);
         toast.error("No se encontró un proveedor con este RUC.");
-        setProveedor({
+        setProveedor((prev) => ({ ...prev,  
           idProveedor: null,
-          ruc: "",
           razonSocial: "",
           telefono: "",
           correo: "",
           direccion: "",
           nombreRepresentante: "",
-        });
+        }));
         setIsRUCSelected(false);
         setIsProveedorSelected(false); // Ignoramos Razón Social
       }
@@ -286,35 +286,9 @@ const CompraForm = ({
         direccion: "",
         nombreRepresentante: "",
       }));
-
-      // setIsProveedorSelected(false); // Habilitamos campos al borrar RUC
     }
   };
 
-  // const handleRazonSocialChange = (razonSocial: string) => {
-  //   setProveedor((prev) => ({ ...prev, razonSocial }));
-
-  //   if (razonSocial.length > 0) {
-  //     const filtered = proveedores.filter((prov) =>
-  //       prov.razonSocial.toLowerCase().includes(razonSocial.toLowerCase())
-  //     );
-  //     setFilteredProveedores(filtered);
-  //     setIsProveedorSelected(false); // No está seleccionado aún, solo está escribiendo
-  //     setIsRUCSelected(false); // Si se usa Razón Social, se ignora RUC
-  //   } else {
-  //     setFilteredProveedores(proveedores);
-  //     setProveedor({
-  //       idProveedor: null,
-  //       ruc: "",
-  //       razonSocial: "",
-  //       telefono: "",
-  //       correo: "",
-  //       direccion: "",
-  //       nombreRepresentante: "",
-  //     });
-  //     setIsProveedorSelected(false); // Habilitamos los campos
-  //   }
-  // };
 
   const selectProveedor = (prov: Proveedor) => {
     setProveedor(prov);
@@ -328,12 +302,38 @@ const CompraForm = ({
     register,
     handleSubmit,
     formState: { errors },
+    setValue
   } = useForm<Inputs>({
     resolver: zodResolver(schema),
   });
 
+  useEffect(() => {
+    if (ventaTemporal) {
+      setValue("fechaPedido", ventaTemporal.fechaPedido);
+      setValue("fechaPago", ventaTemporal.fechaPedido);
+      const proveedor = ventaTemporal.proveedor;
+      if (proveedor) {
+        // Cargar datos del cliente
+        setValue("ruc", proveedor.ruc ||"");
+        setValue("razonSocial", proveedor.razonSocial || "");
+        setValue("direccion", proveedor.direccion || "");
+        setValue("correo", proveedor.correo || "");
+        setValue("telefono", proveedor.telefono || "");
+      } else {
+        // Si no hay cliente, limpiar los valores del cliente
+        setValue("razonSocial", "");
+        setValue("telefono", "");
+        setValue("correo", "");
+        setValue("direccion", "");
+      }
+    }
+  }, [ventaTemporal]);
+
   const onSubmit = handleSubmit(async (data) => {
   
+    if(detallesCompra.length ==  0){
+      return toast.error("Necesitas registrar productos en la compra.")
+    }
     const compra = {
       idProveedor: proveedor.idProveedor,
       fechaPedido,
@@ -392,11 +392,9 @@ const CompraForm = ({
             <input
               type="text"
               id="ruc"
-              value={proveedor.ruc}
               className="w-full px-4 py-2 border rounded-md" 
               {...register("ruc")}
               onChange={(e) => handleRUCChange(e.target.value)}
-              required
             />
              {errors.ruc?.message && (
                 <p className="text-xs text-red-400">{errors.ruc.message}</p>
@@ -410,10 +408,10 @@ const CompraForm = ({
             <input
               type="text"
               id="razonSocial"
-              value={proveedor.razonSocial}
               className="w-full px-4 py-2 border rounded-md"
               {...register("razonSocial")}
               disabled={isProveedorSelected || isRUCSelected} // Deshabilitado si se seleccionó un RUC válido
+              onChange={(e) => setProveedor({ ...proveedor, razonSocial: e.target.value })}
             />
              {errors.razonSocial?.message && (
                 <p className="text-xs text-red-400">{errors.razonSocial.message}</p>
@@ -427,7 +425,6 @@ const CompraForm = ({
             <input
               type="text"
               id="telefono"
-              value={proveedor.telefono}
               {...register("telefono")}
               onChange={(e) => setProveedor({ ...proveedor, telefono: e.target.value })}
               className="w-full px-4 py-2 border rounded-md"
@@ -445,7 +442,6 @@ const CompraForm = ({
             <input
               type="email"
               id="correo"
-              value={proveedor.correo}
               {...register("correo")}
               onChange={(e) => setProveedor({ ...proveedor, correo: e.target.value })}
               className="w-full px-4 py-2 border rounded-md"
@@ -463,7 +459,6 @@ const CompraForm = ({
             <input
               type="text"
               id="direccion"
-              value={proveedor.direccion}
               {...register("direccion")}
               onChange={(e) => setProveedor({ ...proveedor, direccion: e.target.value })}
               className="w-full px-4 py-2 border rounded-md"
