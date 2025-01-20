@@ -88,5 +88,10 @@ class ModuleSeeder extends Seeder
             'icon' => 'usuarios',
         ]);
 
+        Module::create([
+            'name' => 'Compras',
+            'slug' => '/compras',
+        ]);
+
     }
 }

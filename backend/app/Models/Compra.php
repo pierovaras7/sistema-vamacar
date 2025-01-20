@@ -17,7 +17,6 @@ class Compra extends Model
 
     protected $fillable = [
         'fechaPedido',
-        'fechaRecibido',
         'fechaPago',
         'estado',
         'total',
@@ -36,5 +35,10 @@ class Compra extends Model
     public function proveedor()
     {
         return $this->belongsTo(Proveedor::class, 'idProveedor', 'idProveedor');
+    }
+
+    public function detalleCompra()
+    {
+        return $this->hasMany(DetalleCompra::class, 'idCompra', 'idCompra');
     }
 }

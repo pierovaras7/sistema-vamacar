@@ -30,6 +30,18 @@ class ProveedorController extends Controller
         return response()->json($proveedor, 200);
     }
 
+        // Obtener un proveedor por RUC (solo activos)
+    public function getByRS($rs)
+    {
+        $proveedor = Proveedor::where('razonSocial', $rs)->where('estado', true)->first();
+
+        if (!$proveedor) {
+            return response()->json(['message' => 'Proveedor no encontrado.'], 404);
+        }
+
+        return response()->json($proveedor, 200);
+    }
+
     // Crear un nuevo proveedor
     public function store(Request $request)
     {

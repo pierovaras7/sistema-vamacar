@@ -16,6 +16,20 @@ export const getProveedores = async (): Promise<any> => {
   }
 };
 
+export const getProveedorByRUC = async (ruc: string): Promise<any> => {
+  try {
+    const response = await axiosInstance.get(`/proveedores/ruc/${ruc}`);
+    return response.data;
+  } catch (error: any) {
+    if (axios.isAxiosError(error)) {
+      const message =
+        error.response?.data?.message || "Proveedor no encontrado.";
+      throw new Error(message);
+    }
+    throw new Error("Ha ocurrido un error inesperado.");
+  }
+};
+
 export const createProveedor = async (proveedorData: Record<string, any>): Promise<any> => {
   try {
     const response = await axiosInstance.post("/proveedores", proveedorData);

@@ -14,18 +14,29 @@ use App\Http\Controllers\CuentasCobrarController;
 use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\NaturalController;
 use App\Http\Controllers\JuridicoController;
+use App\Http\Controllers\CompraController;
 use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\IndicadoresController;
 
-Route::post('/register', [AuthController::class, 'register'])->name('register');
-Route::post('/login', [AuthController::class, 'login'])->name('login');
 
-// Route::group(['middleware' => ['api', 'auth:api']], function () {
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+use App\Models\Cliente;
+
+// Route::get('/user', function (Request $request) {
+//     return $request->user();
+// })->middleware('auth:sanctum');
+
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'auth'
+], function ($router) {
+    Route::post('/register', [AuthController::class, 'register'])->name('register');
+    Route::post('/login', [AuthController::class, 'login'])->name('login');
+    Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:api')->name('logout');
     Route::put('/updateProfile/{id}', [AuthController::class, 'updateProfile']);
     Route::get('/getUser/{id}', [AuthController::class, 'getUser']);
-    Route::get('/refresh', [AuthController::class, 'refresh']);
-
+    Route::post('/refresh', [AuthController::class, 'refresh'])->middleware('auth:api')->name('refresh');
+    Route::post('/me', [AuthController::class, 'me'])->middleware('auth:api')->name('me');
+    
     Route::get('/marcas', [MarcaController::class, 'index']);
     Route::post('/marcas', [MarcaController::class, 'store']);
     Route::get('/marcas/{id}', [MarcaController::class, 'show']);
@@ -81,19 +92,29 @@ Route::post('/login', [AuthController::class, 'login'])->name('login');
     Route::get('/juridicos/cliente/{idCliente}', [JuridicoController::class, 'getByCliente']);
     Route::get('/naturales/cliente/{idCliente}', [NaturalController::class, 'getByCliente']);
 
+    Route::get('/proveedores', [ProveedorController::class, 'index']);
+    Route::post('/proveedores', [ProveedorController::class, 'store']);
+    Route::get('/proveedores/{id}', [ProveedorController::class, 'show']);
+    Route::put('/proveedores/{id}', [ProveedorController::class, 'update']);
+    Route::delete('/proveedores/{id}', [ProveedorController::class, 'destroy']);
+    Route::get('/proveedores/ruc/{ruc}', [ProveedorController::class, 'getByRuc']);
+    Route::get('/proveedores/rs/{razonSocial}', [ProveedorController::class, 'getByRS']);
 
-    Route::get('/proveedores', [ProveedorController::class, 'index']); // Obtener todos los proveedores activos
-    Route::get('/proveedores/ruc/{ruc}', [ProveedorController::class, 'getByRuc']); // Obtener un proveedor por RUC (activo)
-    Route::post('/proveedores', [ProveedorController::class, 'store']); // Crear un proveedor
-    Route::put('/proveedores/{id}', [ProveedorController::class, 'update']); // Actualizar un proveedor
-    Route::delete('/proveedores/{id}', [ProveedorController::class, 'destroy']); // Eliminación lógica de un proveedor
 
-// });
+    Route::get('/compras', [CompraController::class, 'index']);
+    Route::post('/compras', [CompraController::class, 'store']);
+    Route::get('/compras/{id}', [CompraController::class, 'show']);
+    Route::put('/compras/{id}', [CompraController::class, 'update']);
+    Route::delete('/compras/{id}', [CompraController::class, 'destroy']);
+    Route::get('/getEstado', [CompraController::class, 'getEstado']);
+    Route::put('/updateEstado/{idCompra}', [CompraController::class, 'updateEstado']);
+    Route::get('/cpp', [CompraController::class, 'getCuentasPorPagar']);
 
-Route::get('/ingreso-ventas', [IndicadoresController::class, 'ingresoVentas']);
+    Route::get('/ingreso-ventas', [IndicadoresController::class, 'ingresoVentas']);
 Route::get('/ingreso-compras', [IndicadoresController::class, 'ingresoCompras']);
 Route::get('/ventas-vs-compras-ultimos-5-meses', [IndicadoresController::class, 'ventasVsComprasUltimos5Meses']);
 Route::get('/productos-mas-vendidos', [IndicadoresController::class, 'productosMasVendidos']);
 Route::get('/marcas-mas-vendidas', [IndicadoresController::class, 'marcasMasVendidas']);
 Route::get('/cuentas-por-cobrar', [IndicadoresController::class, 'cuentasPorCobrar']);
-Route::get('/cuentas-por-pagar', [IndicadoresController::class, 'cuentasPorPagar']); 
+
+});
