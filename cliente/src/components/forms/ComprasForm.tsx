@@ -166,10 +166,22 @@ const CompraForm = ({
         detallesCompra: detallesCompra,
       };
       console.log("actualice")
+
       localStorage.setItem("compraTemporal", JSON.stringify(compraActualizada));
       return compraActualizada;
     });
   };
+
+  useEffect(() => {
+    setVentaTemporal((prevCompra: any) => {
+      const compraActualizada = {
+        ...prevCompra,
+        detallesCompra: detallesCompra,
+      };
+      localStorage.setItem("compraTemporal", JSON.stringify(compraActualizada));
+      return compraActualizada;
+    });
+  },[detallesCompra]);
 
   useEffect(() => {
     actualizarCompra({
@@ -177,7 +189,7 @@ const CompraForm = ({
       fechaPedido,
       fechaPago,
     });
-  }, [proveedor, fechaPedido,fechaPago]);
+  }, [proveedor, fechaPedido, fechaPago]);
 
   const handleSelectProducto = (productoId: number) => {
     const producto = productosBase.find((p) => p.idProducto === productoId);
@@ -206,11 +218,10 @@ const CompraForm = ({
           { producto: selectedProducto, cantidad: 1, precio: selectedProducto.precioCosto },
         ]);
       }
-
       setSelectedProducto(null);
       setSearchTerm(""); // Resetea el input
       setIsTyping(false); // Oculta el desplegable
-
+      
     }
   };
 
@@ -335,7 +346,7 @@ const CompraForm = ({
       return toast.error("Necesitas registrar productos en la compra.")
     }
     const compra = {
-      idProveedor: proveedor.idProveedor,
+      proveedor,
       fechaPedido,
       fechaPago,
       detalle: detallesCompra.map((d) => ({
@@ -347,31 +358,31 @@ const CompraForm = ({
 
     console.log(compra);
   
-    // try {
-    //   await postCompra(compra);
-    //   toast.success("Compra registrada con éxito.");
+    try {
+      await postCompra(compra);
+      toast.success("Compra registrada con éxito.");
   
-    //   // Limpia todos los estados
-    //   setProveedor({
-    //     idProveedor: null,
-    //     ruc: "",
-    //     razonSocial: "",
-    //     telefono: "",
-    //     correo: "",
-    //     direccion: "",
-    //     nombreRepresentante: "",
-    //   });
-    //   setFechaPedido("");
-    //   setFechaPago("");
-    //   setDetallesCompra([]);
-    //   setSearchTerm("");
+      // Limpia todos los estados
+      setProveedor({
+        idProveedor: null,
+        ruc: "",
+        razonSocial: "",
+        telefono: "",
+        correo: "",
+        direccion: "",
+        nombreRepresentante: "",
+      });
+      setFechaPedido("");
+      setFechaPago("");
+      setDetallesCompra([]);
+      setSearchTerm("");
   
-    //   // Limpia el Local Storage
-    //   localStorage.removeItem("compraTemporal");
-    // } catch (error: any) {
-    //   const errorMessage = error.response?.data?.message || "Producto sin inventario !Revisar¡";
-    //   toast.error(errorMessage);
-    // }
+      // Limpia el Local Storage
+      localStorage.removeItem("compraTemporal");
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || "Hubo un error al registrar";
+      toast.error(errorMessage);
+    }
   });
   
   

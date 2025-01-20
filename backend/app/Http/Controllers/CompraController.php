@@ -7,7 +7,7 @@ use App\Models\DetalleCompra;
 use App\Models\CuentasPorPagar;
 use App\Models\Inventario;
 use App\Models\MovInventario;
-
+use App\Models\Proveedor;
 use Illuminate\Http\Request;
 
 class CompraController extends Controller
@@ -109,7 +109,7 @@ class CompraController extends Controller
             $request->validate([
                 'fechaPedido' => 'required|date',
                 'fechaPago' => 'nullable|date',
-                'idProveedor' => 'required|exists:proveedor,idProveedor',
+                'proveedor' => 'required',
                 'detalle' => 'required|array',
                 'detalle.*.idProducto' => 'required|exists:producto,idProducto',
                 'detalle.*.cantidad' => 'required|numeric|min:1',
@@ -129,10 +129,6 @@ class CompraController extends Controller
                     ], 404);
                 }
     
-                // Calcular el nuevo stock
-                $nuevoStock = $inventario->stockActual + $detalle['cantidad'];
-    
-    
                 // Agregar el producto como válido
                 $productosValidos[] = [
                     'idProducto' => $detalle['idProducto'],
@@ -144,12 +140,26 @@ class CompraController extends Controller
                 // Calcular el subtotal del detalle
                 $total += $detalle['cantidad'] * $detalle['precioCosto'];
             }
-    
+
+            $idProveedor = $request->proveedor->idProveedor;
+
+            $prov = Proveedor::find($idProveedor);
+            
+            if (!$prov) {
+                // Aquí puedes definir los datos que deseas usar para crear el nuevo proveedor
+                $prov = Proveedor::create([
+                    'razonSocial' => $request->razonSocial,
+                    'telefono' => $request->telefono,
+                    'correo' => $request->correo,
+                    'direccion' => $request->direccion,
+                ]);
+            }
+            
             // Crear la compra
             $compra = Compra::create([
                 'fechaPedido' => $request->fechaPedido,
                 'fechaPago' => $request->fechaPago,
-                'idProveedor' => $request->idProveedor,
+                'idProveedor' => $prov->idProveedor,
                 'total' => $total,
             ]);
     
