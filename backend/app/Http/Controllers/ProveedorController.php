@@ -51,7 +51,6 @@ class ProveedorController extends Controller
             'telefono' => 'nullable|string|max:20',
             'correo' => 'nullable|email|max:255',
             'direccion' => 'nullable|string|max:255',
-            'nombreRepresentante'  => 'nullable|string|max:255',
         ]);
 
         $existingProveedor = Proveedor::where('ruc', $request->input('ruc'))->first();
@@ -98,7 +97,6 @@ class ProveedorController extends Controller
             'telefono' => 'nullable|string|max:20',
             'correo' => 'nullable|email|max:255',
             'direccion' => 'nullable|string|max:255',
-            'nombreRepresentante'  => 'nullable|string|max:255',
         ]);
     
         // Verificar si el RUC está siendo cambiado

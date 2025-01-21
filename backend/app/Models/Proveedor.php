@@ -21,7 +21,6 @@ class Proveedor extends Model
         'telefono',
         'correo',
         'direccion',
-        'nombreRepresentante',
         'estado',
     ];
 

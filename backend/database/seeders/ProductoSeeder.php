@@ -18,6 +18,7 @@ class ProductoSeeder extends Seeder
                 'precioMinVenta' => 25.00,
                 'precioMaxVenta' => 30.00,
                 'precioXMayor' => 22.00,
+                'ubicacion' => 'S2-B',
                 'idSubcategoria' => 1, // Aceite de Motor
                 'idMarca' => 1,        // Mobil
             ],
@@ -29,6 +30,7 @@ class ProductoSeeder extends Seeder
                 'precioMinVenta' => 22.00,
                 'precioMaxVenta' => 28.00,
                 'precioXMayor' => 20.00,
+                'ubicacion' => 'S2-B',
                 'idSubcategoria' => 2, // Aceite para Transmisión
                 'idMarca' => 2,        // Castrol
             ],
@@ -40,6 +42,7 @@ class ProductoSeeder extends Seeder
                 'precioMinVenta' => 27.00,
                 'precioMaxVenta' => 33.00,
                 'precioXMayor' => 24.00,
+                'ubicacion' => 'S2-B',
                 'idSubcategoria' => 1, // Aceite de Motor
                 'idMarca' => 3,        // Shell
             ],
@@ -51,6 +54,7 @@ class ProductoSeeder extends Seeder
                 'precioMinVenta' => 23.00,
                 'precioMaxVenta' => 29.00,
                 'precioXMayor' => 21.00,
+                'ubicacion' => 'S2-B',
                 'idSubcategoria' => 1, // Aceite de Motor
                 'idMarca' => 4,        // Total
             ],
@@ -62,6 +66,7 @@ class ProductoSeeder extends Seeder
                 'precioMinVenta' => 18.00,
                 'precioMaxVenta' => 25.00,
                 'precioXMayor' => 16.50,
+                'ubicacion' => 'S2-B',
                 'idSubcategoria' => 1, // Aceite de Motor
                 'idMarca' => 5,        // Petrobras
             ],
@@ -73,6 +78,7 @@ class ProductoSeeder extends Seeder
                 'precioMinVenta' => 3.00,
                 'precioMaxVenta' => 4.00,
                 'precioXMayor' => 2.50,
+                'ubicacion' => 'S2-B',
                 'idSubcategoria' => 3, // Cinta Aislante
                 'idMarca' => 1,        // Mobil (como ejemplo genérico)
             ],
@@ -84,6 +90,7 @@ class ProductoSeeder extends Seeder
                 'precioMinVenta' => 35.00,
                 'precioMaxVenta' => 45.00,
                 'precioXMayor' => 32.00,
+                'ubicacion' => 'S2-B',
                 'idSubcategoria' => 5, // Pintura Automotriz
                 'idMarca' => 3,        // Shell (como ejemplo genérico)
             ],

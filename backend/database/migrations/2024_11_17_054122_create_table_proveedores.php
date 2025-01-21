@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('telefono');
             $table->string('correo');
             $table->string('direccion');
-            $table->string('nombreRepresentante');
             $table->boolean('estado')->default(1);  
 
         });

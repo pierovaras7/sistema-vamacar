@@ -21,6 +21,7 @@ const columns = [
   { header: "Precio Min", accessor: "precioMinVenta", width: "w-1/12", className: "text-center hidden 2xl:table-cell" },
   { header: "Precio Max", accessor: "precioMaxVenta", width: "w-1/12", className: "text-center hidden 2xl:table-cell" },
   { header: "Precio Mayor", accessor: "precioXMayor", width: "w-1/12", className: "text-center hidden 2xl:table-cell" },
+  { header: "Ubicacion", accessor: "ubicacion", width: "w-1/12", className: "text-center hidden 2xl:table-cell" },
   { header: "Acciones", accessor: "action", width: "w-2/12", className: "text-center" },
 ];
 
@@ -103,6 +104,7 @@ const ProductListPage = () => {
       <td className="text-center hidden 2xl:table-cell">
         {Number(item.precioXMayor)?.toFixed(2) || "N/A"}
       </td>
+      <td className="text-center hidden lg:table-cell">{item.ubicacion}</td>
       <td className="text-center">
         <div className="flex gap-2 justify-center">
           <FormModal

@@ -69,7 +69,7 @@ export default function DashboardLayout({
             className="flex items-center justify-center lg:justify-start gap-2 mb-6"
           >
             <Image src="/logo.png" alt="logo" width={32} height={32} priority />
-            <span className="hidden lg:block font-bold">SchooLama</span>
+            <span className="hidden lg:block font-bold">VAMACAR</span>
           </Link>
           <Menu modules={filteredModules} /> {/* Pasa los módulos filtrados */}
         </div>

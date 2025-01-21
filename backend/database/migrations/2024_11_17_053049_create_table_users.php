@@ -23,6 +23,7 @@ return new class extends Migration
                     ->references('idTrabajador') 
                     ->on('trabajador')
                     ->onDelete('restrict');
+            $table->boolean('isAdmin')->default(0);  
             $table->boolean('estado')->default(1);  
             $table->rememberToken(); // Token de "remember me" para sesiones persistentes
             $table->timestamps(); // Campos created_at y updated_at

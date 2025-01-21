@@ -20,6 +20,7 @@ return new class extends Migration
             $table->decimal('precioMinVenta');
             $table->decimal('precioMaxVenta');
             $table->decimal('precioXMayor');
+            $table->string('ubicacion');
             $table->unsignedBigInteger('idSubcategoria');
             $table->unsignedBigInteger('idMarca');
             $table->foreign('idSubcategoria')

@@ -47,14 +47,14 @@ export const updateCompra = async (id: number, compraData: Record<string, any>):
 };
 
 // Eliminar una compra existente
-export const deleteCompra = async (id: number): Promise<any> => {
+export const anularCompra = async (id: number): Promise<any> => {
   try {
-    const response = await axiosInstance.delete(`/compras/${id}`);
+    const response = await axiosInstance.post(`/compras/anular/${id}`);
     return response.data;
   } catch (error: any) {
     if (axios.isAxiosError(error)) {
       const message =
-        error.response?.data?.message || "Error al eliminar la compra.";
+        error.response?.data?.message || "Error al anular la compra.";
       throw new Error(message);
     }
     throw new Error("Ha ocurrido un error inesperado.");

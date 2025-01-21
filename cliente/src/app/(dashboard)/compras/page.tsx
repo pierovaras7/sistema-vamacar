@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { getCompras, updateEstado, getEstados,deleteCompra  } from "@/services/comprasService";
+import { getCompras, updateEstado, getEstados, anularCompra  } from "@/services/comprasService";
 import Table from "@/components/Table";
 import Pagination from "@/components/Pagination";
 import PrivateRoute from "@/components/PrivateRouter";
@@ -9,9 +9,11 @@ import { useRouter } from "next/navigation";
 import { PlusCircleIcon } from "@heroicons/react/24/solid";
 import { EyeIcon, CurrencyDollarIcon,TrashIcon } from "@heroicons/react/24/outline";
 import Modal from "@/components/Modal";
+import { Producto } from "@/types";
 
 interface DetalleCompra {
   idProducto: number;
+  producto: Producto;
   cantidad: string;
   precioCosto: string;
   subtotal: string;
@@ -92,7 +94,7 @@ const ComprasPage = () => {
   const handleEliminarCompra = async () => {
     if (compraToDelete) {
       try {
-        await deleteCompra(compraToDelete.idCompra); // Eliminar compra
+        await anularCompra(compraToDelete.idCompra); // Eliminar compra
         await refreshData(); // Refrescar datos
         setIsConfirmDeleteOpen(false); // Cerrar el modal de confirmación
       } catch (error) {
@@ -117,8 +119,8 @@ const ComprasPage = () => {
 
   // Renderizar filas de la tabla
   const renderRow = (compra: Compra) => (
-    <tr key={compra.idCompra} className="text-center border-b hover:bg-gray-100">
-      <td>{compra.fechaPedido.split("T")[0]}</td> {/* Mostrar solo la fecha */}
+    <tr key={compra.idCompra} className="text-center border-b hover:bg-gray-100 text-sm">
+      <td className="py-4">{compra.fechaPedido.split("T")[0]}</td> {/* Mostrar solo la fecha */}
       <td>{compra.fechaPago.split("T")[0]}</td>   {/* Mostrar solo la fecha */}
       <td>{compra.proveedor?.razonSocial}</td>
       <td>{compra.total}</td>
@@ -131,26 +133,27 @@ const ComprasPage = () => {
           {compra.estado ? "Pagado" : "Sin pagar"}
         </span>
       </td>
-      <td className="flex justify-center space-x-4">
-  <button
-    className="text-blue-600 hover:underline flex items-center"
-    onClick={() => setSelectedCompra(compra)}
-  >
-    <EyeIcon className="w-5 h-5 mr-1" />
-  </button>
-  {!compra.estado && ( // Mostrar el botón solo si el estado no es "Pagado"
-    <button
-      className="text-red-600 hover:underline flex items-center"
-      onClick={() => {
-        setCompraToDelete(compra);
-        setIsConfirmDeleteOpen(true); // Abrir modal de confirmación
-      }}
-    >
-      <TrashIcon className="w-5 h-5 mr-1" />
-    </button>
-  )}
-</td>
-
+      <td>
+        <div className="flex flex-row gap-2 justify-center">        
+          <button
+            className="text-blue-600 hover:underline flex items-center"
+            onClick={() => setSelectedCompra(compra)}
+          >
+            <EyeIcon className="w-5 h-5 mr-1" />
+          </button>
+          {!compra.estado && ( // Mostrar el botón solo si el estado no es "Pagado"
+            <button
+              className="text-red-600 hover:underline flex items-center"
+              onClick={() => {
+                setCompraToDelete(compra);
+                setIsConfirmDeleteOpen(true); // Abrir modal de confirmación
+              }}
+            >
+              <TrashIcon className="w-5 h-5 mr-1" />
+            </button>
+          )}
+        </div>
+      </td>
     </tr>
   );
 
@@ -165,7 +168,7 @@ const ComprasPage = () => {
 
   return (
     <PrivateRoute slug="/compras">
-      <div className="p-4 bg-white rounded-md">
+      <div className="p-4 bg-white rounded-md mx-5">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-lg font-semibold">Compras</h1>
           <div>

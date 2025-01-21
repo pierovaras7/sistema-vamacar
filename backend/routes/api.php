@@ -105,7 +105,9 @@ Route::group([
     Route::post('/compras', [CompraController::class, 'store']);
     Route::get('/compras/{id}', [CompraController::class, 'show']);
     Route::put('/compras/{id}', [CompraController::class, 'update']);
-    Route::delete('/compras/{id}', [CompraController::class, 'destroy']);
+  
+    Route::post('compras/anular/{id}', [CompraController::class, 'anularCompra']);
+
     Route::get('/getEstado', [CompraController::class, 'getEstado']);
     Route::put('/updateEstado/{idCompra}', [CompraController::class, 'updateEstado']);
     Route::get('/cpp', [CompraController::class, 'getCuentasPorPagar']);

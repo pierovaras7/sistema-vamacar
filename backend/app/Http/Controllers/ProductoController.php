@@ -58,6 +58,7 @@ class ProductoController extends Controller
                 $productoExistente->precioMinVenta = $request->input('precioMinVenta');
                 $productoExistente->precioMaxVenta = $request->input('precioMaxVenta');
                 $productoExistente->precioXMayor = $request->input('precioXMayor');
+                $productoExistente->ubicacion = $request->input('ubicacion');
                 $productoExistente->idSubcategoria = $request->input('idSubcategoria');
                 $productoExistente->idMarca = $request->input('idMarca');
                 $productoExistente->estado = true; // Cambiar el estado a true para activarlo
@@ -77,6 +78,7 @@ class ProductoController extends Controller
                 'precioMinVenta' => $request->input('precioMinVenta'),
                 'precioMaxVenta' => $request->input('precioMaxVenta'),
                 'precioXMayor' => $request->input('precioXMayor'),
+                'ubicacion' => $request->input('ubicacion'),
                 'idSubcategoria' => $request->input('idSubcategoria'),
                 'idMarca' => $request->input('idMarca'),
                 'estado' => true, // Estado por defecto

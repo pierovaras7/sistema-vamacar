@@ -61,11 +61,7 @@ class AuthController extends Controller
             // Crear la cookie HttpOnly para almacenar el token
             $cookie = cookie('token', $token, 60 * 24, '/', null, true, true);
         
-            $isAdmin = false;
-
-            if($user->idUser == 1){
-                $isAdmin = true;
-            }
+            $isAdmin = $user->isAdmin;
             // Retornar la respuesta con la cookie y la información del usuario
             return response()->json([
                 'message' => 'Autenticación exitosa',
@@ -140,7 +136,7 @@ class AuthController extends Controller
             $user = User::findOrFail($idUser);
 
             // Verificar si el usuario es el administrador con id = 1
-            $isAdmin = $idUser == 1;
+            $isAdmin = $user->isAdmin;
 
             // Si el usuario es admin, solo permitimos la actualización de 'username' y 'password'
             $userData = $request->only(['username']);

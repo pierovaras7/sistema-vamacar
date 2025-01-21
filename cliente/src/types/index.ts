@@ -126,6 +126,7 @@ export type Producto = {
     precioMinVenta: number;
     precioMaxVenta: number;
     precioXMayor: number;
+    ubicacion: string;
     idSubcategoria: number;
     idMarca: number;
     stockActual?: number;

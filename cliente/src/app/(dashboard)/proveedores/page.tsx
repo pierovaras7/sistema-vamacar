@@ -18,19 +18,17 @@ type Proveedor = {
   telefono: string;
   correo: string;
   direccion: string;
-  nombreRepresentante:string;
   estado: boolean; // Campo estado
 };
 
 
 
 const columns = [
-  { header: "RUC", accessor: "ruc", className: "text-center",width: "w-1/12" },
+  { header: "RUC", accessor: "ruc", className: "text-center",width: "w-2/12" },
   { header: "Razón Social", accessor: "razonSocial", className: "text-center", width: "w-2/12" },
-  { header: "Teléfono", accessor: "telefono", className: "hidden md:table-cell text-center", width: "w-1/12" },
+  { header: "Teléfono", accessor: "telefono", className: "hidden md:table-cell text-center", width: "w-2/12" },
   { header: "Correo", accessor: "correo", className: "hidden md:table-cell text-center", width: "w-2/12" },
   { header: "Direccion", accessor: "direccion", className: "hidden md:table-cell text-center", width: "w-2/12" },
-  { header: "Representante", accessor: "Representante", className: "hidden md:table-cell text-center", width: "w-2/12" },
   { header: "Acciones", accessor: "actions", className: "", width: "w-2/12" },
 ];
 
@@ -102,7 +100,6 @@ const ProvidersPage = () => {
       <td className="hidden md:table-cell text-center">{item.telefono}</td>
       <td className="hidden md:table-cell text-center">{item.correo}</td>
       <td className="hidden md:table-cell text-center">{item.direccion}</td>
-      <td className="hidden md:table-cell text-center">{item.nombreRepresentante}</td>
       <td>
         <div className="flex items-center gap-2 justify-center">
           <FormModal

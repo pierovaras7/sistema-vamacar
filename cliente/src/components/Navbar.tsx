@@ -21,7 +21,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, notificaciones }) => {
         onClick={() => setIsDropdownOpen((prev) => !prev)}
       >
         <Image src="/announcement.png" alt="" width={20} height={20} />
-        <div className="absolute -top-3 -right-3 w-5 h-5 flex items-center justify-center bg-purple-500 text-white rounded-full text-xs">
+        <div className="absolute -top-3 -right-3 w-5 h-5 flex items-center justify-center bg-blue-800 text-white rounded-full text-xs">
           {notificaciones?.length}
         </div>
       </div>
@@ -38,7 +38,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, notificaciones }) => {
                   className={`border px-1 py-3 text-xs grid grid-cols-12 items-center justify-center ${
                     notificacion.tipo === "STOCK"
                       ? "bg-yellow-100 text-yellow-700"
-                      : "bg-white text-gray-700"
+                      : "bg-blue-400 text-blue-900"
                   }`}
                   onClick={() => {
                     // Asegúrate de que la notificación tenga la propiedad 'ruta' o algo similar

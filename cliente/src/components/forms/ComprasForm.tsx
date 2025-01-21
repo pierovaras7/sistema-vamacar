@@ -321,7 +321,7 @@ const CompraForm = ({
   useEffect(() => {
     if (ventaTemporal) {
       setValue("fechaPedido", ventaTemporal.fechaPedido);
-      setValue("fechaPago", ventaTemporal.fechaPedido);
+      setValue("fechaPago", ventaTemporal.fechaPago);
       const proveedor = ventaTemporal.proveedor;
       if (proveedor) {
         // Cargar datos del cliente
@@ -362,23 +362,23 @@ const CompraForm = ({
       await postCompra(compra);
       toast.success("Compra registrada con éxito.");
   
-      // Limpia todos los estados
-      setProveedor({
-        idProveedor: null,
-        ruc: "",
-        razonSocial: "",
-        telefono: "",
-        correo: "",
-        direccion: "",
-        nombreRepresentante: "",
-      });
-      setFechaPedido("");
-      setFechaPago("");
-      setDetallesCompra([]);
-      setSearchTerm("");
+      // // Limpia todos los estados
+      // setProveedor({
+      //   idProveedor: null,
+      //   ruc: "",
+      //   razonSocial: "",
+      //   telefono: "",
+      //   correo: "",
+      //   direccion: "",
+      //   nombreRepresentante: "",
+      // });
+      // setFechaPedido("");
+      // setFechaPago("");
+      // setDetallesCompra([]);
+      // setSearchTerm("");
   
-      // Limpia el Local Storage
-      localStorage.removeItem("compraTemporal");
+      // // Limpia el Local Storage
+      // localStorage.removeItem("compraTemporal");
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || "Hubo un error al registrar";
       toast.error(errorMessage);
@@ -494,7 +494,6 @@ const CompraForm = ({
             <input
               type="date"
               id="fechaPedido"
-              value={fechaPedido}
               {...register("fechaPedido")}
               onChange={(e) => setFechaPedido(e.target.value)}
               className="w-full px-4 py-2 border rounded-md"
@@ -512,7 +511,6 @@ const CompraForm = ({
             <input
               type="date"
               id="fechaPago"
-              value={fechaPago}
               {...register("fechaPago")}
               onChange={(e) => setFechaPago(e.target.value)}
               className="w-full px-4 py-2 border rounded-md"
@@ -572,7 +570,7 @@ const CompraForm = ({
         <th></th>
                             <th className="px-6 py-3 text-center border-b w-6/12">Producto</th>
                             <th className="px-6 py-3 text-center border-b w-2/12">Cantidad</th>
-                            <th className="px-6 py-3 text-center border-b w-2/4">Precio Unitario</th>
+                            <th className="px-6 py-3 text-center border-b w-2/4">Costo Unitario</th>
                             <th className="px-6 py-3 text-center border-b w-2/4">Subtotal</th>
               </tr>
             </thead>
@@ -628,13 +626,16 @@ const CompraForm = ({
             </tbody>
           </table>
       </div>
-
-      <button
+      <div className="flex flex-col justify-center items-center">
+        <button
         type="submit"
-        className="bg-green-600 text-white px-6 py-2 rounded-md mt-4 hover:bg-green-700"
-      >
-        Registrar Compra
-      </button>
+        className="bg-blue-900 text-white px-6 py-2 rounded-md mt-4 w-1/4"
+        >
+          Registrar Compra
+        </button>
+      </div>
+
+      
     </form>
   );
 };

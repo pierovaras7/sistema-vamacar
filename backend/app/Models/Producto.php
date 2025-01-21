@@ -23,6 +23,7 @@ class Producto extends Model
         'precioMinVenta',
         'precioMaxVenta',
         'precioXMayor',
+        'ubicacion',
         'idSubcategoria',
         'idMarca',
         'estado',

@@ -7,8 +7,8 @@ import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 
 const columns = [
-  { header: "Proveedor", accessor: "proveedor", width: "w-3/12" },
-  { header: "Monto Pago", accessor: "montoPago", width: "w-3/12" },
+  { header: "Proveedor", accessor: "proveedor", width: "w-2/12" },
+  { header: "Monto Pago", accessor: "montoPago", width: "w-2/12" },
   { header: "Estado", accessor: "estado", width: "w-2/12" },
   { header: "Fecha Pedido", accessor: "fechaPedido", width: "w-2/12" },
   { header: "Fecha Pago", accessor: "fechaPago", width: "w-2/12" },
@@ -67,7 +67,7 @@ const CuentasPorPagarPage = () => {
       key={item.idCP}
       className="border-b border-gray-200 even:bg-slate-50 text-sm md:text-md hover:bg-gray-100"
     >
-      <td>{item.proveedor || "Proveedor no identificado"}</td>
+      <td className="p-4">{item.proveedor || "Proveedor no identificado"}</td>
       <td>S/. {item.montoPago}</td>
       <td>
         {item.estado ? (
@@ -82,12 +82,12 @@ const CuentasPorPagarPage = () => {
       </td>
       <td>{item.fechaPedido.split("T")[0]}</td>
       <td>{item.fechaPago.split("T")[0]}</td>
-      <td>
+      <td className="h-full">
         {/* Mostrar botón "Pagar" solo si el estado es "Pendiente" */}
         {!item.estado && (
           <button
             onClick={() => handlePagar(item.idCompra)} // Asegúrate de usar idCompra
-            className="text-blue-500 hover:text-blue-700 flex items-center gap-1"
+            className="text-blue-500 hover:text-blue-700 flex items-center gap-1 m-auto"
             title="Pagar"
           >
             <FaMoneyBillWave className="text-lg" />

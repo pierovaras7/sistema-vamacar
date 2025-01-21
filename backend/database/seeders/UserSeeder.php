@@ -19,7 +19,15 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Administrador',
             'username' => 'admin',
-            'password' => 'admin',
+            'password' => 'admin123',
+            'isAdmin' => true,
+        ]);
+
+        User::create([
+            'name' => 'Iris Varas',
+            'username' => 'irisvaras',
+            'password' => 'irisvaras',
+            "isAdmin" => true,
         ]);
 
     }

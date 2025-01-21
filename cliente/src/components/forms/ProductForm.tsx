@@ -18,41 +18,43 @@ const schema = (isEditing: string) => {
     descripcion: z.string().min(1, { message: "La descripción es obligatoria." }),
     codigo: z.string().min(1, { message: "El código es obligatorio." }),
     uni_medida: z.string().min(1, { message: "La unidad de medida es obligatoria." }),
-    precioCosto: z.preprocess(
-      (value) => (typeof value === "string" ? parseFloat(value) : value),
-      z.number().positive({ message: "El precio debe ser positivo." })
-    ),
-    precioMinVenta: z.preprocess(
-      (value) => (typeof value === "string" ? parseFloat(value) : value),
-      z.number().positive({ message: "El precio debe ser positivo." })
-    ),
-    precioMaxVenta: z.preprocess(
-      (value) => (typeof value === "string" ? parseFloat(value) : value),
-      z.number().positive({ message: "El precio debe ser positivo." })
-    ),
-    precioXMayor: z.preprocess(
-      (value) => (typeof value === "string" ? parseFloat(value) : value),
-      z.number().positive({ message: "El precio debe ser positivo." })
-    ),
-    stockMinimo: z.preprocess(
-      (value) => (typeof value === "string" ? parseFloat(value) : value),
-      z.number().positive({ message: "El stock Minimo debe ser un valor mayor a 0." })
-    ),
+    ubicacion: z.string().min(1, { message: "La ubicacion es un campo obligatorio." }),
+    precioCosto: z.string()
+    .nonempty({ message: "El costo es un campo requerido." }) // Requerido en modo creación
+    .transform((val) => parseFloat(val))
+    .refine((val) => val >= 0, { message: "El costo debe ser mayor o igual a 0." }),
+
+    precioMinVenta: z.string()
+    .nonempty({ message: "El Precio Minimo de Venta es un campo requerido." }) // Requerido en modo creación
+    .transform((val) => parseFloat(val))
+    .refine((val) => val >= 0, { message: "Precio Minimo Venta debe ser mayor o igual a 0." }),
+
+    precioMaxVenta: z.string()
+    .nonempty({ message: "El Precio Max Venta es un campo requerido." }) // Requerido en modo creación
+    .transform((val) => parseFloat(val))
+    .refine((val) => val >= 0, { message: "Precio Max Venta debe ser mayor o igual a 0." }),
+
+    precioXMayor: z.string()
+    .nonempty({ message: "El Precio por Mayor es un campo requerido." }) // Requerido en modo creación
+    .transform((val) => parseFloat(val))
+    .refine((val) => val >= 0, { message: "El Precio por Mayor debe ser mayor o igual a 0." }),
+
+    stockMinimo: z.string()
+      .nonempty({ message: "El stock Minimo es un campo requerido." }) // Requerido en modo creación
+      .transform((val) => parseFloat(val))
+      .refine((val) => val >= 0, { message: "Stock Minimo debe ser mayor o igual a 0." }),
+
     stockInicial: isEditingBoolean
       ? z
           .string()
-          .optional() // Opcional en modo edición
-          // .transform((val) => (val ? parseFloat(val) : undefined)) // Convertir solo si existe
-          // .refine((val) => val === undefined || val >= 0, {
-          //   message: "Stock Actual debe ser mayor o igual a 0.",
-          // })
+          .optional() 
       : z
           .string()
           .nonempty({ message: "El stock Actual es un campo requerido." }) // Requerido en modo creación
           .transform((val) => parseFloat(val))
           .refine((val) => val >= 0, { message: "Stock Actual debe ser mayor o igual a 0." }),
-    idSubcategoria: z.number().positive({ message: "Seleccione una subcategoría válida." }),
-    idMarca: z.number().positive({ message: "Seleccione una marca válida." }),
+          idSubcategoria: z.coerce.number().positive({ message: "Seleccione una subcategoría válida." }),
+          idMarca: z.coerce.number().positive({ message: "Seleccione una marca válida." }),
   });
 };
 
@@ -81,13 +83,14 @@ const ProductForm = ({
       descripcion: data?.descripcion || "",
       codigo: data?.codigo || "",
       uni_medida: data?.uni_medida || "",
-      precioCosto: data?.precioCosto || 0,
-      precioMinVenta: data?.precioMinVenta || 0,
-      precioMaxVenta: data?.precioMaxVenta || 0,
-      precioXMayor: data?.precioXMayor || 0,
-      stockMinimo: data?.inventario.stockMinimo || 0,
-      idSubcategoria: data?.idSubcategoria || 0,
-      idMarca: data?.idMarca || 0,
+      precioCosto: data?.precioCosto || "",
+      precioMinVenta: data?.precioMinVenta || "",
+      precioMaxVenta: data?.precioMaxVenta || "",
+      precioXMayor: data?.precioXMayor || "",
+      stockMinimo: data?.inventario.stockMinimo || "",
+      stockInicial: data?.inventario.stockInicial || "",
+      idSubcategoria: data?.idSubcategoria || "",
+      idMarca: data?.idMarca || "",
     },
   });
 
@@ -207,8 +210,7 @@ const paginatedData = filteredData.slice(startIndex, startIndex + ITEMS_PER_PAGE
         <InputField label="Precio por Mayor" name="precioXMayor"   step="0.01" type="number" register={register} error={errors.precioXMayor} />
         <InputField label="Stock Minimo" name="stockMinimo" type="number" register={register} error={errors.stockMinimo} />
         {type === "create" && <InputField label="Stock Inicial" name="stockInicial" type="number" register={register} error={errors.stockInicial} />}
-        
-
+        <InputField label="Ubicacion" name="ubicacion" register={register} error={errors.ubicacion} />
         <div className="mb-4">
   <label htmlFor="idSubcategoria" className="block text-sm font-medium text-gray-700 mb-2">
     Subcategoría

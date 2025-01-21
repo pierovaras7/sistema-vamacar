@@ -141,17 +141,18 @@ class CompraController extends Controller
                 $total += $detalle['cantidad'] * $detalle['precioCosto'];
             }
 
-            $idProveedor = $request->proveedor->idProveedor;
+            $idProveedor = $request->proveedor['idProveedor'];
 
             $prov = Proveedor::find($idProveedor);
             
             if (!$prov) {
                 // Aquí puedes definir los datos que deseas usar para crear el nuevo proveedor
                 $prov = Proveedor::create([
-                    'razonSocial' => $request->razonSocial,
-                    'telefono' => $request->telefono,
-                    'correo' => $request->correo,
-                    'direccion' => $request->direccion,
+                    'ruc' => $request->proveedor['ruc'],
+                    'razonSocial' => $request->proveedor['razonSocial'],
+                    'telefono' => $request->proveedor['telefono'],
+                    'correo' => $request->proveedor['correo'],
+                    'direccion' => $request->proveedor['direccion'],
                 ]);
             }
             
@@ -175,17 +176,20 @@ class CompraController extends Controller
     
                 // Actualizar el inventario
                 $inventario = Inventario::find($producto['idInventario']);
-                $inventario->update(['stockActual' => $inventario->stockActual + $producto['cantidad']]);
     
                 // Registrar movimiento de inventario
                 MovInventario::create([
-                    'tipo' => 'entrada',
-                    'descripcion' => 'compra realizada',
+                    'tipo' => 'Entrada',
+                    'descripcion' => 'Compra Realizada',
                     'fecha' => now()->format('Y-m-d H:i:s'),
                     'cantidad' => $producto['cantidad'],
+                    'stockRestante' => $inventario->stockActual + $producto['cantidad'],
                     'idInventario' => $producto['idInventario'],
                     'estado' => 1, // Estado activo
                 ]);
+
+                $inventario->stockActual += $detalle['cantidad'];
+                $inventario->save();
             }
     
             // Registrar la cuenta por pagar
@@ -340,7 +344,7 @@ class CompraController extends Controller
 
 
     
-    public function destroy($id)
+    public function anularCompra($id)
     {
         try {
             // Buscar la compra
@@ -374,12 +378,12 @@ class CompraController extends Controller
     
                     // Registrar el movimiento de inventario
                     MovInventario::create([
-                        'tipo' => 'salida', // Movimiento de salida
-                        'descripcion' => 'Compra eliminada',
+                        'tipo' => 'Salida', // Movimiento de salida
+                        'descripcion' => 'Compra Anulada',
                         'fecha' => now()->format('Y-m-d H:i:s'),
                         'cantidad' => $detalle->cantidad,
-                        'idInventario' => $inventario->idInventario,
-                        'estado' => 1, // Estado activo
+                        'stockRestante' => $inventario->stockActual - $detalle->cantidad,
+                        'idInventario' => $inventario->idInventario          
                     ]);
                 }
             }
