@@ -17,9 +17,9 @@ export const getAllVentas = async (fechaInicio?: string, fechaFin?: string): Pro
   }
 };
 
-export const findCliente = async (valor: string): Promise<Cliente> => {
+export const findCliente = async (valor: string, tipo?: string): Promise<Cliente> => {
   try {
-    const response = await axiosInstance.get(`/findCliente/${valor}`);
+    const response = await axiosInstance.get(`/findCliente/${valor}/${tipo}`);
     return response.data;
   } catch (error) {
     throw new Error('Error al obtener el cliente');

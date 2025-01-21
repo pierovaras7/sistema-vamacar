@@ -67,7 +67,8 @@ Route::group([
     Route::get('sedes', [TrabajadorController::class, 'getAvailableSedes']);
 
     Route::resource('clientes', ClienteController::class);
-    Route::get('findCliente/{valor}', [ClienteController::class, 'findCliente']);
+    
+    Route::get('findCliente/{valor}/{tipo}', [ClienteController::class, 'findCliente']);
 
 
     Route::resource('users', UsersController::class);

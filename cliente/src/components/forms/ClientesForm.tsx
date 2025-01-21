@@ -17,65 +17,64 @@ const schema = z
     correo: z.string().email({ message: "Correo no válido" }),
     direccion: z.string().min(1, { message: "Dirección es requerida" }),
     estado: z.boolean().default(true),
-    dni: z.string().optional(), // No aplicamos validación directa aquí
-    nombres: z.string().optional(),
-    apellidos: z.string().optional(),
-    razonSocial: z.string().optional(),
-    ruc: z.string().optional(),
-    representante: z.string().optional(),
+    dni: z.string().optional(), // Validación condicional
+    nombres: z.string().optional(), // Validación condicional
+    apellidos: z.string().optional(), // Validación condicional
+    razonSocial: z.string().optional(), // Validación condicional
+    ruc: z.string().optional(), // Validación condicional
+    representante: z.string().optional(), // Validación condicional
   })
   .superRefine((data, ctx) => {
     if (data.tipoCliente === "Natural") {
-      // Validación para cliente natural
-      if (!data.dni || data.dni.length !== 8) {
+      // Validaciones para clientes naturales
+      if (!data.dni || !/^\d{8}$/.test(data.dni)) {
         ctx.addIssue({
           code: "custom",
           path: ["dni"],
-          message: "El DNI debe tener 8 caracteres.",
+          message: "El DNI debe tener 8 caracteres numéricos.",
         });
       }
-      if (!data.nombres) {
+      if (!data.nombres || data.nombres.trim() === "") {
         ctx.addIssue({
           code: "custom",
           path: ["nombres"],
-          message: "Este campo es requerido",
+          message: "El campo nombres es requerido.",
         });
       }
-      if (!data.apellidos) {
+      if (!data.apellidos || data.apellidos.trim() === "") {
         ctx.addIssue({
           code: "custom",
           path: ["apellidos"],
-          message: "Este campo es requerido",
+          message: "El campo apellidos es requerido.",
         });
       }
     }
 
     if (data.tipoCliente === "Juridico") {
-      // Validación para cliente jurídico
-      if (!data.razonSocial) {
+      // Validaciones para clientes jurídicos
+      if (!data.razonSocial || data.razonSocial.trim() === "") {
         ctx.addIssue({
           code: "custom",
           path: ["razonSocial"],
-          message: "Este campo es requerido",
+          message: "El campo razón social es requerido.",
         });
       }
-      if (!data.ruc) {
+      if (!data.ruc || !/^\d{11}$/.test(data.ruc)) {
         ctx.addIssue({
           code: "custom",
           path: ["ruc"],
-          message: "Este campo es requerido",
+          message: "El RUC debe tener 11 caracteres numéricos.",
         });
       }
-      if (!data.representante) {
+      if (!data.representante || data.representante.trim() === "") {
         ctx.addIssue({
           code: "custom",
           path: ["representante"],
-          message: "Este campo es requerido",
+          message: "El campo representante es requerido.",
         });
       }
     }
   });
-
 
 
 

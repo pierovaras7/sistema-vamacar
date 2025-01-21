@@ -9,7 +9,7 @@ import { ChevronDoubleDownIcon, ChevronDoubleUpIcon } from "@heroicons/react/24/
 import SearchDropdown from "../SearchDropdown";
 import { findCliente, saveVenta } from "@/services/ventaService";
 import useAuthStore from "@/stores/AuthStore";
-import { saveCliente } from "@/services/clientesService";
+import { saveCliente, updateCliente } from "@/services/clientesService";
 import useSedes from "@/hooks/useSedes";
 import useVentaStore from "@/stores/VentaStore";
 import { showErrorsToast } from "@/lib/functions";
@@ -209,10 +209,10 @@ const VentasForm2 = ({
     } else {
       (updatedCliente as any)[name] = value;
     }
-  
     setCliente(updatedCliente); // Ahora cumple con el tipo 'Cliente'
   };
   
+ 
   const handleInputChangeDataVenta = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = event.target;
     console.log(name);
@@ -235,7 +235,7 @@ const VentasForm2 = ({
     const minLength = 7;
     if (dniRucValue.length >= minLength) {
       try {
-        const response = await findCliente(dniRucValue);
+        const response = await findCliente(dniRucValue, ventaTemporal.cliente?.tipoCliente);
         setCliente(response);
         setIsEditing(false);
       } catch (error) {
@@ -298,7 +298,9 @@ const VentasForm2 = ({
   }, [reset]); // Este useEffect se ejecuta cuando se reinicia el formulario
 
   useEffect(() => {
+
     if (ventaTemporal) {
+      console.log("xx",ventaTemporal)
       setValue("fecha", ventaTemporal.fecha);
       setValue("tipoVenta", ventaTemporal.tipoVenta);
       setValue("metodoPago", ventaTemporal.metodoPago);
@@ -307,6 +309,7 @@ const VentasForm2 = ({
       const cliente = ventaTemporal.cliente;
       if (cliente) {
         setTipoCliente(cliente.tipoCliente);
+        // setValue("tipoCliente", cliente.tipoCliente)
         if (cliente?.tipoCliente === "Natural" && cliente.natural) {
           setValue("dni", cliente.natural.dni || "");
           setValue("nombres", cliente.natural.nombres || "");
@@ -336,7 +339,12 @@ const VentasForm2 = ({
         setValue("direccion", "");
       }
     }
-  }, [ventaTemporal, ventaTemporal.cliente, ventaTemporal.sede]);
+  }, []);
+
+
+
+
+
 
   const handleSelectProducto = (producto: Producto) => {
       setSelectedProducto(producto);
@@ -613,7 +621,7 @@ const VentasForm2 = ({
               <p className="text-xs text-red-400">{errors.tipoCliente.message}</p>
             )}
           </div>
-          {ventaTemporal.cliente?.tipoCliente === "Natural" && (
+          {tipoCliente === "Natural" && (
             <>
               <InputField label="DNI" name="dni" register={register} error={errors?.dni} disabled={!tipoCliente} onInput={handleInputChangeDNIRUC} onChange={handleInputChangeDataCliente}/>
               <InputField label="Nombres" name="nombres" register={register} error={errors?.nombres}  disabled={!tipoCliente || !isEditing} onChange={handleInputChangeDataCliente}/>

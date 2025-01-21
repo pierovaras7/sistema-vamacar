@@ -133,12 +133,40 @@ class ClienteController extends Controller
         return response()->json($cliente);
     }
 
-    public function findCliente($valor)
-    {
-        if (!$valor) {
-            return response()->json(['message' => 'Debe proporcionar un valor para buscar.'], 400);
-        }
+    // public function findCliente($valor)
+    // {
+    //     if (!$valor) {
+    //         return response()->json(['message' => 'Debe proporcionar un valor para buscar.'], 400);
+    //     }
 
+    //     // Buscar en la relación Natural por dni
+    //     $clienteNatural = Cliente::whereHas('natural', function ($query) use ($valor) {
+    //         $query->where('dni', $valor);
+    //     })->with('natural')->first();
+
+    //     if ($clienteNatural) {
+    //         return response()->json($clienteNatural);
+    //     }
+
+    //     // Buscar en la relación Juridico por ruc
+    //     $clienteJuridico = Cliente::whereHas('juridico', function ($query) use ($valor) {
+    //         $query->where('ruc', $valor);
+    //     })->with('juridico')->first();
+
+    //     if ($clienteJuridico) {
+    //         return response()->json($clienteJuridico);
+    //     }
+
+    //     return response()->json(['message' => 'Cliente no encontrado.'], 404);
+    // }
+
+    public function findCliente($valor, $tipo)
+{
+    if (!$valor) {
+        return response()->json(['message' => 'Debe proporcionar un valor para buscar.'], 400);
+    }
+
+    if ($tipo === 'Natural') {
         // Buscar en la relación Natural por dni
         $clienteNatural = Cliente::whereHas('natural', function ($query) use ($valor) {
             $query->where('dni', $valor);
@@ -147,7 +175,7 @@ class ClienteController extends Controller
         if ($clienteNatural) {
             return response()->json($clienteNatural);
         }
-
+    } elseif ($tipo === 'Juridico') {
         // Buscar en la relación Juridico por ruc
         $clienteJuridico = Cliente::whereHas('juridico', function ($query) use ($valor) {
             $query->where('ruc', $valor);
@@ -156,9 +184,13 @@ class ClienteController extends Controller
         if ($clienteJuridico) {
             return response()->json($clienteJuridico);
         }
-
-        return response()->json(['message' => 'Cliente no encontrado.'], 404);
+    } else {
+        return response()->json(['message' => 'Tipo de cliente no válido.'], 400);
     }
+
+    return response()->json(['message' => 'Cliente no encontrado.'], 404);
+}
+
 
     public function update(Request $request, $idCliente)
     {

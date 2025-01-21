@@ -89,6 +89,7 @@ const ProductForm = ({
       precioXMayor: data?.precioXMayor || "",
       stockMinimo: data?.inventario.stockMinimo || "",
       stockInicial: data?.inventario.stockInicial || "",
+      ubicacion: data?.ubicacion || "",
       idSubcategoria: data?.idSubcategoria || "",
       idMarca: data?.idMarca || "",
     },

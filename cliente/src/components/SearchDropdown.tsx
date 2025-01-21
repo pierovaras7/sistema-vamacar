@@ -41,8 +41,6 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
     setIsListOpen(false); // Cierra la lista al seleccionar un producto
   };
 
-  console.log("Productos desde search", productos);
-
   return (
     <div className="relative">
       <input
