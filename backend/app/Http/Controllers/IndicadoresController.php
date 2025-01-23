@@ -7,6 +7,8 @@ use App\Models\Compra;
 use App\Models\Producto;
 use App\Models\Marca;
 use App\Models\CuentaPorCobrar;
+use App\Models\cuentasPorPagar;
+
 use Illuminate\Support\Facades\DB;
 
 use App\Models\DetalleVenta;
@@ -96,7 +98,7 @@ class IndicadoresController extends Controller
     // Cuentas por Pagar (si tienes este modelo)
     public function cuentasPorPagar()
     {
-        $cuentasPorPagar = CuentaPorPagar::sum('montoCuenta'); // Asegúrate de tener el modelo CuentaPorPagar
+        $cuentasPorPagar = CuentasPorPagar::sum('montoPago'); // Asegúrate de tener el modelo CuentaPorPagar
         return response()->json(['cuentasPorPagar' => $cuentasPorPagar]);
     }
 }

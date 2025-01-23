@@ -7,6 +7,7 @@ import {
   getProductosMasVendidos,
   getMarcasMasVendidas,
   getCuentasPorCobrar,
+  getCuentasPorPagar,
   getVentasVsComprasUltimos5Meses,
 } from "@/services/indicadoresService";
 import {
@@ -34,6 +35,7 @@ const Home = () => {
   const [ventasVsComprasUltimos5Meses, setVentasVsComprasUltimos5Meses] =
     useState<any[]>([]);
   const [cuentasPorCobrar, setCuentasPorCobrar] = useState<number | null>(null);
+  const [cuentasPorPagar, setCuentasPorPagar] = useState<number | null>(null);
 
   const getColor = (index: number) => {
     const colors = ["#8884d8", "#82ca9d", "#ff7300", "#d0ed57", "#a4de6c"]; // Lista de colores
@@ -49,6 +51,8 @@ const Home = () => {
         const productosMasVendidosData = await getProductosMasVendidos();
         const marcasMasVendidasData = await getMarcasMasVendidas();
         const cuentasPorCobrar = await getCuentasPorCobrar();
+        const cuentasPorPagar = await getCuentasPorPagar();
+
         const ventasVsComprasUltimos5Meses =
           await getVentasVsComprasUltimos5Meses();
 
@@ -57,6 +61,8 @@ const Home = () => {
         setProductosMasVendidos(productosMasVendidosData);
         setMarcasMasVendidas(marcasMasVendidasData);
         setCuentasPorCobrar(cuentasPorCobrar);
+        setCuentasPorPagar(cuentasPorPagar);
+
         setVentasVsComprasUltimos5Meses(ventasVsComprasUltimos5Meses);
       } catch (error) {
         console.error("Error al obtener los datos:", error);
@@ -115,16 +121,16 @@ const Home = () => {
             Cuentas Por Pagar
           </h2>
           <p className="text-2xl text-blue-500 mt-2">
-            {cuentasPorCobrar !== null
-              ? `S/. ${cuentasPorCobrar.toLocaleString()}`
+            {cuentasPorPagar !== null
+              ? `S/. ${cuentasPorPagar.toLocaleString()}`
               : "Cargando..."}
           </p>
         </div>
       </div>
 
       {/* Otros indicadores o cards pueden ir aquí */}
-      <div className="flex flex-wrap justify-between">
-        <div className="w-full md:w-1/3 p-4">
+      <div className="flex flex-col">
+        <div className="w-full p-4">
           <h2 className="text-xl font-semibold text-gray-800">
             Productos Más Vendidos
           </h2>
@@ -144,7 +150,7 @@ const Home = () => {
           )}
         </div>
 
-        <div className="w-full md:w-1/3 p-4">
+        <div className="w-full p-4">
           <h2 className="text-xl font-semibold text-gray-800">
             Marcas Más Vendidas
           </h2>
@@ -168,7 +174,7 @@ const Home = () => {
           )}
         </div>
 
-        <div className="w-full md:w-1/3 p-4">
+        <div className="w-full p-4">
           <h2 className="text-xl font-semibold text-gray-800">
             Ventas Vs Compras los últimos 5 meses
           </h2>

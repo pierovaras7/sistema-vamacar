@@ -119,5 +119,6 @@ Route::get('/ventas-vs-compras-ultimos-5-meses', [IndicadoresController::class, 
 Route::get('/productos-mas-vendidos', [IndicadoresController::class, 'productosMasVendidos']);
 Route::get('/marcas-mas-vendidas', [IndicadoresController::class, 'marcasMasVendidas']);
 Route::get('/cuentas-por-cobrar', [IndicadoresController::class, 'cuentasPorCobrar']);
+Route::get('/cuentas-por-pagar', [IndicadoresController::class, 'cuentasPorPagar']);
 
 });
