@@ -86,12 +86,12 @@ const ClientesPage = () => {
             id={item.idCliente}
             onUpdate={refreshClientes}
           />
-          <FormModal
+          {/* <FormModal
             table="cliente"
             type="delete"
             id={item.idCliente}
             onUpdate={refreshClientes}
-          />
+          /> */}
         </div>
       </td>
     </tr>

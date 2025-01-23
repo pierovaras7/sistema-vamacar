@@ -48,6 +48,9 @@ const schema = z.object({
   razonSocial: z
     .string()
     .nonempty("La razón social es obligatoria"),
+  tipoCompra: z
+    .string()
+    .nonempty("El tipo de compra es obligatoria"),
   telefono: z
     .string()
     .min(7, "El teléfono debe tener al menos 7 dígitos")
@@ -59,7 +62,6 @@ const schema = z.object({
   direccion: z
     .string()
     .nonempty("La dirección es obligatoria"),
-  
   // Fechas
   fechaPedido: z
     .string()
@@ -94,6 +96,7 @@ const CompraForm = ({
   const [showDropdown, setShowDropdown] = useState(false); // Control del desplegable
   const [fechaPedido, setFechaPedido] = useState("");
   const [fechaPago, setFechaPago] = useState("");
+  const [tipoCompra, setTipoCompra] = useState("");
   const [detallesCompra, setDetallesCompra] = useState<DetalleCompra[]>([]);
   const [selectedProducto, setSelectedProducto] = useState<Producto | null>(null);
   const [resetDropdown, setResetDropdown] = useState(false);
@@ -161,10 +164,10 @@ const CompraForm = ({
       } 
       setFechaPedido(compraData.fechaPedido || "");
       setFechaPago(compraData.fechaPago || "");
+      setTipoCompra(compraData.tipoCompra || "");
       setDetallesCompra(compraData.detallesCompra || []);
       setVentaTemporal(compraData); // Para manejo global
     } 
-    console.log(compraGuardada);
   }, []);
 
 
@@ -175,7 +178,6 @@ const CompraForm = ({
         ...nuevaCompra,
         detallesCompra: detallesCompra,
       };
-      console.log("actualice")
 
       localStorage.setItem("compraTemporal", JSON.stringify(compraActualizada));
       return compraActualizada;
@@ -198,6 +200,7 @@ const CompraForm = ({
       proveedor,
       fechaPedido: generarFechaActual(),
       fechaPago,
+      tipoCompra
     });
   }, [proveedor, fechaPedido, fechaPago]);
 
@@ -307,6 +310,7 @@ const CompraForm = ({
         direccion: "",
         nombreRepresentante: "",
       }));
+      setIsRUCSelected(false);
     }
   };
 
@@ -333,6 +337,7 @@ const CompraForm = ({
     if (ventaTemporal) {
       setValue("fechaPedido", ventaTemporal.fechaPedido);
       setValue("fechaPago", ventaTemporal.fechaPago);
+      setValue("tipoCompra", ventaTemporal.tipoCompra);
       const proveedor = ventaTemporal.proveedor;
       if (proveedor) {
         // Cargar datos del cliente
@@ -362,14 +367,15 @@ const CompraForm = ({
       nombreRepresentante: "",
     });
     setFechaPedido(generarFechaActual());
-    setFechaPago("");
+    setFechaPago("");    
+    setTipoCompra("");
     setDetallesCompra([]);
     setVentaTemporal(null);
     setSearchTerm("");
 
     // Limpia el Local Storage
     localStorage.removeItem("compraTemporal");
-    console.log("dtos resetedos")
+
   }
   const handleReset = () => {
     // Limpia todos los estados
@@ -385,6 +391,7 @@ const CompraForm = ({
       proveedor,
       fechaPedido,
       fechaPago,
+      tipoCompra,
       detalle: detallesCompra.map((d) => ({
         idProducto: d.producto.idProducto,
         cantidad: d.cantidad,
@@ -404,6 +411,14 @@ const CompraForm = ({
       toast.error(errorMessage);
     }
   });
+
+  useEffect(() => {
+    if (tipoCompra === "contado") {
+      const hoy = new Date().toISOString().split("T")[0]; // Fecha en formato YYYY-MM-DD
+      setFechaPago(hoy);
+      setValue("fechaPago", hoy)
+    }
+  }, [tipoCompra]);
 
   return (
     <>
@@ -525,7 +540,21 @@ const CompraForm = ({
                   <p className="text-xs text-red-400">{errors.fechaPedido.message}</p>
               )}
             </div>
-
+            <div>
+              <label className="block text-gray-700 font-bold">Tipo de Compra</label>
+              <select
+                className="w-full px-4 py-2 border rounded-md"
+                {...register("tipoCompra")}
+                onChange={(e) => setTipoCompra(e.target.value)}
+              >
+                <option value="">Seleccione una opcion</option>
+                <option value="contado">Contado</option>
+                <option value="credito">Credito</option>
+              </select>
+              {errors.tipoCompra?.message && (
+                <p className="text-xs text-red-400">{errors.tipoCompra.message}</p>
+              )}
+            </div>
             {/* Fecha Pago */}
             <div>
               <label htmlFor="fechaPago" className="block text-gray-700 font-bold">
@@ -536,6 +565,8 @@ const CompraForm = ({
                 id="fechaPago"
                 {...register("fechaPago")}
                 onChange={(e) => setFechaPago(e.target.value)}
+                value={fechaPago}
+                readOnly={tipoCompra === "contado"} // Permite que el valor se envíe, pero desactiva la edición
                 className="w-full px-4 py-2 border rounded-md"
               />
               {errors.fechaPago?.message && (
@@ -543,6 +574,7 @@ const CompraForm = ({
               )}
             </div>
           </div>
+          
         </div>
 
         {/* Productos */}

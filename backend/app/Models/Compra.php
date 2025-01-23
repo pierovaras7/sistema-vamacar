@@ -18,6 +18,7 @@ class Compra extends Model
     protected $fillable = [
         'fechaPedido',
         'fechaPago',
+        'tipoCompra',
         'estado',
         'total',
         'idProveedor',

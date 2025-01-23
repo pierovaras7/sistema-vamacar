@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('compra', function (Blueprint $table) {
             $table->id('idCompra');
             $table->datetime('fechaPedido');
+            $table->string('tipoCompra');
             $table->datetime('fechaPago')->nullable();
             $table->boolean('estado')->default(1);  
             $table->decimal('total', 10, 2)->default(0.00); 

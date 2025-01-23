@@ -28,6 +28,7 @@ interface Compra {
   idCompra: number;
   fechaPedido: string;
   fechaPago: string;
+  tipoCompra: string;
   total: string;
   proveedor: Proveedor;
   detalle_compra: DetalleCompra[];
@@ -35,11 +36,12 @@ interface Compra {
 }
 
 const columns = [
-  { header: "Fecha Pedido", accessor: "fechaPedido", width: "w-2/12" },
-  { header: "Fecha Pago", accessor: "fechaPago", width: "w-2/12" },
-  { header: "Proveedor", accessor: "razonSocial", width: "w-2/12" },
-  { header: "Total", accessor: "total", width: "w-1/12" },
-  { header: "Estado", accessor: "estado", width: "w-1/12" },
+  { header: "Fecha Pedido", accessor: "fechaPedido", width: "w-1/12" },
+  { header: "Fecha Pago", accessor: "fechaPago", width: "w-1/12" },
+  { header: "Proveedor", accessor: "razonSocial", width: "w-3/12" },
+  { header: "Tipo Compra", accessor: "tipoCompra", width: "w-1/12" },
+  { header: "Total", accessor: "total", width: "w-2/12" },
+  { header: "Estado", accessor: "estado", width: "w-2/12" },
   { header: "Opciones", accessor: "opciones", width: "w-2/12" },
 ];
 
@@ -61,19 +63,22 @@ const ComprasPage = () => {
     try {
       const [comprasData, estadosData] = await Promise.all([getCompras(), getEstados()]);
 
-      // Mapear compras y añadir el estado correspondiente
-      const comprasWithEstado = comprasData.map((compra: Compra) => {
-        const estadoObj = estadosData.find(
-          (estado: { idCompra: number; estado: number }) => estado.idCompra === compra.idCompra
-        );
-        return {
-          ...compra,
-          estado: estadoObj?.estado === 1, // Convertir a booleano
-        };
-      });
+      // // Mapear compras y añadir el estado correspondiente
+      // const comprasWithEstado = comprasData.map((compra: Compra) => {
+      //   const estadoObj = estadosData.find(
+      //     (estado: { idCompra: number; estado: number }) => estado.idCompra === compra.idCompra
+      //   );
+      //   return {
+      //     ...compra,
+      //     estado: estadoObj?.estado === 1, // Convertir a booleano
+      //   };
 
-      setCompras(comprasWithEstado);
-      setFilteredCompras(comprasWithEstado);
+      // });
+
+
+      
+      setCompras(comprasData);
+      setFilteredCompras(comprasData);
     } catch (error) {
       console.error("Error al obtener datos:", error);
     } finally {
@@ -123,6 +128,7 @@ const ComprasPage = () => {
       <td className="py-4">{compra.fechaPedido.split("T")[0]}</td> {/* Mostrar solo la fecha */}
       <td>{compra.fechaPago.split("T")[0]}</td>   {/* Mostrar solo la fecha */}
       <td>{compra.proveedor?.razonSocial}</td>
+      <td>{compra.tipoCompra}</td>
       <td>{compra.total}</td>
       <td>
         <span
@@ -130,7 +136,7 @@ const ComprasPage = () => {
             compra.estado ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"
           }`}
         >
-          {compra.estado ? "Pagado" : "Sin pagar"}
+          {compra.estado === true ? "Registrada" : "Anulada"}
         </span>
       </td>
       <td>
@@ -141,7 +147,7 @@ const ComprasPage = () => {
           >
             <EyeIcon className="w-5 h-5 mr-1" />
           </button>
-          {!compra.estado && ( // Mostrar el botón solo si el estado no es "Pagado"
+          {compra.estado && ( // Mostrar el botón solo si el estado no es "Pagado"
             <button
               className="text-red-600 hover:underline flex items-center"
               onClick={() => {
