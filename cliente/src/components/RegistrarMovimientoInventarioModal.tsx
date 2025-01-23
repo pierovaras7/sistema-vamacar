@@ -7,6 +7,8 @@ import InputField from "./InputField";
 import { Inventario, MovInventario } from "@/types";
 import { registrarMovimientoInventario } from "@/services/inventariosService";
 import { ArrowsUpDownIcon, CurrencyDollarIcon } from "@heroicons/react/16/solid";
+import useNotificaciones from "@/hooks/useNotificaciones";
+
 
 // Schema de validación
 const movInventarioSchema = z.object({
@@ -31,6 +33,7 @@ const RegistrarMovimientoInventarioModal = ({
 }) => {
     const [visible, setVisible] = useState(false);
     const [loading, setLoading] = useState(false);
+    const { actualizarNotificaciones } = useNotificaciones();
 
     const {
         register,
@@ -74,6 +77,9 @@ const RegistrarMovimientoInventarioModal = ({
             toast.success("Movimiento registrado exitosamente.");
             handleCloseModal();
             onUpdate();
+
+            actualizarNotificaciones();
+
         } catch (error: any) {
             console.error(error);
             toast.error(error.toString());

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import useInventarios from "./useInventarios";
 import useCuentasPagar from "./useCuentasPagar";
 
@@ -10,12 +10,10 @@ export type Notificacion = {
 
 const useNotificaciones = () => {
   const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
-
   const { inventarios } = useInventarios();
   const { cuentasPagar } = useCuentasPagar();
 
-  useEffect(() => {
-    // Formatear la fecha en formato legible
+  const actualizarNotificaciones = useCallback(() => {
     const formatearFecha = (fechaISO: string): string => {
       const fecha = new Date(fechaISO);
       const dia = fecha.getDate().toString().padStart(2, "0");
@@ -24,7 +22,6 @@ const useNotificaciones = () => {
       return `${dia}/${mes}/${anio}`;
     };
 
-    // Notificaciones de stock mínimo
     const stockMinimoNotificaciones: Notificacion[] = inventarios
       .filter((inventario) => {
         const esMenor =
@@ -38,13 +35,12 @@ const useNotificaciones = () => {
         ruta: "/inventarios",
       }));
 
-    // Notificaciones de cuentas por pagar
     const cuentasPagarNotificaciones: Notificacion[] = cuentasPagar
       .filter((cuenta) => {
         const hoy = new Date();
         const fechaPago = new Date(cuenta.fechaPago);
         const diferenciaDias = (fechaPago.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24);
-        return diferenciaDias <= 3 && diferenciaDias >= 0; // Dentro de 3 días o menos
+        return diferenciaDias <= 3 && diferenciaDias >= 0;
       })
       .map((cuenta) => ({
         tipo: "FECHA",
@@ -52,16 +48,14 @@ const useNotificaciones = () => {
         ruta: "/cuentas-por-pagar",
       }));
 
-    // Combinamos todas las notificaciones
-    const todasNotificaciones = [
-      ...stockMinimoNotificaciones,
-      ...cuentasPagarNotificaciones,
-    ];
-
-    setNotificaciones(todasNotificaciones);
+    setNotificaciones([...stockMinimoNotificaciones, ...cuentasPagarNotificaciones]);
   }, [inventarios, cuentasPagar]);
 
-  return { notificaciones };
+  useEffect(() => {
+    actualizarNotificaciones();
+  }, [actualizarNotificaciones]);
+
+  return { notificaciones, actualizarNotificaciones };
 };
 
 export default useNotificaciones;

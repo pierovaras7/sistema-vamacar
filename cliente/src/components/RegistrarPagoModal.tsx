@@ -36,6 +36,7 @@ const RegistrarPagoModal = ({
         handleSubmit,
         setValue,
         formState: { errors },
+        reset
     } = useForm<Inputs>({
         resolver: zodResolver(detailCCSchema),
         defaultValues: {
@@ -56,6 +57,7 @@ const RegistrarPagoModal = ({
     };
 
     const handleOpenModal = () => {
+        reset();
         setVisible(true);
         setValue("fecha", generarFechaActual()); // Establecer la fecha actual
     };
@@ -75,9 +77,11 @@ const RegistrarPagoModal = ({
             }
             handleCloseModal();
             onUpdate();
+            reset();
         } catch (error: any) {
             console.log(error);
             toast.error(error.toString());
+            reset();
         } finally {
             setLoading(false); // Desactivar el estado de carga
         }

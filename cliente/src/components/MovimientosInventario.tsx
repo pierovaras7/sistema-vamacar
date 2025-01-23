@@ -28,12 +28,12 @@ const MovimientosInventario= ({
         </button>
       { visible &&
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full mx-4 md:w-1/2 py-6 px-3 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-lg w-full mx-4 md:w-1/2 py-6 px-3">
             <h2 className="text-xl font-semibold mb-4">Ver movimientos del Inventario del producto {codigo}</h2>
             {/* {error && <div className="text-red-500 mb-4">{error}</div>} */}
             <div
             >
-              <div className="space-y-4">
+              <div className="space-y-4 max-h-[80vh] overflow-y-auto">
               {data && data.length > 0 ? (
                 <table className="w-full border-collapse border border-gray-200">
                   <thead>

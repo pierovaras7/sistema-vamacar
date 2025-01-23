@@ -208,22 +208,33 @@ class VentaController extends Controller
                 return response()->json(['error' => 'Venta no encontrada'], 404);
             }
 
+
             // Actualizar cuenta por cobrar si existe
             $cuentaPorCobrar = CuentaPorCobrar::where('idCliente', $venta->idCliente)->first();
-            if ($cuentaPorCobrar) {
+            if ($cuentaPorCobrar && ($venta->tipoVenta == 'credito')) {
+
+                $montoDeuda = $venta->total - $venta->montoPagado;
+
                 // Registrar un nuevo detalle para la anulación
                 DetalleCC::create([
                     'idCC' => $cuentaPorCobrar->idCC,
                     'fecha' => now()->format('Y-m-d H:i:s'),
                     'motivo' => 'Anulación de Venta',
-                    'monto' => -$venta->total, // Monto negativo para revertir
-                    'saldo' => $cuentaPorCobrar->montoCuenta - $venta->total, // Nuevo saldo
+                    'monto' => $montoDeuda, // Monto negativo para revertir
+                    'saldo' => max($cuentaPorCobrar->montoCuenta - $montoDeuda, 0), // Nuevo saldo, asegurando que no sea menor a 0
                 ]);
 
                 // Actualizar el saldo de la cuenta por cobrar
-                $cuentaPorCobrar->montoCuenta -= $venta->total;
+                $cuentaPorCobrar->montoCuenta -= $montoDeuda;
+
+                // Asegurar que el saldo no sea menor que 0
+                if ($cuentaPorCobrar->montoCuenta < 0) {
+                    $cuentaPorCobrar->montoCuenta = 0;
+                }
+
                 $cuentaPorCobrar->save();
             }
+
 
             // Revertir los detalles de la venta en el inventario
             foreach ($venta->detalles as $detalle) {

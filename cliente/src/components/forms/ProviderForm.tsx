@@ -6,7 +6,7 @@ import { z } from "zod";
 import InputField from "@/components/InputField";
 import { createProveedor, updateProveedor } from "@/services/proveedorService";
 import { useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from 'sonner';
 import { showErrorsToast } from "@/lib/functions";
 
 const schema = z.object({
@@ -15,7 +15,6 @@ const schema = z.object({
   telefono: z.string().min(1, "El teléfono es obligatorio."),
   correo: z.string().email("Debe ser un correo válido."),
   direccion: z.string().min(1, "La dirección es obligatoria."),
-  nombreRepresentante: z.string().min(1, "El nombre del representante es obligatorio."),
 });
 
 type Inputs = z.infer<typeof schema>;
@@ -43,7 +42,6 @@ const ProviderForm = ({
       telefono: data?.telefono || "",
       correo: data?.correo || "",
       direccion: data?.direccion || "",
-      nombreRepresentante: data?.nombreRepresentante || "",
     },
   });
 
@@ -59,7 +57,6 @@ const ProviderForm = ({
         telefono: formData.telefono,
         correo: formData.correo,
         direccion: formData.direccion,
-        nombreRepresentante: formData.nombreRepresentante,
       };
 
       if (type === "update" && id) {
@@ -118,13 +115,6 @@ const ProviderForm = ({
           name="direccion" 
           register={register} 
           error={errors.direccion} 
-          className="md:col-span-3"
-        />
-        <InputField 
-          label="Nombre del representante" 
-          name="nombreRepresentante" 
-          register={register} 
-          error={errors.nombreRepresentante} 
           className="md:col-span-3"
         />
       </div>

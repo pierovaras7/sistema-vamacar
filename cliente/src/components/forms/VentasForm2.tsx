@@ -526,8 +526,6 @@ const VentasForm2 = ({
     }
   };
   
-
-
   const onSubmit = handleSubmit(async (data) => {
     if (ventaTemporal.detalles.length === 0) {
       toast.warning("Ingrese productos a la venta.");

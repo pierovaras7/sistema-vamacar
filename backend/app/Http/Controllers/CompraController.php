@@ -16,14 +16,14 @@ class CompraController extends Controller
     public function index()
     {
         try {
-            // Obtener solo las compras con estado "true"
+            // Obtener solo las compras con estado "true" y ordenarlas por fecha de creación (desc)
             $compras = Compra::with([
                 'proveedor',
                 'detalleCompra.producto'
             ])
-            ->where('estado', true) // Filtrar por estado true
+            ->orderBy('fechaPedido', 'desc') // Ordenar por fecha de creación en orden descendente
             ->get();
-    
+
             return response()->json($compras, 200);
         } catch (\Exception $e) {
             return response()->json([
@@ -32,6 +32,7 @@ class CompraController extends Controller
             ], 500);
         }
     }
+
     
 
     public function getCuentasPorPagar()
@@ -109,6 +110,7 @@ class CompraController extends Controller
             $request->validate([
                 'fechaPedido' => 'required|date',
                 'fechaPago' => 'nullable|date',
+                'tipoCompra'=> 'required|string',
                 'proveedor' => 'required',
                 'detalle' => 'required|array',
                 'detalle.*.idProducto' => 'required|exists:producto,idProducto',
@@ -160,6 +162,7 @@ class CompraController extends Controller
             $compra = Compra::create([
                 'fechaPedido' => $request->fechaPedido,
                 'fechaPago' => $request->fechaPago,
+                'tipoCompra' => $request->tipoCompra,
                 'idProveedor' => $prov->idProveedor,
                 'total' => $total,
             ]);
@@ -193,12 +196,14 @@ class CompraController extends Controller
             }
     
             // Registrar la cuenta por pagar
-            CuentasPorPagar::create([
-                'montoPago' => $total,
-                'idCompra' => $compra->idCompra,
-                'estado' => 0,
-            ]);
-    
+            if($request->tipoCompra == "credito"){
+                CuentasPorPagar::create([
+                    'montoPago' => $total,
+                    'idCompra' => $compra->idCompra,
+                    'estado' => 0,
+                ]);
+            }
+
             return response()->json([
                 'message' => 'Compra creada exitosamente.',
                 'compra' => $compra,
