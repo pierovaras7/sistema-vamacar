@@ -8,6 +8,7 @@ use App\Models\Producto;
 use App\Models\Marca;
 use App\Models\CuentaPorCobrar;
 use App\Models\cuentasPorPagar;
+use App\Models\DetalleCC;
 
 use Illuminate\Support\Facades\DB;
 
@@ -36,28 +37,44 @@ class IndicadoresController extends Controller
 
 
 
-    public function ventasVsComprasUltimos5Meses()
-    {
-        $result = [];
-        $now = Carbon::now()->startOfMonth(); // Inicio del mes actual
-        for ($i = 1; $i <= 5; $i++) {
-            $month = $now->subMonth(); // Retrocede un mes
-            $ventas = Venta::whereYear('fecha', $month->year)
-                ->whereMonth('fecha', $month->month)
-                ->where('estado', true)
-                ->sum('total');
-            $compras = Compra::whereYear('fechaPedido', $month->year)
-                ->whereMonth('fechaPedido', $month->month)
-                ->where('estado', true)
-                ->sum('total');
-            $result[] = [
-                'month' => $month->format('F Y'),
-                'ventas' => $ventas,
-                'compras' => $compras,
-            ];
-        }
-        return response()->json($result);
+public function ventasVsComprasUltimos5Meses()
+{
+    $result = [];
+    $now = Carbon::now()->startOfMonth(); // Inicio del mes actual
+
+    for ($i = 1; $i <= 5; $i++) {
+        $month = $now->subMonth(); // Retrocede un mes
+        
+        // Suma de las ventas para el mes
+        $ventas = Venta::whereYear('fecha', $month->year)
+            ->whereMonth('fecha', $month->month)
+            ->where('estado', true)
+            ->sum('total');
+
+        // Suma de los montos de DetalleCC para el mes
+        $montoDetalleCC = DetalleCC::whereYear('fecha', $month->year)
+            ->whereMonth('fecha', $month->month)
+            ->sum('monto');
+        
+        // Total de ventas, incluyendo el monto de DetalleCC
+        $ventasTotal = $ventas + $montoDetalleCC;
+
+        // Suma de las compras para el mes
+        $compras = Compra::whereYear('fechaPedido', $month->year)
+            ->whereMonth('fechaPedido', $month->month)
+            ->where('estado', true)
+            ->sum('total');
+
+        // Agregar los resultados al arreglo
+        $result[] = [
+            'month' => $month->format('F Y'),
+            'ventas' => $ventasTotal,
+            'compras' => $compras,
+        ];
     }
+
+    return response()->json($result);
+}
     // 5 productos más vendidos
     public function productosMasVendidos()
     {
@@ -96,9 +113,17 @@ class IndicadoresController extends Controller
     }
 
     // Cuentas por Pagar (si tienes este modelo)
-    public function cuentasPorPagar()
+  /*  public function cuentasPorPagar()
     {
         $cuentasPorPagar = CuentasPorPagar::sum('montoPago'); // Asegúrate de tener el modelo CuentaPorPagar
         return response()->json(['cuentasPorPagar' => $cuentasPorPagar]);
-    }
+    }*/
+
+    public function cuentasPorPagar()
+{
+    $cuentasPorPagar = Compra::where('tipoCompra', 'crédito')
+        ->sum('total');
+
+    return response()->json(['cuentasPorPagar' => $cuentasPorPagar]);
+}
 }
