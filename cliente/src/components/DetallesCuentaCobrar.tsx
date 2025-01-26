@@ -50,7 +50,7 @@ const DetallesCuentaCobrar= ({
                           {detalle.motivo}</td>
                           <td className={`border border-gray-200 px-4 py-2 text-gray-800 
                             ${(detalle.motivo.toLocaleUpperCase() ===  "AMORTIZACION" || detalle.motivo.toLocaleUpperCase() ===  "ANULACIÓN DE VENTA") ? "text-green-500" : "text-red-500"}`}>
-                            S/.{detalle.monto.toFixed(2)}
+                            S/.{detalle.monto}
                           </td>
                         <td className="border border-gray-200 px-4 py-2 text-gray-800">S/.{detalle.saldo?.toFixed(2)}</td>
                         <td className="border border-gray-200 px-4 py-2 text-gray-800">{detalle.fecha}</td>

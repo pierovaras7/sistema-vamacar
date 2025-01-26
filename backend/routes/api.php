@@ -1,5 +1,6 @@
 <?php
 
+use App\Exports\SalesExport;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TrabajadorController;
 use App\Http\Controllers\UsersController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\IndicadoresController;
 
 
 use App\Models\Cliente;
+use Maatwebsite\Excel\Facades\Excel;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -62,6 +64,9 @@ Route::group([
     Route::put('/productos/{id}', [ProductoController::class, 'update']);
     Route::delete('/productos/{id}', [ProductoController::class, 'destroy']);
     Route::get('modules', [UsersController::class, 'getAvailableModules']);
+
+    Route::post('/products/import', [ProductoController::class, 'import']);
+
     
     Route::resource('trabajadores', TrabajadorController::class);
     Route::get('sedes', [TrabajadorController::class, 'getAvailableSedes']);
@@ -76,6 +81,11 @@ Route::group([
 
     Route::resource('ventas', VentaController::class);
     Route::post('ventas/anular/{id}', [VentaController::class, 'anularVenta']);
+    Route::get('exportarventas', [VentaController::class, 'exportVentas']); // Ruta para exportar las ventas
+    // Route::get('exportarventas', function () {
+    //     return response()->json(['message' => 'La ruta de exportación ha sido accedida correctamente.']);
+    // });
+    
 
     Route::resource('naturales', NaturalController::class);
     Route::resource('juridicos', JuridicoController::class);
@@ -106,6 +116,7 @@ Route::group([
     Route::post('/compras', [CompraController::class, 'store']);
     Route::get('/compras/{id}', [CompraController::class, 'show']);
     Route::put('/compras/{id}', [CompraController::class, 'update']);
+    Route::get('exportarcompras', [CompraController::class, 'exportCompras']);
   
     Route::post('compras/anular/{id}', [CompraController::class, 'anularCompra']);
 
@@ -114,10 +125,11 @@ Route::group([
     Route::get('/cpp', [CompraController::class, 'getCuentasPorPagar']);
 
     Route::get('/ingreso-ventas', [IndicadoresController::class, 'ingresoVentas']);
-Route::get('/ingreso-compras', [IndicadoresController::class, 'ingresoCompras']);
-Route::get('/ventas-vs-compras-ultimos-5-meses', [IndicadoresController::class, 'ventasVsComprasUltimos5Meses']);
-Route::get('/productos-mas-vendidos', [IndicadoresController::class, 'productosMasVendidos']);
-Route::get('/marcas-mas-vendidas', [IndicadoresController::class, 'marcasMasVendidas']);
-Route::get('/cuentas-por-cobrar', [IndicadoresController::class, 'cuentasPorCobrar']);
+    Route::get('/ingreso-compras', [IndicadoresController::class, 'ingresoCompras']);
+    Route::get('/ventas-vs-compras-ultimos-5-meses', [IndicadoresController::class, 'ventasVsComprasUltimos5Meses']);
+    Route::get('/productos-mas-vendidos', [IndicadoresController::class, 'productosMasVendidos']);
+    Route::get('/marcas-mas-vendidas', [IndicadoresController::class, 'marcasMasVendidas']);
+    Route::get('/cuentas-por-cobrar', [IndicadoresController::class, 'cuentasPorCobrar']);
+    Route::get('/cuentas-por-pagar', [IndicadoresController::class, 'cuentasPorPagar']);
 
 });

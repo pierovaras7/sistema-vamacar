@@ -59,7 +59,7 @@ class AuthController extends Controller
             $user->load(['modules', 'trabajador.sede']);
 
             // Crear la cookie HttpOnly para almacenar el token
-            $cookie = cookie('token', $token, 60 * 24, '/', null, true, true);
+            $cookie = cookie('token', $token, 1, '/', null, true, true);
         
             $isAdmin = $user->isAdmin;
             // Retornar la respuesta con la cookie y la información del usuario

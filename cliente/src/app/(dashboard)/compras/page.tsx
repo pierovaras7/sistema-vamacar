@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { getCompras, updateEstado, getEstados, anularCompra  } from "@/services/comprasService";
+import { getCompras, updateEstado, getEstados, anularCompra, exportCompras  } from "@/services/comprasService";
 import Table from "@/components/Table";
 import Pagination from "@/components/Pagination";
 import PrivateRoute from "@/components/PrivateRouter";
@@ -10,6 +10,8 @@ import { PlusCircleIcon } from "@heroicons/react/24/solid";
 import { EyeIcon, CurrencyDollarIcon,TrashIcon } from "@heroicons/react/24/outline";
 import Modal from "@/components/Modal";
 import { Producto } from "@/types";
+import TableSearch from "@/components/TableSearch";
+import { DocumentIcon } from "@heroicons/react/16/solid";
 
 interface DetalleCompra {
   idProducto: number;
@@ -55,27 +57,18 @@ const ComprasPage = () => {
   const [selectedCompra, setSelectedCompra] = useState<Compra | null>(null);
   const router = useRouter();
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false); // Estado para el modal de confirmación
-  const [compraToDelete, setCompraToDelete] = useState<Compra | null>(null); // Compra a eliminar
+  const [compraToDelete, setCompraToDelete] = useState<Compra | null>(null); // Compra a eliminar7
+  const [fechaInicio, setFechaInicio] = useState<string>("");
+  const [fechaFin, setFechaFin] = useState<string>("");
+  const [cargadas, setCargadas] = useState(false);
+
 
   // Obtener compras y estados, luego cruzar datos
-  const refreshData = async () => {
+  const refreshData = async (start?: string, end?: string) => {
+    setCargadas(true);
     setLoading(true);
     try {
-      const [comprasData, estadosData] = await Promise.all([getCompras(), getEstados()]);
-
-      // // Mapear compras y añadir el estado correspondiente
-      // const comprasWithEstado = comprasData.map((compra: Compra) => {
-      //   const estadoObj = estadosData.find(
-      //     (estado: { idCompra: number; estado: number }) => estado.idCompra === compra.idCompra
-      //   );
-      //   return {
-      //     ...compra,
-      //     estado: estadoObj?.estado === 1, // Convertir a booleano
-      //   };
-
-      // });
-
-
+      const [comprasData, estadosData] = await Promise.all([getCompras(start, end), getEstados()]);
       
       setCompras(comprasData);
       setFilteredCompras(comprasData);
@@ -86,15 +79,6 @@ const ComprasPage = () => {
     }
   };
 
-  // Cambiar el estado de una compra
-  const handlePagar = async (idCompra: number) => {
-    try {
-      await updateEstado(idCompra, true); // Cambiar estado a "Pagado"
-      await refreshData(); // Refrescar datos automáticamente
-    } catch (error) {
-      console.error("Error al actualizar el estado:", error);
-    }
-  };
 
   const handleEliminarCompra = async () => {
     if (compraToDelete) {
@@ -108,11 +92,6 @@ const ComprasPage = () => {
     }
   };
 
-  // Cargar datos al montar el componente
-  useEffect(() => {
-    refreshData();
-  }, []);
-
   // Filtrar compras por el término de búsqueda
   useEffect(() => {
     const filtered = compras.filter((compra) =>
@@ -121,6 +100,9 @@ const ComprasPage = () => {
     setFilteredCompras(filtered);
   }, [searchTerm, compras]);
 
+  const exportarCompras = async (start?: string, end?: string) => {
+    await exportCompras(start,end);
+  };
 
   // Renderizar filas de la tabla
   const renderRow = (compra: Compra) => (
@@ -172,25 +154,69 @@ const ComprasPage = () => {
     [filteredCompras, perPage]
   );
 
+  const getMinDate = (fechaInicio: string): string => {
+    const date = new Date(fechaInicio);
+    date.setDate(date.getDate() + 1);
+    return date.toISOString().split("T")[0];
+  };
+
   return (
     <PrivateRoute slug="/compras">
       <div className="p-4 bg-white rounded-md mx-5">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-lg font-semibold">Compras</h1>
+          <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8 justify-between w-full my-6">
           <div>
-            <button
-              onClick={() => router.push("/compras/create")}
-              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              <PlusCircleIcon className="w-5 h-5 mr-2" />
-              Nueva Compra
-            </button>
+            <h1 className="text-lg font-semibold md:w-auto w-full text-center md:text-left m-2">Compras</h1>
+            <div className="flex flex-col md:flex-row items-center justify-center gap-4 w-full md:w-auto px-3">
+              {/* inputs fechas */}
+              <div className="flex flex-col w-full md:w-auto">
+                <label htmlFor="fechaInicio" className="text-xs font-semibold">Fecha de Inicio</label>
+                <input
+                  type="date"
+                  id="fechaInicio"
+                  value={fechaInicio}
+                  onChange={(e) => setFechaInicio(e.target.value)}
+                  className="border p-2 rounded text-xs"
+                />
+              </div>
+              <div className="flex flex-col w-full md:w-auto">
+                <label htmlFor="fechaFin" className="text-xs font-semibold">Fecha de Fin</label>
+                <input
+                  type="date"
+                  id="fechaFin"
+                  value={fechaFin}
+                  min={fechaInicio ? getMinDate(fechaInicio) : undefined}
+                  onChange={(e) => setFechaFin(e.target.value)}
+                  className="border p-2 rounded text-xs"
+                />
+              </div>
+              <button
+                onClick={() => refreshData(fechaInicio, fechaFin)}
+                className="text-white bg-blue-500 px-4 py-2 rounded-md"
+              >
+                Buscar
+              </button>
+            </div>
           </div>
+          {cargadas && (
+            <div className="flex items-center gap-4 w-full md:w-auto">
+              <TableSearch onSearch={(term) => setSearchTerm(term)} />
+              <span onClick={() => { router.push('/compras/create') }} className="cursor-pointer">
+                <PlusCircleIcon className="w-6 h-6 text-gray-800" />
+              </span>
+            </div>)
+          }
         </div>
-        {loading ? (
-          <p>Cargando...</p>
+        { !cargadas ? (
+          null
         ) : (
           <>
+             <div className="flex w-full justify-end">
+              <button className="bg-green-700 text-white p-2 rounded-md flex gap-2"
+              onClick={() => exportarCompras(fechaInicio, fechaFin)}>
+               <DocumentIcon className="w-6 h-6" /> {/* Ícono de documento */}
+                Exportar compras a Excel
+              </button>
+            </div>
             <Table columns={columns} renderRow={renderRow} data={currentCompras} />
             <Pagination
               currentPage={currentPage}

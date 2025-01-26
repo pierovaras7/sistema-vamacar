@@ -15,7 +15,7 @@ class UsersController extends Controller
      */
     public function index()
     {
-        $users = User::where("estado", "=", 1)->where("idUser","!=",1)->get();
+        $users = User::where("estado", "=", 1)->where("isAdmin",false)->get();
 
         $users->load('modules');
 

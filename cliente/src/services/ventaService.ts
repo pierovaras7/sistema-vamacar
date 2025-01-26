@@ -17,6 +17,34 @@ export const getAllVentas = async (fechaInicio?: string, fechaFin?: string): Pro
   }
 };
 
+export const exportVentas = async (fechaInicio?: string, fechaFin?: string): Promise<any> => {
+  try {
+    const params: any = {};
+    if (fechaInicio) params.fechaInicio = fechaInicio;
+    if (fechaFin) params.fechaFin = fechaFin;
+
+    console.log(params);  // Para depuración, muestra los parámetros en la consola
+
+    // Realiza la solicitud GET usando axiosInstance con los parámetros
+    const response = await axiosInstance.get('exportarventas', { params, responseType: 'blob' });
+
+    // Verifica la respuesta del servidor
+    if (response.status === 200) {
+      const blob = response.data;
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'ventas.xlsx';  // Nombre del archivo Excel
+      link.click();  // Inicia la descarga
+    } else {
+      throw new Error('Hubo un problema al exportar las ventas');
+    }
+
+  } catch (error) {
+    console.log(error);
+    throw new Error('Error al exportar las ventas');
+  }
+};
+
 export const findCliente = async (valor: string, tipo?: string): Promise<Cliente> => {
   try {
     const response = await axiosInstance.get(`/findCliente/${valor}/${tipo}`);

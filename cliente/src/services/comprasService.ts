@@ -2,9 +2,12 @@ import axiosInstance from "@/lib/axiosInstance";
 import axios from "axios";
 
 // Obtener todas las compras
-export const getCompras = async (): Promise<any> => {
+export const getCompras = async (fechaInicio?: string, fechaFin?: string): Promise<any> => {
   try {
-    const response = await axiosInstance.get("/compras");
+    const params: any = {};
+    if (fechaInicio) params.fechaInicio = fechaInicio;
+    if (fechaFin) params.fechaFin = fechaFin;
+    const response = await axiosInstance.get("/compras",{params});
     return response.data;
   } catch (error: any) {
     if (axios.isAxiosError(error)) {
@@ -13,6 +16,34 @@ export const getCompras = async (): Promise<any> => {
       throw new Error(message);
     }
     throw new Error("Ha ocurrido un error inesperado.");
+  }
+};
+
+export const exportCompras = async (fechaInicio?: string, fechaFin?: string): Promise<any> => {
+  try {
+    const params: any = {};
+    if (fechaInicio) params.fechaInicio = fechaInicio;
+    if (fechaFin) params.fechaFin = fechaFin;
+
+    console.log(params);  // Para depuración, muestra los parámetros en la consola
+
+    // Realiza la solicitud GET usando axiosInstance con los parámetros
+    const response = await axiosInstance.get('exportarcompras', { params, responseType: 'blob' });
+
+    // Verifica la respuesta del servidor
+    if (response.status === 200) {
+      const blob = response.data;
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'compras.xlsx';  // Nombre del archivo Excel
+      link.click();  // Inicia la descarga
+    } else {
+      throw new Error('Hubo un problema al exportar las compras');
+    }
+
+  } catch (error) {
+    console.log(error);
+    throw new Error('Error al exportar las compras');
   }
 };
 

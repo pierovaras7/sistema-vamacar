@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ComprasExport;
 use App\Models\Compra;
 use App\Models\DetalleCompra;
 use App\Models\CuentasPorPagar;
@@ -9,21 +10,38 @@ use App\Models\Inventario;
 use App\Models\MovInventario;
 use App\Models\Proveedor;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CompraController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
         try {
-            // Obtener solo las compras con estado "true" y ordenarlas por fecha de creación (desc)
+            $fechaInicio = $request->input('fechaInicio');
+            $fechaFin = $request->input('fechaFin');
+
+            // Obtener compras con relaciones y aplicar filtros
             $compras = Compra::with([
                 'proveedor',
                 'detalleCompra.producto'
             ])
-            ->orderBy('fechaPedido', 'desc') // Ordenar por fecha de creación en orden descendente
+            ->when($fechaInicio && $fechaFin, function ($query) use ($fechaInicio, $fechaFin) {
+                return $query->whereBetween('fechaPedido', [$fechaInicio, $fechaFin]);
+            })
+            ->when($fechaInicio && !$fechaFin, function ($query) use ($fechaInicio) {
+                return $query->where('fechaPedido', '>=', $fechaInicio);
+            })
+            ->when(!$fechaInicio && $fechaFin, function ($query) use ($fechaFin) {
+                return $query->where('fechaPedido', '<=', $fechaFin);
+            })
+            ->when(!$fechaInicio && !$fechaFin, function ($query) {
+                return $query->where('fechaPedido', '>=', now()->subMonth());
+            })
+            ->orderBy('fechaPedido', 'desc')
             ->get();
 
+            // Mapear la estructura de la respuesta JSON
             return response()->json($compras, 200);
         } catch (\Exception $e) {
             return response()->json([
@@ -33,7 +51,14 @@ class CompraController extends Controller
         }
     }
 
-    
+
+    public function exportCompras(Request $request)
+    {
+        $fechaInicio = $request->input('fechaInicio');
+        $fechaFin = $request->input('fechaFin');
+
+        return Excel::download(new ComprasExport($fechaInicio, $fechaFin), 'ventas.xlsx');
+    }
 
     public function getCuentasPorPagar()
 {

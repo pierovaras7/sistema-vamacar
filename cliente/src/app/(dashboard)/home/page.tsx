@@ -8,6 +8,7 @@ import {
   getMarcasMasVendidas,
   getCuentasPorCobrar,
   getVentasVsComprasUltimos5Meses,
+  getCuentasPorPagar,
 } from "@/services/indicadoresService";
 import {
   LineChart,
@@ -23,10 +24,12 @@ import {
   PieChart,
   Pie,
   Cell,
+  LabelList,
 } from "recharts";
 
 const Home = () => {
   // Estado para almacenar los datos de los indicadores
+  const [loading, setLoading] = useState<boolean>(true); // Estado para indicar si se está cargando
   const [ingresoVentas, setIngresoVentas] = useState<number | null>(null);
   const [ingresoCompras, setIngresoCompras] = useState<number | null>(null);
   const [productosMasVendidos, setProductosMasVendidos] = useState<any[]>([]);
@@ -34,43 +37,73 @@ const Home = () => {
   const [ventasVsComprasUltimos5Meses, setVentasVsComprasUltimos5Meses] =
     useState<any[]>([]);
   const [cuentasPorCobrar, setCuentasPorCobrar] = useState<number | null>(null);
+  const [cuentasPorPagar, setCuentasPorPagar] = useState<number | null>(null);
 
   const getColor = (index: number) => {
     const colors = ["#8884d8", "#82ca9d", "#ff7300", "#d0ed57", "#a4de6c"]; // Lista de colores
     return colors[index % colors.length]; // Retorna el color basado en el índice
   };
 
-  // Usamos useEffect para llamar a los servicios al montar el componente
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const ingresoVentasData = await getIngresoVentas();
-        const ingresoComprasData = await getIngresoCompras();
-        const productosMasVendidosData = await getProductosMasVendidos();
-        const marcasMasVendidasData = await getMarcasMasVendidas();
-        const cuentasPorCobrar = await getCuentasPorCobrar();
-        const ventasVsComprasUltimos5Meses =
-          await getVentasVsComprasUltimos5Meses();
-
+        const [
+          ingresoVentasData,
+          ingresoComprasData,
+          productosMasVendidosData,
+          marcasMasVendidasData,
+          cuentasPorCobrarData,
+          cuentasPorPagarData,
+          ventasVsComprasUltimos5MesesData,
+        ] = await Promise.all([
+          getIngresoVentas(),
+          getIngresoCompras(),
+          getProductosMasVendidos(),
+          getMarcasMasVendidas(),
+          getCuentasPorCobrar(),
+          getCuentasPorPagar(),
+          getVentasVsComprasUltimos5Meses(),
+        ]);
+  
         setIngresoVentas(ingresoVentasData);
         setIngresoCompras(ingresoComprasData);
         setProductosMasVendidos(productosMasVendidosData);
         setMarcasMasVendidas(marcasMasVendidasData);
-        setCuentasPorCobrar(cuentasPorCobrar);
-        setVentasVsComprasUltimos5Meses(ventasVsComprasUltimos5Meses);
+        setCuentasPorCobrar(cuentasPorCobrarData);
+        setCuentasPorPagar(cuentasPorPagarData);
+
+        // Convertir strings a números en ventasVsComprasUltimos5MesesData
+        const ventasComprasData = ventasVsComprasUltimos5MesesData.map((item: any) => ({
+          ...item,
+          ventas: parseFloat(item.ventas), // Convertir ventas a número
+          compras: parseFloat(item.compras), // Convertir compras a número
+        }));
+  
+        setVentasVsComprasUltimos5Meses(ventasComprasData);
+  
+        setLoading(false);
+        console.log(ventasComprasData)
       } catch (error) {
         console.error("Error al obtener los datos:", error);
+        setLoading(false);
       }
     };
-
+  
     fetchData();
-  }, []); // El array vacío asegura que se ejecute solo una vez cuando el componente se monte
+  }, []);
+  
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <h1 className="text-3xl font-bold">Cargando estadísticas...</h1>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-3xl font-bold text-center">
-        Indicadores Financieros
-      </h1>
+      <h1 className="text-3xl font-bold text-center">Indicadores Financieros</h1>
 
       <div className="flex flex-wrap justify-between gap-2">
         {/* Card para Ingreso por Ventas */}
@@ -79,9 +112,7 @@ const Home = () => {
             Ingreso por Ventas
           </h2>
           <p className="text-2xl text-green-500 mt-2">
-            {ingresoVentas !== null
-              ? `S/. ${ingresoVentas.toLocaleString()}`
-              : "Cargando..."}
+            {ingresoVentas !== null ? `S/. ${ingresoVentas}` : "0"}
           </p>
         </div>
 
@@ -91,9 +122,7 @@ const Home = () => {
             Ingreso por Compras
           </h2>
           <p className="text-2xl text-blue-500 mt-2">
-            {ingresoCompras !== null
-              ? `S/. ${ingresoCompras.toLocaleString()}`
-              : "Cargando..."}
+            {ingresoCompras !== null ? `S/. ${ingresoCompras}` : "0"}
           </p>
         </div>
 
@@ -103,9 +132,7 @@ const Home = () => {
             Cuentas Por Cobrar
           </h2>
           <p className="text-2xl text-blue-500 mt-2">
-            {cuentasPorCobrar !== null
-              ? `S/. ${cuentasPorCobrar.toLocaleString()}`
-              : "Cargando..."}
+            {cuentasPorCobrar !== null ? `S/. ${cuentasPorCobrar}` : "0"}
           </p>
         </div>
 
@@ -115,87 +142,110 @@ const Home = () => {
             Cuentas Por Pagar
           </h2>
           <p className="text-2xl text-blue-500 mt-2">
-            {cuentasPorCobrar !== null
-              ? `S/. ${cuentasPorCobrar.toLocaleString()}`
-              : "Cargando..."}
+            {cuentasPorPagar !== null ? `S/. ${cuentasPorPagar}` : "0"}
           </p>
         </div>
       </div>
 
-      {/* Otros indicadores o cards pueden ir aquí */}
+      {/* Otros indicadores */}
       <div className="flex flex-wrap justify-between">
-        <div className="w-full md:w-1/3 p-4">
-          <h2 className="text-xl font-semibold text-gray-800">
-            Productos Más Vendidos
-          </h2>
-          {productosMasVendidos.length > 0 ? (
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={productosMasVendidos}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="descripcion" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="total_cantidad" fill="#8884d8" />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <p>Cargando...</p>
-          )}
-        </div>
+      
+      {/* Productos más vendidos */}
+      <div className="w-full p-4">
+        <h2 className="text-xl font-semibold text-gray-800 text-center">
+          Productos Más Vendidos
+        </h2>
+        {productosMasVendidos.length > 0 ? (
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart data={productosMasVendidos}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="descripcion" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="total_cantidad" fill="#8884d8" />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <p>No hay datos disponibles</p>
+        )}
+      </div>
 
-        <div className="w-full md:w-1/3 p-4">
-          <h2 className="text-xl font-semibold text-gray-800">
-            Marcas Más Vendidas
-          </h2>
-          {marcasMasVendidas.length > 0 ? (
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={marcasMasVendidas}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="marca" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="total_vendido">
-                  {marcasMasVendidas.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={getColor(index)} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <p>Cargando...</p>
-          )}
-        </div>
+      {/* Marcas más vendidas */}
+      <div className="w-full p-4">
+        <h2 className="text-xl font-semibold text-gray-800 text-center">
+          Marcas Más Vendidas
+        </h2>
+        {marcasMasVendidas.length > 0 ? (
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart data={marcasMasVendidas}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="marca" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="total_vendido">
+                {marcasMasVendidas.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={getColor(index)} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <p>No hay datos disponibles</p>
+        )}
+      </div>
 
-        <div className="w-full md:w-1/3 p-4">
-          <h2 className="text-xl font-semibold text-gray-800">
+
+        {/* Ventas Vs Compras */}
+        <div className="w-full p-4">
+          <h2 className="text-xl font-semibold text-gray-800 text-center">
             Ventas Vs Compras los últimos 5 meses
           </h2>
           {ventasVsComprasUltimos5Meses.length > 0 ? (
-            <ResponsiveContainer width="100%" height={400}>
-              <LineChart data={ventasVsComprasUltimos5Meses}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="ventas"
-                  stroke="#8884d8"
-                  activeDot={{ r: 8 }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="compras"
-                  stroke="#82ca9d"
-                  activeDot={{ r: 8 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            <div className="w-full h-[400px]"> {/* Contenedor flexible */}
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={ventasVsComprasUltimos5Meses}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  
+                  {/* Barra para Ventas */}
+                  <Bar 
+                    dataKey="ventas" 
+                    fill="#8884d8" 
+                    name="Ventas" 
+                    barSize={20} // Hacer las barras más delgadas
+                  >
+                    <LabelList dataKey="ventas" position="top" />
+                  </Bar>
+
+                  {/* Barra para Compras */}
+                  <Bar 
+                    dataKey="compras" 
+                    fill="#82ca9d" 
+                    name="Compras" 
+                    barSize={20} // Hacer las barras más delgadas
+                  >
+                    <LabelList dataKey="compras" position="top" />
+                  </Bar>
+
+                  {/* Línea de tendencia */}
+                  <Line 
+                    type="monotone" 
+                    dataKey="ventas" 
+                    stroke="#ff7300" 
+                    dot={false} // Desactiva los puntos en la línea
+                    activeDot={{ r: 8 }}
+                    strokeWidth={2}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           ) : (
-            <p>Cargando...</p>
+            <p className="text-center">No hay datos disponibles</p>
           )}
         </div>
       </div>
@@ -204,3 +254,4 @@ const Home = () => {
 };
 
 export default Home;
+

@@ -5,8 +5,8 @@ import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
 import { useEffect, useState, useMemo } from "react";
 import PrivateRoute from "@/components/PrivateRouter";
-import { anularVenta, getAllVentas } from "@/services/ventaService";
-import { PlusCircleIcon, PrinterIcon } from "@heroicons/react/16/solid";
+import { anularVenta, exportVentas, getAllVentas } from "@/services/ventaService";
+import { DocumentIcon, PlusCircleIcon, PrinterIcon } from "@heroicons/react/16/solid";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { pdf } from "@react-pdf/renderer";
@@ -20,6 +20,8 @@ const columns = [
   { header: "Estado", accessor: "estado", className: "text-center hidden md:table-cell", width: "w-2/12" },
   { header: "Opciones", accessor: "opciones", className: "text-center hidden md:table-cell", width: "w-2/12" },
 ];
+
+const url = process.env.NEXT_PUBLIC_API_URL;
 
 const VentasPage = () => {
   const [ventas, setVentas] = useState<Venta[]>([]);
@@ -56,6 +58,11 @@ const VentasPage = () => {
       console.error(error);
     }
   };
+
+  const exportarVentas = async (start?: string, end?: string) => {
+    await exportVentas(start,end);
+  };
+
 
   useEffect(() => {
         const filtered = ventas.filter((venta) => {
@@ -181,19 +188,30 @@ const VentasPage = () => {
               </button>
             </div>
           </div>
+          
           {cargadas && (
+            <>
             <div className="flex items-center gap-4 w-full md:w-auto">
               <TableSearch onSearch={(term) => setSearchTerm(term)} />
               <span onClick={() => { router.push('/ventas/create') }} className="cursor-pointer">
                 <PlusCircleIcon className="w-6 h-6 text-gray-800" />
               </span>
-            </div>)
+            </div>
+            </>
+            )
           }
         </div>
         {!cargadas ? (
           null
         ) : (
           <>
+            <div className="flex w-full justify-end">
+              <button className="bg-green-700 text-white p-2 rounded-md flex gap-2"
+              onClick={() => exportarVentas(fechaInicio, fechaFin)}>
+               <DocumentIcon className="w-6 h-6" /> {/* Ícono de documento */}
+                Exportar ventas a Excel
+              </button>
+            </div>
             <div className="overflow-x-auto">
               <Table columns={columns} renderRow={renderRow} data={currentVentas} />
             </div>

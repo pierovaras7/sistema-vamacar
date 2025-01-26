@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Inventario;
 use App\Models\Producto;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\ProductsImport;
+use ProductsImport as GlobalProductsImport;
 
 class ProductoController extends Controller
 {
@@ -102,6 +105,31 @@ class ProductoController extends Controller
             return response()->json(['message' => 'Error al crear o actualizar el producto.', 'error' => $e->getMessage()], 500);
         }
     }
+
+
+    public function import(Request $request)
+    {
+        try {
+            $request->validate([
+                'file' => 'required|mimes:xlsx,csv',
+            ], [
+                'file.mimes' => 'El archivo debe ser de formato .xlsx o .csv.', // Corregido aquí
+            ]);
+
+            $import = new ProductsImport();
+            Excel::import($import, $request->file('file'));
+
+            return response()->json([
+                'message' => 'Importación completada.',
+                'errors' => $import->errors,
+            ], empty($import->errors) ? 200 : 206);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al importar productos.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+
+
     
     public function show($id)
     {

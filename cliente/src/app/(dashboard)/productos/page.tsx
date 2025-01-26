@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
@@ -10,6 +10,7 @@ import Image from "next/image";
 import { toast } from 'sonner';
 import { Producto } from "@/types";
 import PrivateRoute from "@/components/PrivateRouter";
+import { DocumentIcon } from "@heroicons/react/16/solid";
 
 
 const columns = [
@@ -35,6 +36,11 @@ const ProductListPage = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [uploadErrors, setUploadErrors] = useState<{ row: any; error: string[] }[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
 
   const fetchProducts = async () => {
     try {
@@ -77,7 +83,49 @@ const ProductListPage = () => {
     }
   };
 
-  
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => 
+  {
+      const file = event.target.files ? event.target.files[0] : null;
+
+      // Verifica si hay un archivo antes de enviar la solicitud
+      if (!file) {
+          alert("Por favor, selecciona un archivo.");
+          return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      setIsUploading(true);
+
+      try {
+          const response = await fetch("http://localhost:8000/api/auth/products/import", {
+              method: "POST",
+              body: formData,
+          });
+
+          const result = await response.json();
+
+          console.log(result)
+          if (result.errors && result.errors.length > 0) {
+            setUploadErrors(result.errors); // Guardamos los errores en el estado
+          } else if(result.error) {
+            toast.error(result.error); // Muestra el mensaje de éxito si no hay errores
+          }else {
+            toast.success(result.message); // Muestra el mensaje de éxito si no hay errores
+          }
+          event.target.value = "";
+          fetchProducts();
+      } catch (error) {
+          console.error("Error al subir el archivo", error);
+      }  finally {
+        setIsUploading(false);
+        setSelectedFile(null); // Limpia el estado del archivo seleccionado
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ""; // Resetea el input file
+        }
+      }
+  };
 
   useEffect(() => {
     fetchProducts();
@@ -132,7 +180,7 @@ const ProductListPage = () => {
     <PrivateRoute slug="/productos">
       <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
         <div className="flex flex-col  md:flex-row items-center justify-between">
-          <h1 className="text-lg font-semibold w-full justify-start m-2">Productos</h1>
+          <h1 className="text-lg font-semibold w-full justify-start m-2">Productos</h1>         
           <div className="flex items-center gap-4 w-full md:w-auto">
             <TableSearch onSearch={handleSearch} />
             <FormModal
@@ -141,6 +189,23 @@ const ProductListPage = () => {
               onUpdate={fetchProducts}
             />
           </div>
+        </div>
+        <div className="flex flex-col justify-start my-3">
+          <button
+            className="bg-green-600 text-white text-xs p-2 rounded-md w-48 flex gap-3"
+            onClick={() => document.getElementById("fileInput")?.click()}
+          >
+            <DocumentIcon className="w-4 h-4" /> {/* Ícono de documento */}
+            Importar productos
+          </button>
+          
+          {/* Input file oculto */}
+          <input
+            id="fileInput"
+            type="file"
+            onChange={handleFileUpload}
+            className="hidden"
+          />      
         </div>
         {loading ? (
           <div className="text-center py-4">Cargando...</div>
@@ -152,6 +217,38 @@ const ProductListPage = () => {
           totalPages={totalPages}
           onPageChange={handlePageChange}
         />
+        {/* Modal para mostrar los errores */}
+        {uploadErrors.length > 0 && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-md shadow-lg w-1/2 max-h-[90vh] flex flex-col">
+            
+            {/* Título fijo */}
+            <h2 className="text-lg font-semibold mb-4">Errores al cargar archivo</h2>
+        
+            {/* Contenedor scrollable */}
+            <div className="overflow-y-auto max-h-64 px-2 border-t border-b">
+              <ul className="space-y-2">
+                {uploadErrors.map((error, index) => (
+                  <li key={index} className="text-gray text-xs">
+                    El producto <b>{error.row.codigo} - {error.row.descripcion}</b> no pudo cargarse correctamente. 
+                    <p>Errores: {error.error}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+        
+            {/* Botón fijo */}
+            <button
+              className="mt-4 bg-gray-300 text-black px-4 py-2 rounded-md"
+              onClick={() => setUploadErrors([])} // Cerrar el modal
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+        
+        )}
+
         {isDeleteModalOpen && selectedProduct && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white p-6 rounded-md shadow-lg">

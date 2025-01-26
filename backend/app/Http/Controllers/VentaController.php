@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\VentasExport;
 use App\Models\Venta;
 use App\Models\Trabajador;
 use App\Models\Sede;
@@ -15,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class VentaController extends Controller
 {
@@ -34,8 +36,6 @@ class VentaController extends Controller
             }
         ]);
 
-
-
         if ($fechaInicio && $fechaFin) {
             // Si ambos parámetros están presentes, usar whereBetween
             $query->whereBetween('fecha', [$fechaInicio, $fechaFin]);
@@ -54,6 +54,15 @@ class VentaController extends Controller
         $ventas = $query->orderBy('fecha', 'desc')->get();
 
         return response()->json($ventas);
+    }
+
+    // Método para exportar las ventas a Excel
+    public function exportVentas(Request $request)
+    {
+        $fechaInicio = $request->input('fechaInicio');
+        $fechaFin = $request->input('fechaFin');
+
+        return Excel::download(new VentasExport($fechaInicio, $fechaFin), 'ventas.xlsx');
     }
 
     // Mostrar una venta específica
