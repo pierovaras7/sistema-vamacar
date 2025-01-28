@@ -87,7 +87,6 @@ const ProductListPage = () => {
   {
       const file = event.target.files ? event.target.files[0] : null;
 
-      // Verifica si hay un archivo antes de enviar la solicitud
       if (!file) {
           alert("Por favor, selecciona un archivo.");
           return;
@@ -108,11 +107,11 @@ const ProductListPage = () => {
 
           console.log(result)
           if (result.errors && result.errors.length > 0) {
-            setUploadErrors(result.errors); // Guardamos los errores en el estado
+            setUploadErrors(result.errors); 
           } else if(result.error) {
-            toast.error(result.error); // Muestra el mensaje de éxito si no hay errores
+            toast.error(result.error); 
           }else {
-            toast.success(result.message); // Muestra el mensaje de éxito si no hay errores
+            toast.success(result.message); 
           }
           event.target.value = "";
           fetchProducts();
@@ -120,9 +119,9 @@ const ProductListPage = () => {
           console.error("Error al subir el archivo", error);
       }  finally {
         setIsUploading(false);
-        setSelectedFile(null); // Limpia el estado del archivo seleccionado
+        setSelectedFile(null); 
         if (fileInputRef.current) {
-          fileInputRef.current.value = ""; // Resetea el input file
+          fileInputRef.current.value = ""; 
         }
       }
   };
@@ -191,6 +190,7 @@ const ProductListPage = () => {
           </div>
         </div>
         <div className="flex flex-col justify-start my-3">
+          <a href="https://docs.google.com/spreadsheets/d/12v5nyf2_Ws16km_FtoArXIXNjmnQ7YbJ/edit?usp=sharing&ouid=107824534272396672832&rtpof=true&sd=true" target="_blank" className="text-xs underline m-2">Ver formato</a>
           <button
             className="bg-green-600 text-white text-xs p-2 rounded-md w-48 flex gap-3"
             onClick={() => document.getElementById("fileInput")?.click()}

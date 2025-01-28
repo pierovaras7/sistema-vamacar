@@ -21,7 +21,7 @@ class GeneralSeeder extends Seeder
     {
         // Crear registros manualmente
         Sede::create([
-            'direccion' => 'Alto Moche - Av San Jose XXX',
+            'direccion' => 'Alto Moche - Av San Jose 365',
             'telefono' => '044-465505',
         ]);
 

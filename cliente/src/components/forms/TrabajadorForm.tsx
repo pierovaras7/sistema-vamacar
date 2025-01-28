@@ -121,13 +121,15 @@ const TrabajadorForm = ({
         crearCuenta: data.crearCuenta, // Aquí se pasa el valor del checkbox
       };
 
+      console.log(requestData)
+
       if (type === "create") {
         // Crear un nuevo trabajador
         await saveTrabajador(requestData);
         toast.success("Trabajador creado exitosamente");
       } else if (type === "update" && id) {
         // Actualizar un trabajador existente
-        await updateTrabajador(id, trabajador);
+        await updateTrabajador(id, requestData);
         toast.success("Trabajador actualizado exitosamente");
       }
 
@@ -269,14 +271,17 @@ const TrabajadorForm = ({
             <p className="text-sm text-red-500">{errors.sede.message}</p>
           )}
         </div>
-        <div className="flex gap-2 px-4 py-3 w-full col-span-2">
-          <label className="text-sm">
-            <input type="checkbox" {...register("crearCuenta")} /> Crear cuenta en el sistema
-          </label>
-          {errors.crearCuenta && (
-            <p className="text-sm text-red-500">{errors.crearCuenta.message}</p>
-          )}
-        </div>
+        {
+          !data.crearCuenta &&
+          <div className="flex gap-2 px-4 py-3 w-full col-span-2">
+            <label className="text-sm">
+              <input type="checkbox" {...register("crearCuenta")} /> Crear cuenta en el sistema
+            </label>
+            {errors.crearCuenta && (
+              <p className="text-sm text-red-500">{errors.crearCuenta.message}</p>
+            )}
+          </div>
+        }
       </div>
       <button className="bg-blue-700 text-white p-2 rounded-md">
         {type === "create" ? "Crear" : "Actualizar"}

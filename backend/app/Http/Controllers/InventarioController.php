@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\InventoryMovementsImport;
 use App\Models\Inventario;
 use App\Models\MovInventario;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-
+use Maatwebsite\Excel\Facades\Excel;
 
 class InventarioController extends Controller
 {
@@ -21,35 +22,26 @@ class InventarioController extends Controller
 }
     
 
-    // public function store(Request $request)
-    // {
-    //     $idCliente = $request->input('cliente.idCliente');
+    public function import(Request $request)
+    {
+        try {
+            $request->validate([
+                'file' => 'required|mimes:xlsx,csv',
+            ], [
+                'file.mimes' => 'El archivo debe ser de formato .xlsx o .csv.', // Corregido aquí
+            ]);
 
-    //     $CC = CuentaPorCobrar::where("idCliente","=",$idCliente)->first();
+            $import = new InventoryMovementsImport();
+            Excel::import($import, $request->file('file'));
 
-    //     if($CC){
-    //         return response()->json(['error' => 'El cliente ya esta asociado a una cuenta por cobrar.'], 404);
-        
-    //     }
-
-    //     $newCuenta = CuentaPorCobrar::create([
-    //         'idCliente' => $idCliente, // Asociar el detalle con la cuenta por cobrar
-    //         'montoCuenta' => 0,
-    //     ]);
-
-    //     DetalleCC::create([
-    //         'motivo' => $request->input('motivo'), // Asociar el detalle con la cuenta por cobrar
-    //         'fecha' =>  Carbon::parse(Date::now())->format('Y-m-d H:i:s'),
-    //         'monto' => $request->input('montoCuenta'),
-    //         'saldo' => $request->input('montoCuenta'),
-    //         'idCC' => $newCuenta->idCC,
-    //     ]);
-
-    //     $newCuenta->montoCuenta = $request->input('montoCuenta');
-    //     $newCuenta->save();
-        
-    //     return response()->json(['message' => 'Cuenta por cobrar registrada correctamente',$newCuenta], 200);
-    // }
+            return response()->json([
+                'message' => 'Importación completada.',
+                'errors' => $import->errors,
+            ], empty($import->errors) ? 200 : 206);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al importar productos.', 'error' => $e->getMessage()], 500);
+        }
+    }
 
 
 
@@ -64,7 +56,7 @@ class InventarioController extends Controller
 
         // Validar los datos del request
         $validatedData = $request->validate([
-            'tipo' => 'required|string|in:Ingreso,Egreso', // El tipo debe ser 'Ingreso' o 'Egreso'
+            'tipo' => 'required|string|in:Entrada,Salida', // El tipo debe ser 'Ingreso' o 'Egreso'
             'descripcion' => 'required|string',
             'cantidad' => 'required|numeric|gt:0', // La cantidad debe ser mayor a 0
             'fecha' => 'required|date', // Valida que sea una fecha válida
@@ -76,14 +68,14 @@ class InventarioController extends Controller
         $fecha = Carbon::parse($validatedData['fecha'])->format('Y-m-d H:i:s'); // Formato MySQL compatible
 
         // Calcular la nueva cantidad de stock según el tipo de movimiento
-        if ($tipo === 'Egreso') {
+        if ($tipo === 'Salida') {
             if ($cantidad > $inventario->stockActual) {
             return response()->json([
                     'error' => 'La cantidad de egreso no puede ser mayor que el stock actual.'
                 ], 400);
             }
             $inventario->stockActual -= $cantidad; // Restar la cantidad al stock
-        } elseif ($tipo === 'Ingreso') {
+        } elseif ($tipo === 'Entrada') {
             $inventario->stockActual += $cantidad; // Sumar la cantidad al stock
         }
 

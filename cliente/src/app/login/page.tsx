@@ -19,7 +19,7 @@ const LoginPage = () => {
       toast.success("Inicio de sesión exitoso");
         setTimeout(() => {
         router.push("/home");
-      }, 1000); 
+      }, 500); 
     } catch (error: any) {
       showErrorsToast(error);
     }
@@ -31,7 +31,7 @@ const LoginPage = () => {
         {/* Sección de la imagen */}
         <div className="hidden md:block md:w-1/2">
           <img
-            src="https://windmill-dashboard-nextjs-typescript.vercel.app/_next/image?url=%2Fassets%2Fimg%2Flogin-office.jpeg&w=1920&q=75"
+            src="https://lubritodo.com/wp-content/uploads/2018/11/bienvenido-a-lubricentro-lubritodo-zona-norte-florida-equipamiento-3.jpg"
             alt="Imagen de bienvenida"
             className="object-cover w-full h-full rounded-l-lg"
           />

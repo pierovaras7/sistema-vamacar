@@ -82,9 +82,7 @@ Route::group([
     Route::resource('ventas', VentaController::class);
     Route::post('ventas/anular/{id}', [VentaController::class, 'anularVenta']);
     Route::get('exportarventas', [VentaController::class, 'exportVentas']); // Ruta para exportar las ventas
-    // Route::get('exportarventas', function () {
-    //     return response()->json(['message' => 'La ruta de exportación ha sido accedida correctamente.']);
-    // });
+
     
 
     Route::resource('naturales', NaturalController::class);
@@ -95,6 +93,7 @@ Route::group([
     Route::post('cuentascobrar/registrarDetalleCC/{id}', [CuentasCobrarController::class, 'registrarDetalleCC']);
 
     Route::resource('inventarios', InventarioController::class);
+    Route::post('/inventarios/import', [InventarioController::class, 'import']);
     Route::post('inventarios/registrarMovInventario/{id}', [InventarioController::class, 'registrarMovInventario']);
 
 

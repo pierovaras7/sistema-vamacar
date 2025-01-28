@@ -54,7 +54,7 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
         className="w-full px-2 py-4 border rounded-lg"
       />
       {isListOpen && searchTerm && (
-        <ul className="absolute w-full bg-white border border-gray-200 mt-1 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+        <ul className="absolute w-full bg-white border border-gray-200 mt-1 rounded-lg shadow-lg max-h-60 overflow-y-auto z-10">
           {filteredProductos?.map((producto) => (
             <li
               key={producto.idProducto}

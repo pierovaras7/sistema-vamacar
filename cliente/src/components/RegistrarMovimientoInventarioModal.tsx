@@ -108,8 +108,8 @@ const RegistrarMovimientoInventarioModal = ({
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:ring focus:ring-blue-300 focus:outline-none"
                                     {...register("tipo")}
                                 >
-                                    <option value="Ingreso">Ingreso</option>
-                                    <option value="Egreso">Egreso</option>
+                                    <option value="Entrada">Entrada</option>
+                                    <option value="Salida">Salida</option>
                                 </select>
                                 {errors.tipo?.message && (
                                     <p className="text-sm text-red-500">{errors.tipo.message}</p>

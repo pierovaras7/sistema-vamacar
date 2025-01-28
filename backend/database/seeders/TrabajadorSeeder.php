@@ -18,7 +18,7 @@ class TrabajadorSeeder extends Seeder
         //
         $faker = Faker::create();
 
-        for ($i = 0; $i < 15; $i++) {
+        for ($i = 0; $i < 2; $i++) {
             Trabajador::create([
                 'nombres' => $faker->firstName,
                 'apellidos' => $faker->lastName,

@@ -170,7 +170,7 @@ const VentasForm3 = ({
   const [isFinded, setFinded] = useState(false);
   const { productos, reloadProductos} = useProductos();
   const [ventaTemporal, setVentaTemporal] = useState<Venta | null>(null);
-  const [detallesVenta, setDetallesVenta] = useState<DetailVenta[]>();
+  const [detalles, setDetalles] = useState<DetailVenta[]>();
 
   const {
     register,
@@ -202,7 +202,7 @@ const VentasForm3 = ({
         if(ventaData.cliente.idCliente){
           setIsEditing(false);
         }
-        setDetallesVenta(ventaData.detallesVenta || []);
+        setDetalles(ventaData.detalles || []);
         setVentaTemporal(ventaData); // Para manejo global
       } 
   }, []);
@@ -260,14 +260,14 @@ const VentasForm3 = ({
       cliente,
       fecha: generarFechaActual(),
     });
-  }, [cliente, detallesVenta]);
+  }, [cliente, detalles]);
 
   const actualizarVenta = (nuevaVenta: Partial<any>) => {
     setVentaTemporal((prevVenta: any) => {
       const ventaActualizada = {
         ...prevVenta,
         ...nuevaVenta,
-        detallesVenta: detallesVenta,
+        detalles: detalles,
       };
 
       localStorage.setItem("ventaTemporal", JSON.stringify(ventaActualizada));
@@ -298,7 +298,7 @@ const VentasForm3 = ({
       telefono: "",
     });
     setTipoCliente("");
-    setDetallesVenta([]);
+    setDetalles([]);
     setVentaTemporal(null);
     setIsEditing(false);
 
@@ -332,7 +332,7 @@ const VentasForm3 = ({
         return;
       }
   
-      setDetallesVenta((prev) =>
+      setDetalles((prev) =>
         prev?.map((detalle) =>
           detalle.idDetalleVenta === detalleVenta.idDetalleVenta
           ? {
@@ -352,7 +352,7 @@ const VentasForm3 = ({
         return;
       }
       
-      setDetallesVenta((prev) =>
+      setDetalles((prev) =>
         prev?.map((detalle) =>
           detalle.idDetalleVenta === detalleVenta.idDetalleVenta
           ? {
@@ -398,7 +398,6 @@ const VentasForm3 = ({
         (d: DetailVenta) => d.producto.idProducto === selectedProducto.idProducto
       );
   
-      console.log(productoExiste)
 
       let nuevosDetalles;
 
@@ -423,14 +422,14 @@ const VentasForm3 = ({
         const detallesActuales = Array.isArray(ventaTemporal?.detalles) ? ventaTemporal.detalles : []; 
         
         nuevosDetalles = [...detallesActuales, detalleVenta];
-        console.log(nuevosDetalles)
+        console.log(ventaTemporal)
           toast.success("Producto agregado correctamente.");
         } else {
           toast.error("No puedes agregar este producto, no hay suficiente stock disponible.");
           return;
         }
       }
-      setDetallesVenta(nuevosDetalles);
+      setDetalles(nuevosDetalles);
     }
     setSelectedProducto(null);
   };  
@@ -507,11 +506,11 @@ const VentasForm3 = ({
   };
   
   const handleEliminarDetalle = (detalleVenta: DetailVenta) => {
-    setDetallesVenta(ventaTemporal?.detalles?.filter((detalle: any) => detalle !== detalleVenta));
+    setDetalles(ventaTemporal?.detalles?.filter((detalle: any) => detalle !== detalleVenta));
   };
 
   const calcularTotal = () => {
-    return detallesVenta?.reduce((total: any, detalleVenta: any) => total + (detalleVenta.subtotal || 0), 0);
+    return detalles?.reduce((total: any, detalleVenta: any) => total + (detalleVenta.subtotal || 0), 0);
   };
 
   useEffect(() => {
@@ -566,7 +565,7 @@ const VentasForm3 = ({
 
   
   const onSubmit = handleSubmit(async (data) => {
-    if (detallesVenta?.length === 0) {
+    if (detalles?.length === 0) {
       toast.warning("Ingrese productos a la venta.");
       return;
     }
@@ -587,7 +586,7 @@ const VentasForm3 = ({
         metodoPago: data.metodoPago || "",
         total: data.total,
         tipoVenta: data.tipoVenta,
-        detalles: detallesVenta,
+        detalles: detalles,
         ...(data.tipoVenta === "credito" && data.montoPagado !== undefined && { montoPagado: data.montoPagado }),
         trabajador: user?.trabajador,
         sede: ventaTemporal?.sede ?? user?.trabajador?.sede,
@@ -718,6 +717,7 @@ const VentasForm3 = ({
               type="text"
               register={register}
               error={errors?.fecha}
+              disabled
             />
             <div className="flex flex-col gap-2 px-2 w-full">
               <label className="text-sm text-gray-500">Tipo de Venta</label>
@@ -822,7 +822,7 @@ const VentasForm3 = ({
                             Seleccionar
                         </button>
                     </div>
-                    <div className="overflow-x-auto mt-4">
+                    <div className="relative mt-4">
                       <table className="w-full table-auto border-collapse border border-gray-200 rounded-lg text-center">
                           <thead>
                             <tr className="text-left text-gray-500 text-sm bg-gray-100">
@@ -834,18 +834,35 @@ const VentasForm3 = ({
                             </tr>
                           </thead>
                           <tbody>
-                          {detallesVenta?.map((detalleVenta, index) => (
+                          {detalles?.map((detalleVenta, index) => (
                               <tr
                               key={index}
                               className={`${index % 2 === 0 ? "bg-white" : "bg-gray-50"} hover:bg-gray-100`}
                               >
                               <td className="px-6 py-3 border-b">
+                                <div className="flex items-center">
                                   <button
                                   className="w-7 h-7 bg-gray-600 text-white rounded-md hover:bg-gray-400 tex"
                                   onClick={() => handleEliminarDetalle(detalleVenta)}
                                   >
                                   X
                                   </button>
+                                  <button
+                                    type="button"
+                                    className="w-7 h-7 bg-blue-600 text-white rounded-md hover:bg-blue-400 ml-2 relative group"
+                                  >
+                                      ℹ️
+                                      <div className="absolute left-0 bottom-8 hidden group-hover:block bg-blue-800 border border-gray-300 shadow-lg rounded-lg p-3 text-xs z-30 w-48"> 
+                                          <h2 className="font-bold">Detalles del Producto</h2>
+                                          <p><strong>P. Costo:</strong> {detalleVenta.producto.precioCosto}</p>
+                                          <p><strong>P. Minimo:</strong> {detalleVenta.producto.precioMinVenta}</p>
+                                          <p><strong>P. Maximo:</strong> {detalleVenta.producto.precioMaxVenta}</p>
+                                          <p><strong>P. X Mayor:</strong> {detalleVenta.producto.precioXMayor}</p>
+                                          <p><strong>Ubicacion:</strong> {detalleVenta.producto.ubicacion}</p>
+                                          <p><strong>Stock Actual:</strong> {detalleVenta.producto.stockActual}</p>
+                                      </div>
+                                  </button>
+                                </div>
                               </td>
                               <td className="px-6 py-3 border-b">{detalleVenta.producto.codigo} - {detalleVenta.producto.descripcion}</td>
                               <td className="px-6 py-3 border-b">

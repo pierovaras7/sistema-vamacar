@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Sede;
 use App\Models\Trabajador;
 use App\Models\User;
+use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -15,19 +16,24 @@ class TrabajadorController extends Controller
      * Muestra una lista de trabajadores.
      */
     public function index()
-    {
-        //corregir
-        $trabajadores = Trabajador::where("estado", "=", 1)->with('sede')->get();
+{
+    $trabajadores = Trabajador::where("estado", 1)
+        ->with('sede')
+        ->get()
+        ->map(function ($trabajador) {
+            $trabajador->crearCuenta = User::where('idTrabajador', $trabajador->idTrabajador)->exists();
+            return $trabajador;
+        });
 
-        
-        if ($trabajadores->isEmpty()) {
-            return response()->json([
-                'message' => 'No se encontraron trabajadores.'
-            ], 404);
-        }
-
-        return response()->json($trabajadores, 200);
+    if ($trabajadores->isEmpty()) {
+        return response()->json([
+            'message' => 'No se encontraron trabajadores.'
+        ], 404);
     }
+
+    return response()->json($trabajadores, 200);
+}
+
 
     public function getAvailableSedes()
     {
@@ -270,7 +276,15 @@ class TrabajadorController extends Controller
                 $trabajador->idSede = $request->input('sede.idSede');
                 $trabajador->save();
             }
-            
+            if($request->crearCuenta){
+                User::create([
+                    'name' => $request->nombres . ' ' . $request->apellidos,
+                    'username' => $request->dni,
+                    'password' => bcrypt($request->dni), // Encriptar la contraseña
+                    'idTrabajador' => $trabajador->idTrabajador
+                ]);
+            }
+
             return response()->json([
                 'message' => 'Trabajador actualizado exitosamente.',
                 'trabajador' => $trabajador

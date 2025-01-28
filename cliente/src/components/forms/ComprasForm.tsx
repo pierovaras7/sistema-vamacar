@@ -535,6 +535,7 @@ const CompraForm = ({
                 {...register("fechaPedido")}
                 name="fechaPedido"
                 className="w-full px-4 py-2 border rounded-md"
+                disabled
               />
               {errors.fechaPedido?.message && (
                   <p className="text-xs text-red-400">{errors.fechaPedido.message}</p>
